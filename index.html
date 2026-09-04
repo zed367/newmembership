@@ -457,7 +457,27 @@
                 </div>
               </div>
 
-              <div class="form-group operation-extension" id="operation-extension" hidden><div class="operation-note" id="operation-extension-copy"></div></div>
+              <div class="form-group operation-extension" id="operation-extension" hidden>
+                <div class="cohort-settings" id="cohort-settings" hidden>
+                  <h2 class="group-title">2-2. 종료일 및 모집 설정</h2>
+                  <div class="field-grid two">
+                    <div class="field full" id="cohort-end-date-field">
+                      <label class="group-label" for="cohort-end-date">이용 종료일 <span class="required-mark">*</span></label>
+                      <div class="input-wrap"><input class="text-input required-input" id="cohort-end-date" type="date" /></div>
+                      <div class="input-error">이용 종료일을 선택해주세요.</div>
+                    </div>
+                    <div class="field full" id="recruitment-period-field">
+                      <span class="group-label" id="recruitment-period-label">모집 기간</span>
+                      <div class="compact-options discount-options" role="radiogroup" aria-labelledby="recruitment-period-label">
+                        <label class="option-row"><input type="radio" name="recruitment-period" value="always" checked /><span class="radio"></span><span>상시 모집</span></label>
+                        <label class="option-row"><input type="radio" name="recruitment-period" value="limited" aria-controls="recruitment-period-details" /><span class="radio"></span><span>특정 기간 모집</span></label>
+                      </div>
+                      <div class="discount-details" id="recruitment-period-details" aria-hidden="true"><div class="discount-details-inner"><div class="field-grid two"><div class="field"><label class="group-label" for="recruitment-start-date">모집 시작일</label><input class="text-input" id="recruitment-start-date" type="date" disabled /></div><div class="field"><label class="group-label" for="recruitment-end-date">모집 종료일</label><input class="text-input" id="recruitment-end-date" type="date" disabled /></div></div></div></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="operation-note" id="operation-extension-copy"></div>
+              </div>
 
               <div class="form-group">
                 <h2 class="group-title">2-3. 가입 설정</h2>
@@ -552,7 +572,15 @@
       ];
       const $ = (selector) => document.querySelector(selector);
       const $$ = (selector) => [...document.querySelectorAll(selector)];
-      const inputs = { name: $('#plan-name'), summary: $('#plan-summary'), price: $('#plan-price'), duration: $('#duration'), image: $('#plan-image'), instantDiscount: $('#instant-discount-amount'), firstDiscount: $('#first-discount-amount'), capacity: $('#capacity-limit') };
+      const inputs = { name: $('#plan-name'), summary: $('#plan-summary'), price: $('#plan-price'), duration: $('#duration'), endDate: $('#cohort-end-date'), recruitmentStart: $('#recruitment-start-date'), recruitmentEnd: $('#recruitment-end-date'), image: $('#plan-image'), instantDiscount: $('#instant-discount-amount'), firstDiscount: $('#first-discount-amount'), capacity: $('#capacity-limit') };
+
+      function getRequiredLabel(item) {
+        return item.key === 'duration' && state.planType === 'cohort' ? '이용 종료일' : item.label;
+      }
+
+      function getRequiredTarget(item) {
+        return item.key === 'duration' && state.planType === 'cohort' ? 'cohort-end-date-field' : item.target;
+      }
 
       function validValues() {
         const price = Number(inputs.price.value);
@@ -563,7 +591,11 @@
           summary: inputs.summary.value.trim().length > 0,
           image: Boolean(state.imageName),
           price: Number.isFinite(price) && price >= 1000 && price <= 5000000,
-          duration: Boolean(state.planType) && (state.planType !== 'subscription' || (Number.isFinite(duration) && duration >= 1))
+          duration: state.planType === 'subscription'
+            ? Number.isFinite(duration) && duration >= 1
+            : state.planType === 'cohort'
+              ? Boolean(inputs.endDate.value)
+              : Boolean(state.planType)
         };
       }
 
@@ -678,6 +710,15 @@
         $('#capacity-field').classList.toggle('invalid', limited && raw !== '' && !validCapacity);
       }
 
+      function updateRecruitmentPeriodSettings() {
+        const limited = $('input[name="recruitment-period"]:checked').value === 'limited';
+        const details = $('#recruitment-period-details');
+        details.classList.toggle('open', limited);
+        details.setAttribute('aria-hidden', String(!limited));
+        inputs.recruitmentStart.disabled = !limited;
+        inputs.recruitmentEnd.disabled = !limited;
+      }
+
       function setStatus(el, text, type = '') {
         el.textContent = text;
         el.className = `section-status ${type}`.trim();
@@ -694,6 +735,7 @@
       function updateOperationSettings() {
         const selected = Boolean(state.planType);
         const isSubscription = state.planType === 'subscription';
+        const isCohort = state.planType === 'cohort';
         const operationNames = { subscription: '가입일 기준', cohort: '종료일 기준', deduction: '혜택 이용 기준' };
         const configuration = $('#configuration');
 
@@ -701,6 +743,10 @@
         configuration.setAttribute('aria-hidden', String(!selected));
         $('#subscription-settings').hidden = !isSubscription;
         $('#operation-extension').hidden = !selected || isSubscription;
+        $('#cohort-settings').hidden = !isCohort;
+        $('#operation-extension-copy').hidden = isCohort;
+        $('#first-discount-field').hidden = isCohort;
+        $('#instant-discount-field').classList.toggle('full', isCohort);
         $('#operation-status').classList.toggle('visible', selected);
 
         if (!selected) {
@@ -709,9 +755,7 @@
         }
 
         $('#operation-status').textContent = `${operationNames[state.planType]} 멤버십으로 설정하고 있습니다.`;
-        $('#operation-extension-copy').textContent = state.planType === 'cohort'
-          ? '종료일 기준 멤버십의 시작일과 종료일은 세부 정책이 확정되면 이 영역에서 설정할 수 있습니다.'
-          : '혜택 이용 기준 멤버십의 이용 횟수와 종료 조건은 세부 정책이 확정되면 이 영역에서 설정할 수 있습니다.';
+        $('#operation-extension-copy').textContent = '혜택 이용 기준 멤버십의 이용 횟수와 종료 조건은 세부 정책이 확정되면 이 영역에서 설정할 수 있습니다.';
       }
 
       function update() {
@@ -728,11 +772,13 @@
         $('#name-count').textContent = inputs.name.value.length;
         $('#summary-count').textContent = inputs.summary.value.length;
         $('#price-field').classList.toggle('invalid', inputs.price.value !== '' && !values.price);
-        $('#duration-field').classList.toggle('invalid', inputs.duration.value !== '' && !values.duration);
+        $('#duration-field').classList.toggle('invalid', state.planType === 'subscription' && inputs.duration.value !== '' && !values.duration);
+        $('#cohort-end-date-field').classList.toggle('invalid', state.planType === 'cohort' && inputs.endDate.value !== '' && !values.duration);
         updateDiscounts();
         updateRenewalMode();
         updateLongPassSettings();
         updateCapacitySettings();
+        updateRecruitmentPeriodSettings();
 
         setStatus($('#basic-header-status'), basicComplete ? '✓ 멤버십 설정 완료' : `멤버십 설정 · ${missing.length}개 항목 미완료`, basicComplete ? 'complete' : '');
         setStatus($('#benefit-header-status'), benefitComplete ? '✓ 혜택 설정 완료' : '선택 항목 · 아직 설정하지 않음', benefitComplete ? 'complete' : 'optional');
@@ -755,8 +801,8 @@
           $('#missing-title').textContent = '미완료 필수 항목';
           missing.forEach((item) => {
             const button = document.createElement('button');
-            button.type = 'button'; button.className = 'missing-item'; button.textContent = item.label;
-            button.dataset.target = item.target; missingList.append(button);
+            button.type = 'button'; button.className = 'missing-item'; button.textContent = getRequiredLabel(item);
+            button.dataset.target = getRequiredTarget(item); missingList.append(button);
           });
         }
         $('#register-button').disabled = !basicComplete;
@@ -799,10 +845,11 @@
         update();
       }));
 
-      [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.instantDiscount, inputs.firstDiscount, inputs.capacity].forEach((input) => input.addEventListener('input', update));
+      [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.instantDiscount, inputs.firstDiscount, inputs.capacity].forEach((input) => input.addEventListener('input', update));
       $$('input[name="instant-discount"], input[name="first-discount"]').forEach((input) => input.addEventListener('change', update));
       $$('input[name="renewal-mode"], input[name="multi-month"]').forEach((input) => input.addEventListener('change', update));
       $$('input[name="capacity"]').forEach((input) => input.addEventListener('change', update));
+      $$('input[name="recruitment-period"]').forEach((input) => input.addEventListener('change', update));
       inputs.image.addEventListener('change', (event) => {
         const file = event.target.files && event.target.files[0];
         if (!file) return;
@@ -866,7 +913,7 @@
       $$('.summary-section-link').forEach((button) => button.addEventListener('click', () => {
         const name = button.dataset.summarySection; const section = expandSection(name);
         section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        if (name === 'basic') { const firstMissing = required.find((item) => !validValues()[item.key]); if (firstMissing) window.setTimeout(() => scrollToTarget(firstMissing.target), 300); }
+        if (name === 'basic') { const firstMissing = required.find((item) => !validValues()[item.key]); if (firstMissing) window.setTimeout(() => scrollToTarget(getRequiredTarget(firstMissing)), 300); }
       }));
       $('#missing-list').addEventListener('click', (event) => { const button = event.target.closest('.missing-item'); if (button) scrollToTarget(button.dataset.target); });
 
@@ -874,7 +921,7 @@
         const price = Number(inputs.price.value);
         const validPrice = Number.isFinite(price) && price >= 1000 && price <= 5000000;
         const instantApplied = isDiscountApplied('instant-discount');
-        const firstApplied = isDiscountApplied('first-discount');
+        const firstApplied = state.planType !== 'cohort' && isDiscountApplied('first-discount');
         const instant = readAmount(inputs.instantDiscount);
         const first = readAmount(inputs.firstDiscount);
         const validInstant = !instantApplied || (validPrice && instant.isPositiveNumber && instant.value <= price);
@@ -909,12 +956,12 @@
         $('#preview-discount-total').textContent = `${formatWon(totalDiscount)} 할인`;
         $('#preview-period').textContent = state.planType === 'subscription' && hasDuration
           ? `${duration}개월 이용`
-          : state.planType === 'cohort' ? '종료일 기준 이용'
+          : state.planType === 'cohort' ? inputs.endDate.value ? `${inputs.endDate.value} 종료` : '종료일 미정'
           : state.planType === 'deduction' ? '혜택 이용 기준'
           : '이용 기간 미정';
         $('#preview-usage').textContent = state.planType === 'subscription'
           ? hasDuration ? `${duration}개월 이용 · ${$('input[name="renewal-mode"]:checked').value === 'auto' ? '자동 갱신' : '1회 이용'}` : '기본 이용 기간을 입력해주세요.'
-          : state.planType === 'cohort' ? '설정된 종료일을 기준으로 이용이 종료됩니다.'
+          : state.planType === 'cohort' ? inputs.endDate.value ? `${inputs.endDate.value}에 이용이 종료됩니다.` : '이용 종료일을 선택해주세요.'
           : state.planType === 'deduction' ? '제공된 혜택을 모두 사용하면 이용이 종료됩니다.'
           : '운영 방식을 선택하면 이용 안내가 표시됩니다.';
 
