@@ -389,7 +389,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="field-grid two" style="margin-top: 24px;">
+                <div class="field-grid two" id="discount-settings" style="margin-top: 24px;">
                   <div class="field" id="instant-discount-field">
                     <span class="group-label" id="instant-discount-label">즉시 할인</span>
                     <p class="discount-description">결제 금액에서 즉시 할인할 금액을 설정합니다.</p>
@@ -479,10 +479,30 @@
                     </div>
                   </div>
                 </div>
+                <div class="benefit-settings" id="benefit-settings" hidden>
+                  <h2 class="group-title">2-2. 혜택 이용 설정</h2>
+                  <div class="field-grid two">
+                    <div class="field full">
+                      <span class="group-label" id="benefit-regular-price-label">플랜 정가 설정</span>
+                      <div class="option-stack" role="radiogroup" aria-labelledby="benefit-regular-price-label">
+                        <label class="option-row"><input type="radio" name="benefit-regular-price" value="none" checked /><span class="radio"></span><span>설정 안 함</span></label>
+                        <label class="option-row"><input type="radio" name="benefit-regular-price" value="set" /><span class="radio"></span><span>설정함</span></label>
+                      </div>
+                    </div>
+                    <div class="field full">
+                      <span class="group-label" id="benefit-renewal-limit-label">플랜 갱신 제한</span>
+                      <p class="discount-description">한 멤버가 플랜을 갱신하여 연속 이용할 수 없도록 설정합니다.</p>
+                      <div class="option-stack" role="radiogroup" aria-labelledby="benefit-renewal-limit-label">
+                        <label class="option-row"><input type="radio" name="benefit-renewal-limit" value="none" checked /><span class="radio"></span><span>설정 안 함</span></label>
+                        <label class="option-row"><input type="radio" name="benefit-renewal-limit" value="set" /><span class="radio"></span><span>설정함</span></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div class="operation-note" id="operation-extension-copy"></div>
               </div>
 
-              <div class="form-group">
+              <div class="form-group" id="join-settings">
                 <h2 class="group-title">2-3. 가입 설정</h2>
                 <div class="field-grid two">
                   <div class="field" id="capacity-field"><span class="group-label" id="capacity-label">가입 인원</span><div class="compact-options" role="radiogroup" aria-labelledby="capacity-label"><label class="option-row"><input type="radio" name="capacity" value="limited" aria-controls="capacity-details" /><span class="radio"></span><span>제한 있음</span></label><label class="option-row"><input type="radio" name="capacity" value="unlimited" checked /><span class="radio"></span><span>제한 없음</span></label></div><div class="discount-details" id="capacity-details" aria-hidden="true"><div class="discount-details-inner"><label class="group-label" for="capacity-limit">최대 가입 인원</label><div class="input-wrap"><input class="number-input with-suffix" id="capacity-limit" type="number" min="1" max="9999" inputmode="numeric" placeholder="1" disabled /><span class="input-suffix">명</span></div><div class="input-error" id="capacity-error">가입 인원은 1명 ~ 9,999명 사이로 입력해야 합니다.</div><p class="capacity-range">1명 ~ 9,999명</p></div></div></div>
@@ -491,7 +511,7 @@
               </div>
 
               <div class="form-group">
-                <h2 class="group-title">2-4. 공개 상태</h2>
+                <h2 class="group-title" id="visibility-title">2-4. 공개 상태</h2>
                 <div class="option-stack"><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>공개</span></span></label><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>일부 공개</span><span class="option-sub">링크를 통해 페이지에 접근한 사용자에게만 공개됩니다.</span></span></label><label class="option-row"><input type="radio" name="visibility" checked /><span class="radio"></span><span class="option-content"><span>나에게만 공개</span><span class="option-sub">나에게만 공개됩니다.</span></span></label></div>
               </div>
             </div>
@@ -773,6 +793,7 @@
         const selected = Boolean(state.planType);
         const isSubscription = state.planType === 'subscription';
         const isCohort = state.planType === 'cohort';
+        const isBenefit = state.planType === 'deduction';
         const operationNames = { subscription: '가입일 기준', cohort: '종료일 기준', deduction: '혜택 이용 기준' };
         const configuration = $('#configuration');
 
@@ -781,9 +802,13 @@
         $('#subscription-settings').hidden = !isSubscription;
         $('#operation-extension').hidden = !selected || isSubscription;
         $('#cohort-settings').hidden = !isCohort;
-        $('#operation-extension-copy').hidden = isCohort;
-        $('#first-discount-field').hidden = isCohort;
+        $('#benefit-settings').hidden = !isBenefit;
+        $('#operation-extension-copy').hidden = true;
+        $('#discount-settings').hidden = isBenefit;
+        $('#first-discount-field').hidden = isCohort || isBenefit;
         $('#instant-discount-field').classList.toggle('full', isCohort);
+        $('#join-settings').hidden = isBenefit;
+        $('#visibility-title').textContent = isBenefit ? '2-3. 공개 상태' : '2-4. 공개 상태';
         $('#operation-status').classList.toggle('visible', selected);
 
         if (!selected) {
@@ -792,7 +817,6 @@
         }
 
         $('#operation-status').textContent = `${operationNames[state.planType]} 멤버십으로 설정하고 있습니다.`;
-        $('#operation-extension-copy').textContent = '혜택 이용 기준 멤버십의 이용 횟수와 종료 조건은 세부 정책이 확정되면 이 영역에서 설정할 수 있습니다.';
       }
 
       function update() {
@@ -968,8 +992,9 @@
       function getPreviewPricing() {
         const price = Number(inputs.price.value);
         const validPrice = Number.isFinite(price) && price >= 1000 && price <= 5000000;
-        const instantApplied = isDiscountApplied('instant-discount');
-        const firstApplied = state.planType !== 'cohort' && isDiscountApplied('first-discount');
+        const discountAvailable = state.planType !== 'deduction';
+        const instantApplied = discountAvailable && isDiscountApplied('instant-discount');
+        const firstApplied = state.planType === 'subscription' && isDiscountApplied('first-discount');
         const instant = readAmount(inputs.instantDiscount);
         const first = readAmount(inputs.firstDiscount);
         const validInstant = !instantApplied || (validPrice && instant.isPositiveNumber && instant.value <= price);
