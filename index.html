@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>멤버십 등록 | Fanding Studio</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #181818;
+      --surface: #202022;
+      --card: #252527;
+      --card-hover: #2b2b2f;
+      --input: #303034;
+      --line: #3b3b40;
+      --line-soft: #303034;
+      --text: #f2f1f6;
+      --muted: #aaa9b4;
+      --subtle: #777681;
+      --purple: #6c63ff;
+      --purple-soft: #383664;
+      --purple-weak: rgba(108, 99, 255, .12);
+      --success: #73d8a7;
+      --warning: #f3bf64;
+      --danger: #ff7c8a;
+      --radius: 12px;
+      --shadow: 0 18px 40px rgba(0, 0, 0, .18);
+      font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--bg); }
+    body { margin: 0; min-width: 1160px; background: var(--bg); color: var(--text); }
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+    button, label { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, [contenteditable]:focus-visible {
+      outline: 2px solid #9b95ff; outline-offset: 2px;
+    }
+
+    .topbar {
+      height: 64px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 36px; border-bottom: 1px solid var(--line); background: #1b1b1c;
+      position: sticky; top: 0; z-index: 20;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; font-size: 14px; font-weight: 700; letter-spacing: -.2px; }
+    .brand-mark { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: linear-gradient(145deg, #847bff, #554cff); box-shadow: 0 5px 15px rgba(92, 82, 255, .32); }
+    .brand-mark::before { content: "F"; font-size: 14px; font-weight: 800; color: #fff; }
+    .crumb { color: var(--subtle); font-weight: 500; }
+    .crumb strong { color: #dad9e0; font-weight: 600; }
+    .top-actions { display: flex; gap: 10px; align-items: center; }
+    .saved { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; }
+    .saved::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px rgba(115,216,167,.1); }
+
+    .page { max-width: 1480px; padding: 42px 44px 84px; margin: 0 auto; }
+    .page-intro { display: flex; justify-content: space-between; align-items: end; margin: 0 0 30px; }
+    .eyebrow { display: flex; gap: 8px; align-items: center; color: #a59fff; font-size: 13px; font-weight: 700; }
+    .eyebrow .dot { width: 5px; height: 5px; background: var(--purple); border-radius: 50%; }
+    h1 { margin: 9px 0 0; letter-spacing: -.8px; font-size: 28px; line-height: 1.3; }
+    .intro-copy { max-width: 660px; margin: 9px 0 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .required-note { padding: 9px 12px; border: 1px solid var(--line); background: #202021; color: var(--muted); border-radius: 8px; font-size: 12px; }
+    .required-mark { color: #ff717f; }
+
+    .layout { display: grid; grid-template-columns: minmax(680px, 1fr) 326px; align-items: start; gap: 28px; }
+    .form-column { min-width: 0; }
+
+    .form-section { scroll-margin-top: 92px; margin-bottom: 18px; border: 1px solid var(--line); border-radius: var(--radius); overflow: clip; background: var(--surface); box-shadow: 0 5px 18px rgba(0,0,0,.08); transition: border-color .2s ease; }
+    .form-section:has(.accordion-panel:not(.collapsed)) { border-color: #46464d; }
+    .form-section.highlight { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(108,99,255,.12); }
+    .accordion-header { width: 100%; border: 0; padding: 20px 22px; background: transparent; display: flex; align-items: center; justify-content: space-between; gap: 20px; cursor: pointer; text-align: left; }
+    .section-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .section-num { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; background: #34343a; color: #cac9d3; font-size: 12px; font-weight: 700; }
+    .section-heading { font-size: 17px; letter-spacing: -.3px; font-weight: 700; }
+    .section-status { margin-left: 3px; color: var(--warning); font-size: 13px; white-space: nowrap; }
+    .section-status.complete { color: var(--success); }
+    .section-status.optional { color: var(--subtle); }
+    .header-right { display: flex; align-items: center; gap: 14px; }
+    .chevron { width: 9px; height: 9px; border-right: 2px solid #a6a5b0; border-bottom: 2px solid #a6a5b0; transform: rotate(45deg) translateY(-2px); transition: transform .2s ease; }
+    .accordion-header[aria-expanded="false"] .chevron { transform: rotate(225deg) translate(-2px, -2px); }
+    .accordion-panel { overflow: hidden; border-top: 1px solid var(--line); max-height: 4000px; opacity: 1; transition: max-height .35s ease, opacity .2s ease, border .25s ease; }
+    .accordion-panel.collapsed { max-height: 0; opacity: 0; border-top-color: transparent; }
+    .section-body { padding: 28px 28px 32px; }
+    .section-description { margin: -2px 0 24px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+    .form-group + .form-group { margin-top: 34px; padding-top: 32px; border-top: 1px solid var(--line-soft); }
+    .group-title { display: flex; align-items: center; gap: 8px; margin: 0 0 7px; font-size: 15px; font-weight: 700; }
+    .group-help { margin: 0 0 18px; color: var(--subtle); font-size: 12px; line-height: 1.5; }
+    .group-label { display: block; margin: 0 0 9px; font-size: 13px; font-weight: 650; color: #e3e2e8; }
+    .field-help { color: var(--subtle); font-size: 12px; font-weight: 400; }
+
+    .plan-grid { display: grid; gap: 10px; }
+    .plan-card { position: relative; display: flex; justify-content: space-between; align-items: start; width: 100%; min-height: 96px; padding: 18px 19px; border: 1px solid #3b3b40; border-radius: 10px; background: var(--card); color: var(--text); text-align: left; cursor: pointer; transition: background .16s, border-color .16s, transform .16s; }
+    .plan-card:hover { background: var(--card-hover); border-color: #55545e; }
+    .plan-card.selected { border-color: #7670ff; background: var(--purple-soft); }
+    .plan-card.selected .plan-name { color: #9691ff; }
+    .plan-card:active { transform: scale(.998); }
+    .plan-name { display: block; margin-bottom: 7px; font-size: 15px; font-weight: 750; letter-spacing: -.2px; }
+    .plan-copy { display: block; padding-right: 30px; color: #c3c1cb; font-size: 13px; line-height: 1.55; }
+    .choice-dot { flex: 0 0 auto; width: 20px; height: 20px; border: 1px solid #4d4d55; border-radius: 50%; background: #202024; margin: 1px 0 0 16px; }
+    .selected .choice-dot { display: grid; place-items: center; border-color: #726aff; background: #726aff; }
+    .selected .choice-dot::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: white; }
+
+    .field-grid { display: grid; gap: 20px; }
+    .field-grid.two { grid-template-columns: 1fr 1fr; }
+    .field-grid.price-grid { grid-template-columns: 1.15fr .85fr; align-items: end; }
+    .field { min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .input-wrap { position: relative; }
+    .text-input, .textarea, .number-input { width: 100%; border: 1px solid transparent; border-radius: 8px; background: var(--input); color: #f2f1f5; padding: 12px 13px; line-height: 20px; outline: none; transition: border-color .16s, box-shadow .16s, background .16s; }
+    .text-input::placeholder, .textarea::placeholder { color: #777681; }
+    .text-input:hover, .textarea:hover, .number-input:hover { background: #35353a; }
+    .text-input:focus, .textarea:focus, .number-input:focus { border-color: #7770ff; box-shadow: 0 0 0 3px rgba(108,99,255,.14); background: #323238; }
+    .text-input, .number-input { height: 46px; }
+    .textarea { height: 88px; min-height: 88px; resize: vertical; }
+    .character-count { margin-top: 6px; color: var(--subtle); font-size: 11px; text-align: right; }
+    .input-suffix { position: absolute; top: 50%; right: 13px; transform: translateY(-50%); pointer-events: none; color: #dad9e1; font-size: 13px; font-weight: 650; }
+    .with-suffix { padding-right: 64px; }
+    .input-error { display: none; margin-top: 7px; color: var(--danger); font-size: 12px; }
+    .invalid .text-input, .invalid .number-input { border-color: rgba(255,124,138,.8); }
+    .invalid .input-error { display: block; }
+
+    .image-field { display: flex; gap: 15px; align-items: center; }
+    .image-preview { width: 86px; height: 86px; overflow: hidden; display: grid; place-items: center; border: 1px solid #44444b; border-radius: 10px; background: linear-gradient(135deg, #3c3a61, #27272c); color: #b4b0ff; }
+    .image-preview svg { width: 38px; height: 38px; }
+    .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .image-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .image-picker { position: relative; display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 0 12px; border: 1px solid #4a4952; border-radius: 7px; background: #313137; color: #e0dfe6; cursor: pointer; font-size: 12px; font-weight: 650; transition: .16s; }
+    .image-picker:hover { background: #3a3940; border-color: #62616b; }
+    .image-meta { margin: 7px 0 0; color: var(--subtle); font-size: 11px; }
+    .image-meta.selected { color: var(--success); }
+
+    .option-stack { display: grid; gap: 8px; }
+    .option-row { display: flex; align-items: flex-start; gap: 10px; min-height: 30px; cursor: pointer; color: #e0dfe5; font-size: 13px; line-height: 1.45; }
+    .option-row input { position: absolute; opacity: 0; pointer-events: none; }
+    .radio { display: grid; flex: 0 0 auto; place-items: center; width: 20px; height: 20px; border: 1px solid #4a4952; border-radius: 50%; background: #27272c; margin-top: -1px; }
+    .option-row input:checked + .radio { border-color: #736bff; background: #736bff; }
+    .option-row input:checked + .radio::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+    .option-row:has(input:disabled) { cursor: not-allowed; color: #777681; }
+    .option-row:has(input:disabled) .radio { border-color: #3b3b40; background: #242428; }
+    .option-content { display: grid; gap: 2px; }
+    .option-sub { color: var(--subtle); font-size: 12px; }
+    .compact-options { display: flex; align-items: center; flex-wrap: wrap; gap: 11px 22px; min-height: 46px; padding: 0 0 1px; }
+    .compact-options .option-row { align-items: center; min-height: 20px; }
+    .compact-options .radio { margin-top: 0; }
+    .discount-description { margin: -2px 0 12px; color: var(--subtle); font-size: 12px; line-height: 1.5; }
+    .discount-options { min-height: 32px; gap: 10px 20px; }
+    .discount-details { display: grid; grid-template-rows: 0fr; margin-top: 0; opacity: 0; transition: grid-template-rows .24s ease, margin-top .24s ease, opacity .18s ease; }
+    .discount-details.open { grid-template-rows: 1fr; margin-top: 15px; opacity: 1; }
+    .discount-details-inner { min-height: 0; overflow: hidden; }
+    .capacity-range { margin: 7px 0 0; color: var(--subtle); font-size: 12px; }
+    .discount-note { margin: 7px 0 0; color: var(--subtle); font-size: 11px; line-height: 1.45; }
+    .discount-result { display: grid; gap: 4px; margin-top: 12px; padding: 12px; border: 1px solid #414049; border-radius: 8px; background: #29292d; }
+    .discount-result-label { color: var(--muted); font-size: 11px; font-weight: 650; }
+    .discount-result-value { color: #f3f2f8; font-size: 16px; letter-spacing: -.2px; }
+    .discount-result-copy { color: var(--success); font-size: 12px; font-weight: 650; }
+    .discount-result-copy.muted { color: var(--subtle); font-weight: 400; }
+    .renewal-description { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .long-pass-description { margin: -2px 0 12px; color: var(--subtle); font-size: 12px; line-height: 1.5; }
+    .long-pass-details { display: grid; grid-template-rows: 0fr; margin-top: 0; opacity: 0; transition: grid-template-rows .24s ease, margin-top .24s ease, opacity .18s ease; }
+    .long-pass-details.open { grid-template-rows: 1fr; margin-top: 15px; opacity: 1; }
+    .long-pass-details-inner { min-height: 0; overflow: hidden; }
+    .long-pass-note { margin: 10px 0 0; color: var(--subtle); font-size: 12px; line-height: 1.5; }
+    .ticket-options { display: flex; flex-wrap: wrap; gap: 9px 16px; }
+    .checkbox-option { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; cursor: pointer; color: #e0dfe5; font-size: 13px; }
+    .checkbox-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .checkbox { display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid #4a4952; border-radius: 5px; background: #27272c; }
+    .checkbox-option input:checked + .checkbox { border-color: #736bff; background: #736bff; }
+    .checkbox-option input:checked + .checkbox::after { content: "✓"; color: #fff; font-size: 12px; font-weight: 800; }
+    .checkbox-option:has(input:disabled) { cursor: not-allowed; color: #777681; }
+    .checkbox-option:has(input:disabled) .checkbox { border-color: #3b3b40; background: #242428; }
+
+    .reward-stack { display: grid; gap: 10px; }
+    .reward-setting { display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 13px 14px; border: 1px solid #35353a; border-radius: 10px; background: var(--card); }
+    .reward-left { display: flex; align-items: center; gap: 12px; }
+    .reward-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: #37373e; color: #dedce7; }
+    .reward-icon svg { width: 19px; height: 19px; }
+    .reward-name { display: block; font-size: 13px; font-weight: 700; }
+    .reward-state { display: block; margin-top: 4px; color: var(--subtle); font-size: 12px; }
+    .reward-state.on { color: var(--success); }
+    .text-button { height: 33px; padding: 0 12px; border: 1px solid #4b4a52; border-radius: 7px; background: #303037; color: #e4e2eb; cursor: pointer; font-size: 12px; font-weight: 650; }
+    .text-button:hover { background: #3b3a42; }
+    .custom-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .custom-count { color: #f3f2f6; font-size: 15px; font-weight: 700; }
+    .custom-count span { color: #a9a7b3; font-weight: 500; }
+    .empty-reward { display: grid; place-items: center; min-height: 160px; padding: 26px; border: 1px dashed #44434b; border-radius: 10px; background: rgba(37,37,39,.52); text-align: center; }
+    .empty-illustration { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 10px; border-radius: 14px; background: var(--purple-weak); color: #a8a3ff; }
+    .empty-illustration svg { width: 22px; height: 22px; }
+    .empty-reward strong { font-size: 13px; }
+    .empty-reward p { margin: 5px 0 14px; color: var(--subtle); font-size: 12px; }
+    .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 38px; padding: 0 15px; border: 0; border-radius: 8px; background: #6259ef; color: #fff; cursor: pointer; font-size: 12px; font-weight: 700; box-shadow: 0 5px 15px rgba(88,78,234,.18); transition: transform .15s, background .15s, opacity .15s; }
+    .primary-button:hover:not(:disabled) { background: #746cff; }
+    .primary-button:active:not(:disabled) { transform: translateY(1px); }
+    .primary-button:disabled { cursor: not-allowed; opacity: .45; box-shadow: none; }
+    .add-reward-form { display: none; margin-top: 12px; padding: 16px; border: 1px solid #4e4a8b; border-radius: 10px; background: #29283a; }
+    .add-reward-form.visible { display: block; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+    .secondary-button { height: 36px; padding: 0 12px; border: 1px solid #4b4a52; border-radius: 7px; background: transparent; color: #d7d5df; cursor: pointer; font-size: 12px; font-weight: 650; }
+    .secondary-button:hover { background: #323238; }
+    .reward-list { display: grid; gap: 8px; }
+    .custom-card { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 14px; border: 1px solid #3d3d43; border-radius: 9px; background: #28282b; }
+    .custom-card strong { display: block; font-size: 13px; }
+    .custom-card p { margin: 4px 0 0; color: var(--subtle); font-size: 12px; }
+    .delete-reward { flex: 0 0 auto; width: 30px; height: 30px; border: 0; border-radius: 6px; background: transparent; color: #a4a3ad; cursor: pointer; font-size: 18px; }
+    .delete-reward:hover { background: rgba(255,124,138,.12); color: #ff9aa4; }
+
+    .editor { overflow: hidden; border: 1px solid #404047; border-radius: 10px; background: #28282c; transition: border-color .16s, box-shadow .16s; }
+    .editor:focus-within { border-color: #7770ff; box-shadow: 0 0 0 3px rgba(108,99,255,.13); }
+    .editor-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 3px; padding: 8px 10px; border-bottom: 1px solid #3b3b40; background: #303035; }
+    .editor-tool { width: 30px; height: 30px; border: 0; border-radius: 5px; background: transparent; color: #d5d3dc; cursor: pointer; font-size: 13px; font-weight: 750; }
+    .editor-tool:hover { background: #424149; }
+    .editor-divider { width: 1px; height: 17px; margin: 0 5px; background: #515057; }
+    .editor-body { min-height: 260px; padding: 22px; outline: none; color: #e2e0e7; font-size: 14px; line-height: 1.75; }
+    .editor-body:empty::before { content: attr(data-placeholder); color: #777681; pointer-events: none; }
+    .editor-body h2 { margin: 0 0 10px; font-size: 22px; line-height: 1.35; }
+    .editor-body .demo-image { display: grid; place-items: center; height: 138px; margin: 16px 0; border: 1px dashed #5a576d; border-radius: 8px; color: #aaa4f7; background: #302f3d; font-size: 12px; }
+    .optional-banner { display: flex; align-items: center; gap: 8px; margin-bottom: 17px; padding: 10px 12px; border-radius: 8px; background: #29292c; color: #aaa9b4; font-size: 12px; }
+    .optional-banner b { color: #d1cfda; }
+
+    .summary-wrap { position: sticky; top: 88px; }
+    .summary { overflow: hidden; border: 1px solid #494850; border-radius: 12px; background: #242426; box-shadow: var(--shadow); }
+    .summary-top { padding: 21px 20px 18px; border-bottom: 1px solid #3b3b40; }
+    .summary-title { margin: 0; font-size: 15px; font-weight: 750; letter-spacing: -.2px; }
+    .summary-caption { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+    .progress-row { display: flex; align-items: center; gap: 14px; margin-top: 20px; }
+    .progress-ring { --progress: 0%; position: relative; display: grid; place-items: center; width: 65px; height: 65px; border-radius: 50%; background: conic-gradient(var(--purple) var(--progress), #38383d var(--progress)); }
+    .progress-ring::before { content: ""; position: absolute; width: 54px; height: 54px; border-radius: 50%; background: #242426; }
+    .progress-ring strong { position: relative; font-size: 13px; }
+    .progress-copy b { display: block; font-size: 13px; }
+    .progress-copy span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .summary-statuses { padding: 14px 20px; border-bottom: 1px solid #3b3b40; }
+    .summary-section-link { display: flex; align-items: center; width: 100%; min-height: 38px; padding: 0; border: 0; background: transparent; color: #e1e0e6; cursor: pointer; text-align: left; font-size: 13px; }
+    .summary-section-link:hover .summary-label { color: #a9a4ff; }
+    .summary-indicator { width: 17px; height: 17px; display: grid; place-items: center; margin-right: 9px; border: 1px solid #5a5961; border-radius: 50%; color: transparent; font-size: 11px; }
+    .summary-indicator.done { border-color: rgba(115,216,167,.65); background: rgba(115,216,167,.15); color: var(--success); }
+    .summary-indicator.optional { border-style: dashed; }
+    .summary-label { min-width: 0; flex: 1; transition: color .15s; }
+    .summary-state { margin-left: 8px; color: var(--warning); font-size: 11px; white-space: nowrap; }
+    .summary-state.done { color: var(--success); }
+    .summary-state.optional { color: var(--subtle); }
+    .missing { padding: 18px 20px; }
+    .missing h3 { margin: 0 0 9px; color: #d8d6df; font-size: 12px; }
+    .missing-list { display: grid; gap: 4px; }
+    .missing-item { display: flex; align-items: center; width: 100%; min-height: 28px; padding: 3px 0; border: 0; background: transparent; color: #b8b6c2; cursor: pointer; text-align: left; font-size: 12px; }
+    .missing-item::before { content: ""; width: 5px; height: 5px; margin-right: 8px; border-radius: 50%; background: var(--warning); }
+    .missing-item:hover { color: #aba6ff; text-decoration: underline; text-underline-offset: 3px; }
+    .missing-complete { display: flex; gap: 7px; align-items: center; color: var(--success); font-size: 12px; }
+    .missing-complete::before { content: "✓"; font-weight: 800; }
+    .summary-actions { display: grid; gap: 8px; padding: 0 20px 20px; }
+    .wide { width: 100%; }
+    .register-help { margin: 4px 0 0; color: var(--subtle); font-size: 11px; text-align: center; line-height: 1.4; }
+
+    .modal-backdrop { position: fixed; inset: 0; display: none; place-items: center; padding: 20px; background: rgba(0,0,0,.62); z-index: 100; }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(460px, 100%); overflow: hidden; border: 1px solid #52515a; border-radius: 13px; background: #28282c; box-shadow: 0 24px 70px rgba(0,0,0,.48); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #414148; }
+    .modal-header h2 { margin: 0; font-size: 16px; }
+    .modal-close { width: 30px; height: 30px; border: 0; border-radius: 7px; background: transparent; color: #c5c3cc; cursor: pointer; font-size: 22px; line-height: 1; }
+    .modal-close:hover { background: #38383e; }
+    .modal-content { padding: 20px; }
+    .modal-content > p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .setting-choices { display: grid; gap: 9px; margin-top: 16px; }
+    .setting-choice { display: flex; align-items: center; justify-content: space-between; padding: 14px; border: 1px solid #46454e; border-radius: 9px; background: #303035; color: #eceaf1; cursor: pointer; text-align: left; }
+    .setting-choice:hover, .setting-choice.active { border-color: #736bff; background: #37355b; }
+    .setting-choice strong { font-size: 13px; }
+    .setting-choice span { color: #aaa7b2; font-size: 12px; }
+    .preview-card { overflow: hidden; margin-top: 14px; border: 1px solid #45444c; border-radius: 10px; background: #212123; }
+    .preview-hero { height: 110px; display: grid; place-items: center; background: linear-gradient(130deg, #48427d, #2f2b42); color: #b4afff; font-size: 12px; }
+    .preview-copy { padding: 16px; }
+    .preview-copy b { display: block; font-size: 17px; }
+    .preview-copy p { margin: 6px 0 0; color: #b7b4c1; font-size: 12px; line-height: 1.5; }
+    .preview-price { display: block; margin-top: 14px; color: #b3aeff; font-size: 16px; font-weight: 800; }
+    .toast { position: fixed; right: 30px; bottom: 30px; display: flex; align-items: center; gap: 9px; transform: translateY(20px); padding: 13px 15px; border: 1px solid rgba(115,216,167,.4); border-radius: 9px; background: #26362f; color: #dff9e9; box-shadow: 0 12px 30px rgba(0,0,0,.3); opacity: 0; pointer-events: none; transition: .25s; z-index: 120; font-size: 13px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast::before { content: "✓"; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #53b983; font-size: 12px; font-weight: 800; }
+
+    @media (max-width: 1180px) { body { min-width: 0; } .page { padding: 32px 24px 72px; } .layout { grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; } }
+    @media (max-width: 940px) { .topbar { padding: 0 20px; } .page-intro { align-items: flex-start; flex-direction: column; gap: 16px; } .layout { grid-template-columns: 1fr; } .summary-wrap { position: static; order: -1; } .summary-statuses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; } .summary-section-link { min-height: 34px; } }
+    @media (max-width: 620px) { .page { padding: 24px 14px 56px; } .topbar { height: 56px; } .crumb { display: none; } h1 { font-size: 24px; } .section-body { padding: 22px 17px 26px; } .accordion-header { padding: 17px; } .section-status { display: none; } .field-grid.two, .field-grid.price-grid { grid-template-columns: 1fr; } .summary-statuses { grid-template-columns: 1fr; } .image-field { align-items: flex-start; flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>FANDING STUDIO</span><span class="crumb">멤버십 관리&nbsp; / &nbsp;<strong>새 멤버십 등록</strong></span></div>
+    <div class="top-actions"><span class="saved">작성 내용 저장됨</span></div>
+  </header>
+
+  <main class="page">
+    <div class="page-intro">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>MEMBERSHIP PLAN</div>
+        <h1>새 멤버십 등록</h1>
+        <p class="intro-copy">한 화면에서 멤버십의 모든 설정을 확인하고 완성할 수 있습니다. 필요한 항목을 입력하면 등록 준비 상태가 실시간으로 갱신됩니다.</p>
+      </div>
+      <div class="required-note"><span class="required-mark">*</span> 필수 입력 항목</div>
+    </div>
+
+    <div class="layout">
+      <div class="form-column">
+        <section class="form-section" id="basic-section" data-section="basic">
+          <button class="accordion-header" type="button" aria-expanded="true" aria-controls="basic-panel">
+            <span class="section-title"><span class="section-num">1</span><span class="section-heading">기본 설정</span></span>
+            <span class="header-right"><span class="section-status" id="basic-header-status">기본 설정 · 6개 항목 미완료</span><span class="chevron" aria-hidden="true"></span></span>
+          </button>
+          <div class="accordion-panel" id="basic-panel">
+            <div class="section-body">
+              <p class="section-description">플랜의 판매 방식, 소개, 이용 조건과 가입 방식을 한 번에 설정합니다.</p>
+
+              <div class="form-group" id="plan-type-field">
+                <h2 class="group-title">A. 플랜 운영 방식 <span class="required-mark">*</span></h2>
+                <p class="group-help">멤버십 이용이 종료되는 기준을 선택할 수 있습니다.</p>
+                <div class="plan-grid" role="radiogroup" aria-label="플랜 운영 방식">
+                  <button class="plan-card" type="button" data-plan-type="subscription" aria-pressed="false"><span><span class="plan-name">가입일 기준</span><span class="plan-copy">가입한 날부터 설정된 기간 동안 이용하는 플랜입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
+                  <button class="plan-card" type="button" data-plan-type="cohort" aria-pressed="false"><span><span class="plan-name">종료일 고정</span><span class="plan-copy">가입일과 관계없이 설정된 종료일에 모두 이용이 종료되는 플랜입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
+                  <button class="plan-card" type="button" data-plan-type="deduction" aria-pressed="false"><span><span class="plan-name">혜택 이용 기준</span><span class="plan-copy">가입 시 제공되는 혜택이 모두 사용 완료되면 이용이 종료되는 플랜입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <h2 class="group-title">B. 플랜 정보</h2>
+                <div class="field-grid two">
+                  <div class="field" id="plan-name-field">
+                    <label class="group-label" for="plan-name">플랜 이름 <span class="required-mark">*</span> <span class="field-help">최대 60자</span></label>
+                    <input class="text-input required-input" id="plan-name" type="text" maxlength="60" placeholder="예) 팬더들을 위한 브론즈 멤버십" />
+                    <div class="character-count"><span id="name-count">0</span>/60</div>
+                  </div>
+                  <div class="field" id="price-field">
+                    <label class="group-label" for="plan-price">판매가 <span class="required-mark">*</span></label>
+                    <div class="input-wrap"><input class="number-input required-input with-suffix" id="plan-price" type="number" min="1000" max="5000000" inputmode="numeric" placeholder="10,000" /><span class="input-suffix">원</span></div>
+                    <div class="input-error">1,000원~5,000,000원 사이로 입력해야 합니다.</div>
+                  </div>
+                  <div class="field full" id="plan-summary-field">
+                    <label class="group-label" for="plan-summary">플랜 한 줄 설명 <span class="required-mark">*</span> <span class="field-help">최대 400자</span></label>
+                    <textarea class="textarea required-input" id="plan-summary" maxlength="400" placeholder="예) 매월 새로운 콘텐츠와 멤버 전용 소식을 전해 드립니다."></textarea>
+                    <div class="character-count"><span id="summary-count">0</span>/400</div>
+                  </div>
+                  <div class="field full" id="image-field">
+                    <span class="group-label">대표 이미지 <span class="required-mark">*</span></span>
+                    <div class="image-field">
+                      <div class="image-preview" id="image-preview" aria-label="대표 이미지 미리보기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.4"/><path d="m4 18 5.2-5.1a1.5 1.5 0 0 1 2.1 0L14 15.5l1.5-1.5a1.5 1.5 0 0 1 2.1 0L21 17.4"/></svg></div>
+                      <div><label class="image-picker" for="plan-image">이미지 선택<input id="plan-image" type="file" accept="image/*" /></label><p class="image-meta" id="image-meta">100px × 100px 이상, 10MB 이하의 이미지를 등록할 수 있습니다.</p></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="field-grid two" style="margin-top: 24px;">
+                  <div class="field" id="instant-discount-field">
+                    <span class="group-label" id="instant-discount-label">즉시 할인</span>
+                    <p class="discount-description">결제 금액에서 즉시 할인할 금액을 설정합니다.</p>
+                    <div class="compact-options discount-options" role="radiogroup" aria-labelledby="instant-discount-label">
+                      <label class="option-row"><input type="radio" name="instant-discount" value="apply" aria-controls="instant-discount-details" /><span class="radio"></span><span>적용</span></label>
+                      <label class="option-row"><input type="radio" name="instant-discount" value="none" checked /><span class="radio"></span><span>적용 안 함</span></label>
+                    </div>
+                    <div class="discount-details" id="instant-discount-details" aria-hidden="true"><div class="discount-details-inner">
+                      <label class="group-label" for="instant-discount-amount">할인 금액</label>
+                      <div class="input-wrap"><input class="number-input with-suffix" id="instant-discount-amount" type="number" min="1" max="5000000" inputmode="numeric" placeholder="2,000" disabled /><span class="input-suffix">원</span></div>
+                      <div class="input-error" id="instant-discount-error">할인 금액은 판매가 이하로 입력해야 합니다.</div>
+                      <p class="discount-note">원 단위 정액 할인만 지원합니다.</p>
+                      <div class="discount-result" aria-live="polite"><span class="discount-result-label">할인 적용가</span><strong class="discount-result-value" id="instant-discount-price">—</strong><span class="discount-result-copy muted" id="instant-discount-copy">판매가를 입력하면 할인 적용가가 표시됩니다.</span></div>
+                    </div></div>
+                  </div>
+                  <div class="field" id="first-discount-field">
+                    <span class="group-label" id="first-discount-label">첫 결제 할인</span>
+                    <p class="discount-description">멤버십 첫 결제에만 추가로 할인할 금액을 설정합니다.</p>
+                    <div class="compact-options discount-options" role="radiogroup" aria-labelledby="first-discount-label">
+                      <label class="option-row"><input type="radio" name="first-discount" value="apply" aria-controls="first-discount-details" /><span class="radio"></span><span>적용</span></label>
+                      <label class="option-row"><input type="radio" name="first-discount" value="none" checked /><span class="radio"></span><span>적용 안 함</span></label>
+                    </div>
+                    <div class="discount-details" id="first-discount-details" aria-hidden="true"><div class="discount-details-inner">
+                      <label class="group-label" for="first-discount-amount">할인 금액</label>
+                      <div class="input-wrap"><input class="number-input with-suffix" id="first-discount-amount" type="number" min="1" max="5000000" inputmode="numeric" placeholder="1,000" disabled /><span class="input-suffix">원</span></div>
+                      <div class="input-error" id="first-discount-error">할인 금액은 즉시 할인 적용가 이하로 입력해야 합니다.</div>
+                      <p class="discount-note">원 단위 정액 할인만 지원합니다.</p>
+                      <div class="discount-result" aria-live="polite"><span class="discount-result-label">첫 결제 적용가</span><strong class="discount-result-value" id="first-discount-price">—</strong><span class="discount-result-copy muted" id="first-discount-copy">판매가를 입력하면 첫 결제 적용가가 표시됩니다.</span></div>
+                    </div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <h2 class="group-title">C. 결제 설정</h2>
+                <div class="field-grid two">
+                  <div class="field full" id="duration-field">
+                    <label class="group-label" for="duration">기본 이용 기간 <span class="required-mark">*</span></label>
+                    <p class="discount-description">한 번 결제했을 때 이용할 수 있는 기간입니다.</p>
+                    <div class="input-wrap"><input class="number-input required-input with-suffix" id="duration" type="number" min="1" max="120" inputmode="numeric" placeholder="1" /><span class="input-suffix">개월</span></div>
+                    <div class="input-error">1개월 이상의 이용 기간을 입력해야 합니다.</div>
+                  </div>
+                  <div class="field full" id="renewal-mode-field">
+                    <span class="group-label" id="renewal-mode-label">갱신 방식 <span class="required-mark">*</span></span>
+                    <div class="compact-options discount-options" role="radiogroup" aria-labelledby="renewal-mode-label">
+                      <label class="option-row"><input type="radio" name="renewal-mode" value="auto" checked /><span class="radio"></span><span>자동 갱신</span></label>
+                      <label class="option-row"><input type="radio" name="renewal-mode" value="one-time" /><span class="radio"></span><span>1회 이용</span></label>
+                    </div>
+                    <p class="renewal-description" id="renewal-description">기본 이용 기간이 끝나면 동일한 기간으로 자동 결제되어 계속 이용합니다.</p>
+                  </div>
+                  <div class="field full" id="long-pass-field" hidden>
+                    <span class="group-label" id="long-pass-label">묶음 이용권 판매</span>
+                    <p class="long-pass-description">1개월 이용권을 3·6·12개월 단위로 묶어 한 번에 판매합니다.</p>
+                    <div class="compact-options discount-options" role="radiogroup" aria-labelledby="long-pass-label">
+                      <label class="option-row"><input type="radio" name="multi-month" value="sell" /><span class="radio"></span><span>판매</span></label>
+                      <label class="option-row"><input type="radio" name="multi-month" value="none" checked /><span class="radio"></span><span>판매 안 함</span></label>
+                    </div>
+                    <p class="long-pass-note">묶음 이용권은 구매한 기간이 끝나면 자동으로 종료됩니다.</p>
+                    <div class="long-pass-details" id="long-pass-details" aria-hidden="true"><div class="long-pass-details-inner">
+                      <span class="group-label">판매할 묶음 이용권</span>
+                      <div class="ticket-options" aria-label="판매할 묶음 이용권 선택">
+                        <label class="checkbox-option"><input type="checkbox" name="long-pass-term" value="3" checked disabled /><span class="checkbox"></span><span>3개월권</span></label>
+                        <label class="checkbox-option"><input type="checkbox" name="long-pass-term" value="6" checked disabled /><span class="checkbox"></span><span>6개월권</span></label>
+                        <label class="checkbox-option"><input type="checkbox" name="long-pass-term" value="12" checked disabled /><span class="checkbox"></span><span>12개월권</span></label>
+                      </div>
+                    </div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <h2 class="group-title">D. 가입 설정</h2>
+                <div class="field-grid two">
+                  <div class="field" id="capacity-field"><span class="group-label" id="capacity-label">가입 인원</span><div class="compact-options" role="radiogroup" aria-labelledby="capacity-label"><label class="option-row"><input type="radio" name="capacity" value="limited" aria-controls="capacity-details" /><span class="radio"></span><span>제한 있음</span></label><label class="option-row"><input type="radio" name="capacity" value="unlimited" checked /><span class="radio"></span><span>제한 없음</span></label></div><div class="discount-details" id="capacity-details" aria-hidden="true"><div class="discount-details-inner"><label class="group-label" for="capacity-limit">최대 가입 인원</label><div class="input-wrap"><input class="number-input with-suffix" id="capacity-limit" type="number" min="1" max="9999" inputmode="numeric" placeholder="1" disabled /><span class="input-suffix">명</span></div><div class="input-error" id="capacity-error">가입 인원은 1명 ~ 9,999명 사이로 입력해야 합니다.</div><p class="capacity-range">1명 ~ 9,999명</p></div></div></div>
+                  <div class="field"><span class="group-label">가입 승인 방식</span><div class="compact-options"><label class="option-row"><input type="radio" name="approval" checked /><span class="radio"></span><span>자동 승인</span></label><label class="option-row"><input type="radio" name="approval" /><span class="radio"></span><span>직접 승인</span></label></div></div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <h2 class="group-title">E. 공개 상태</h2>
+                <div class="option-stack"><label class="option-row"><input type="radio" name="visibility" checked /><span class="radio"></span><span class="option-content"><span>공개</span></span></label><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>일부 공개</span><span class="option-sub">링크를 통해 페이지에 접근한 사용자에게만 공개됩니다.</span></span></label><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>비공개</span><span class="option-sub">크리에이터에게만 공개됩니다.</span></span></label></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section" id="benefit-section" data-section="benefit">
+          <button class="accordion-header" type="button" aria-expanded="true" aria-controls="benefit-panel">
+            <span class="section-title"><span class="section-num">2</span><span class="section-heading">혜택 설정</span></span>
+            <span class="header-right"><span class="section-status optional" id="benefit-header-status">선택 항목 · 아직 설정하지 않음</span><span class="chevron" aria-hidden="true"></span></span>
+          </button>
+          <div class="accordion-panel" id="benefit-panel">
+            <div class="section-body">
+              <p class="section-description">멤버십 가입자에게 제공하는 기본 혜택과 추가 혜택을 설정합니다.</p>
+              <div class="form-group" style="margin-top: 0; padding-top: 0; border-top: 0;">
+                <h2 class="group-title">A. 기본 혜택</h2>
+                <div class="reward-stack">
+                  <div class="reward-setting"><div class="reward-left"><span class="reward-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11.5a7.2 7.2 0 0 1-7.5 7A8.2 8.2 0 0 1 9 17.7L4 19l1.4-4.1A6.5 6.5 0 0 1 4 11.3a7.2 7.2 0 0 1 7.5-7A7.2 7.2 0 0 1 20 11.5Z"/><path d="M8.4 11.4h.1m3.3 0h.1m3.3 0h.1"/></svg></span><span><span class="reward-name">다이렉트 메시지 이용 권한</span><span class="reward-state" id="dm-state">아직 설정하지 않음</span></span></div><button class="text-button reward-config" data-setting="dm" type="button">설정</button></div>
+                  <div class="reward-setting"><div class="reward-left"><span class="reward-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.8 14.2 6l3.1-.4.4 3.1 2.2 2.2-2.2 2.2.4 3.1-3.1.4-2.2 2.2-2.2-2.2-3.1.4.4-3.1L7.6 12l2.2-2.2-.4-3.1 3.1-.4L12 3.8Z"/><path d="m9.5 12 1.6 1.6 3.5-3.5"/></svg></span><span><span class="reward-name">멤버십 배지</span><span class="reward-state" id="badge-state">아직 설정하지 않음</span></span></div><button class="text-button reward-config" data-setting="badge" type="button">설정</button></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="custom-head"><h2 class="group-title" style="margin:0;">B. 추가 혜택</h2><span class="custom-count">등록된 혜택 <span id="reward-count">0</span>개</span></div>
+                <div id="reward-content"><div class="empty-reward" id="reward-empty"><span class="empty-illustration"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18"/></svg></span><strong>아직 추가한 혜택이 없습니다.</strong><p>멤버십 가입자에게 제공할 혜택을 추가해주세요.</p><button class="primary-button" id="open-reward-form" type="button">＋ 혜택 추가</button></div><div class="reward-list" id="reward-list"></div></div>
+                <div class="add-reward-form" id="reward-form"><label class="group-label" for="reward-name">혜택 이름</label><input class="text-input" id="reward-name" type="text" maxlength="40" placeholder="예) 1:1 드로잉 피드백" /><label class="group-label" for="reward-description" style="margin-top:14px;">혜택 설명 <span class="field-help">선택</span></label><input class="text-input" id="reward-description" type="text" maxlength="100" placeholder="예) 월 4회 이용" /><div class="form-actions"><button class="secondary-button" id="cancel-reward" type="button">취소</button><button class="primary-button" id="save-reward" type="button">혜택 추가</button></div></div>
+                <button class="secondary-button" id="open-reward-form-bottom" type="button" style="margin-top:12px;">＋ 혜택 추가</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section" id="detail-section" data-section="detail">
+          <button class="accordion-header" type="button" aria-expanded="true" aria-controls="detail-panel">
+            <span class="section-title"><span class="section-num">3</span><span class="section-heading">상세 소개</span></span>
+            <span class="header-right"><span class="section-status optional" id="detail-header-status">선택 항목 · 아직 작성하지 않음</span><span class="chevron" aria-hidden="true"></span></span>
+          </button>
+          <div class="accordion-panel" id="detail-panel">
+            <div class="section-body">
+              <p class="section-description">멤버십 상세 페이지에 노출할 소개를 작성할 수 있습니다.</p>
+              <div class="optional-banner"><span>ⓘ</span><span><b>선택 항목</b> · 상세 소개의 필수 여부는 정책 확정 전으로, 현재는 등록 가능 여부에 영향을 주지 않습니다.</span></div>
+              <div class="editor">
+                <div class="editor-toolbar" aria-label="상세 소개 편집 도구"><button class="editor-tool" data-command="bold" type="button" title="굵게">B</button><button class="editor-tool" data-command="italic" type="button" title="기울임꼴"><i>I</i></button><span class="editor-divider"></span><button class="editor-tool" data-command="formatBlock" data-value="h2" type="button" title="제목">T</button><button class="editor-tool" data-command="insertUnorderedList" type="button" title="글머리표">☷</button><button class="editor-tool" data-command="insertOrderedList" type="button" title="번호 목록">☰</button><span class="editor-divider"></span><button class="editor-tool" data-command="image-placeholder" type="button" title="이미지 자리 표시자">▧</button></div>
+                <div class="editor-body" id="detail-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="멤버십을 소개하는 제목, 콘텐츠, 이미지 등을 자유롭게 작성할 수 있습니다."></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="summary-wrap" aria-label="멤버십 등록 준비 상태">
+        <div class="summary">
+          <div class="summary-top"><h2 class="summary-title">등록 준비 상태</h2><p class="summary-caption">필수 입력 항목을 모두 입력해야 등록할 수 있습니다.</p><div class="progress-row"><div class="progress-ring" id="progress-ring"><strong id="progress-percent">0%</strong></div><div class="progress-copy"><b id="progress-title">필수 항목 0 / 6 완료</b><span id="progress-subtitle">기본 설정의 필수 항목을 입력해야 합니다.</span></div></div></div>
+          <div class="summary-statuses">
+            <button class="summary-section-link" data-summary-section="basic" type="button"><span class="summary-indicator" id="basic-indicator">✓</span><span class="summary-label">기본 설정</span><span class="summary-state" id="basic-summary-state">6개 미완료</span></button>
+            <button class="summary-section-link" data-summary-section="benefit" type="button"><span class="summary-indicator optional" id="benefit-indicator">✓</span><span class="summary-label">혜택 설정</span><span class="summary-state optional" id="benefit-summary-state">선택</span></button>
+            <button class="summary-section-link" data-summary-section="detail" type="button"><span class="summary-indicator optional" id="detail-indicator">✓</span><span class="summary-label">상세 소개</span><span class="summary-state optional" id="detail-summary-state">선택</span></button>
+          </div>
+          <div class="missing"><h3 id="missing-title">미완료 필수 항목</h3><div class="missing-list" id="missing-list"></div></div>
+          <div class="summary-actions"><button class="secondary-button wide" id="preview-button" type="button">미리보기</button><button class="primary-button wide" id="register-button" type="button" disabled>멤버십 등록</button><p class="register-help" id="register-help">필수 항목 6개를 모두 입력해야 합니다.</p></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="modal-backdrop" id="setting-modal" role="dialog" aria-modal="true" aria-labelledby="setting-modal-title"><div class="modal"><div class="modal-header"><h2 id="setting-modal-title">기본 혜택 설정</h2><button class="modal-close" data-close-modal="setting-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p id="setting-modal-copy"></p><div class="setting-choices" id="setting-choices"></div></div></div></div>
+  <div class="modal-backdrop" id="preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title"><div class="modal"><div class="modal-header"><h2 id="preview-modal-title">멤버십 미리보기</h2><button class="modal-close" data-close-modal="preview-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>입력한 내용을 기준으로 멤버십 상세 페이지의 첫 화면을 확인할 수 있습니다.</p><div class="preview-card"><div class="preview-hero" id="preview-hero">대표 이미지</div><div class="preview-copy"><b id="preview-name">새 멤버십</b><p id="preview-summary">플랜 한 줄 설명이 여기에 표시됩니다.</p><span class="preview-price" id="preview-price">판매가 미정</span></div></div></div></div></div>
+  <div class="toast" id="toast">멤버십 등록 요청이 준비되었습니다.</div>
+
+  <script>
+    (() => {
+      const state = { planType: '', imageName: '', imageUrl: '', dm: null, badge: null, rewards: [] };
+      const required = [
+        { key: 'planType', label: '플랜 운영 방식', target: 'plan-type-field' },
+        { key: 'name', label: '플랜 이름', target: 'plan-name-field' },
+        { key: 'summary', label: '플랜 한 줄 설명', target: 'plan-summary-field' },
+        { key: 'image', label: '대표 이미지', target: 'image-field' },
+        { key: 'price', label: '판매가', target: 'price-field' },
+        { key: 'duration', label: '기본 이용 기간', target: 'duration-field' }
+      ];
+      const $ = (selector) => document.querySelector(selector);
+      const $$ = (selector) => [...document.querySelectorAll(selector)];
+      const inputs = { name: $('#plan-name'), summary: $('#plan-summary'), price: $('#plan-price'), duration: $('#duration'), image: $('#plan-image'), instantDiscount: $('#instant-discount-amount'), firstDiscount: $('#first-discount-amount'), capacity: $('#capacity-limit') };
+
+      function validValues() {
+        const price = Number(inputs.price.value);
+        const duration = Number(inputs.duration.value);
+        return {
+          planType: Boolean(state.planType),
+          name: inputs.name.value.trim().length > 0,
+          summary: inputs.summary.value.trim().length > 0,
+          image: Boolean(state.imageName),
+          price: Number.isFinite(price) && price >= 1000 && price <= 5000000,
+          duration: Number.isFinite(duration) && duration >= 1
+        };
+      }
+
+      function formatWon(value) { return `${Math.max(0, value).toLocaleString('ko-KR')}원`; }
+
+      function readAmount(input) {
+        const raw = input.value.trim();
+        const value = Number(raw);
+        return { hasValue: raw !== '', value, isPositiveNumber: Number.isFinite(value) && value >= 1 };
+      }
+
+      function isDiscountApplied(name) { return $(`input[name="${name}"]:checked`).value === 'apply'; }
+
+      function setDiscountDetails(name, applied) {
+        const details = $(`#${name}-discount-details`);
+        const input = name === 'instant' ? inputs.instantDiscount : inputs.firstDiscount;
+        details.classList.toggle('open', applied);
+        details.setAttribute('aria-hidden', String(!applied));
+        input.disabled = !applied;
+      }
+
+      function setDiscountResult(name, value, copy, muted = false) {
+        $(`#${name}-discount-price`).textContent = value;
+        const copyElement = $(`#${name}-discount-copy`);
+        copyElement.textContent = copy;
+        copyElement.classList.toggle('muted', muted);
+      }
+
+      function updateDiscounts() {
+        const price = Number(inputs.price.value);
+        const validPrice = Number.isFinite(price) && price >= 1000 && price <= 5000000;
+        const instantApplied = isDiscountApplied('instant-discount');
+        const firstApplied = isDiscountApplied('first-discount');
+        const instant = readAmount(inputs.instantDiscount);
+        const first = readAmount(inputs.firstDiscount);
+
+        setDiscountDetails('instant', instantApplied);
+        setDiscountDetails('first', firstApplied);
+
+        const validInstant = instantApplied && instant.isPositiveNumber && validPrice && instant.value <= price;
+        const instantReady = !instantApplied || validInstant;
+        const instantPrice = validInstant ? price - instant.value : price;
+        const validFirst = firstApplied && first.isPositiveNumber && validPrice && instantReady && first.value <= instantPrice;
+
+        const instantInvalid = instantApplied && instant.hasValue && !validInstant;
+        const firstInvalid = firstApplied && first.hasValue && !validFirst;
+        $('#instant-discount-field').classList.toggle('invalid', instantInvalid);
+        $('#first-discount-field').classList.toggle('invalid', firstInvalid);
+
+        $('#instant-discount-error').textContent = !validPrice
+          ? '판매가를 먼저 올바르게 입력해야 합니다.'
+          : '할인 금액은 판매가 이하의 1원 이상으로 입력해야 합니다.';
+        $('#first-discount-error').textContent = !instantReady
+          ? '즉시 할인 금액을 먼저 확인해야 합니다.'
+          : !validPrice
+            ? '판매가를 먼저 올바르게 입력해야 합니다.'
+            : '할인 금액은 즉시 할인 적용가 이하의 1원 이상으로 입력해야 합니다.';
+
+        if (!validPrice) {
+          setDiscountResult('instant', '—', '판매가를 입력하면 할인 적용가가 표시됩니다.', true);
+        } else if (!instant.hasValue) {
+          setDiscountResult('instant', '—', '할인 금액을 입력하면 할인 적용가가 표시됩니다.', true);
+        } else if (!validInstant) {
+          setDiscountResult('instant', '—', '할인 금액을 확인해야 합니다.', true);
+        } else {
+          setDiscountResult('instant', formatWon(instantPrice), `${formatWon(instant.value)} 할인`);
+        }
+
+        if (!validPrice) {
+          setDiscountResult('first', '—', '판매가를 입력하면 첫 결제 적용가가 표시됩니다.', true);
+        } else if (!instantReady) {
+          setDiscountResult('first', '—', '즉시 할인 금액을 입력하면 첫 결제 적용가가 표시됩니다.', true);
+        } else if (!first.hasValue) {
+          setDiscountResult('first', '—', '할인 금액을 입력하면 첫 결제 적용가가 표시됩니다.', true);
+        } else if (!validFirst) {
+          setDiscountResult('first', '—', '할인 금액을 확인해야 합니다.', true);
+        } else {
+          setDiscountResult('first', formatWon(instantPrice - first.value), `${formatWon(first.value)} 첫 결제 할인`);
+        }
+      }
+
+      function updateRenewalMode() {
+        const autoRenewal = $('input[name="renewal-mode"]:checked').value === 'auto';
+        $('#renewal-description').textContent = autoRenewal
+          ? '기본 이용 기간이 끝나면 동일한 기간으로 자동 결제되어 계속 이용합니다.'
+          : '기본 이용 기간이 끝나면 자동 갱신 없이 종료됩니다.';
+      }
+
+      function updateLongPassSettings() {
+        const isOneMonth = Number(inputs.duration.value) === 1;
+        const termOptions = $$('input[name="long-pass-term"]');
+        const sellingLongPass = isOneMonth && $('input[name="multi-month"]:checked').value === 'sell';
+        const longPassField = $('#long-pass-field');
+        const details = $('#long-pass-details');
+
+        termOptions.forEach((option) => { option.disabled = !sellingLongPass; });
+        longPassField.hidden = !isOneMonth;
+        details.classList.toggle('open', sellingLongPass);
+        details.setAttribute('aria-hidden', String(!sellingLongPass));
+      }
+
+      function updateCapacitySettings() {
+        const limited = $('input[name="capacity"]:checked').value === 'limited';
+        const details = $('#capacity-details');
+        const raw = inputs.capacity.value.trim();
+        const value = Number(raw);
+        const validCapacity = Number.isInteger(value) && value >= 1 && value <= 9999;
+
+        details.classList.toggle('open', limited);
+        details.setAttribute('aria-hidden', String(!limited));
+        inputs.capacity.disabled = !limited;
+        $('#capacity-field').classList.toggle('invalid', limited && raw !== '' && !validCapacity);
+      }
+
+      function setStatus(el, text, type = '') {
+        el.textContent = text;
+        el.className = `section-status ${type}`.trim();
+      }
+
+      function setSummaryStatus(prefix, complete, text, optional = false) {
+        const indicator = $(`#${prefix}-indicator`);
+        const label = $(`#${prefix}-summary-state`);
+        indicator.className = `summary-indicator${complete ? ' done' : optional ? ' optional' : ''}`;
+        label.className = `summary-state${complete ? ' done' : optional ? ' optional' : ''}`;
+        label.textContent = text;
+      }
+
+      function update() {
+        const values = validValues();
+        const missing = required.filter((item) => !values[item.key]);
+        const done = required.length - missing.length;
+        const percent = Math.round((done / required.length) * 100);
+        const basicComplete = missing.length === 0;
+        const benefitComplete = state.dm !== null || state.badge !== null || state.rewards.length > 0;
+        const editorText = $('#detail-editor').innerText.trim();
+        const detailComplete = editorText.length > 0;
+
+        $('#name-count').textContent = inputs.name.value.length;
+        $('#summary-count').textContent = inputs.summary.value.length;
+        $('#price-field').classList.toggle('invalid', inputs.price.value !== '' && !values.price);
+        $('#duration-field').classList.toggle('invalid', inputs.duration.value !== '' && !values.duration);
+        updateDiscounts();
+        updateRenewalMode();
+        updateLongPassSettings();
+        updateCapacitySettings();
+
+        setStatus($('#basic-header-status'), basicComplete ? '✓ 기본 설정 완료' : `기본 설정 · ${missing.length}개 항목 미완료`, basicComplete ? 'complete' : '');
+        setStatus($('#benefit-header-status'), benefitComplete ? '✓ 혜택 설정 완료' : '선택 항목 · 아직 설정하지 않음', benefitComplete ? 'complete' : 'optional');
+        setStatus($('#detail-header-status'), detailComplete ? '✓ 상세 소개 완료' : '선택 항목 · 아직 작성하지 않음', detailComplete ? 'complete' : 'optional');
+
+        $('#progress-ring').style.setProperty('--progress', `${percent}%`);
+        $('#progress-percent').textContent = `${percent}%`;
+        $('#progress-title').textContent = `필수 항목 ${done} / ${required.length} 완료`;
+        $('#progress-subtitle').textContent = basicComplete ? '등록 가능한 상태입니다.' : '기본 설정의 필수 항목을 입력해야 합니다.';
+        setSummaryStatus('basic', basicComplete, basicComplete ? '완료' : `${missing.length}개 미완료`);
+        setSummaryStatus('benefit', benefitComplete, benefitComplete ? '완료' : '선택', !benefitComplete);
+        setSummaryStatus('detail', detailComplete, detailComplete ? '작성 완료' : '선택', !detailComplete);
+
+        const missingList = $('#missing-list');
+        missingList.innerHTML = '';
+        if (basicComplete) {
+          $('#missing-title').textContent = '등록 필수 항목';
+          missingList.innerHTML = '<div class="missing-complete">필수 항목이 모두 입력되었습니다.</div>';
+        } else {
+          $('#missing-title').textContent = '미완료 필수 항목';
+          missing.forEach((item) => {
+            const button = document.createElement('button');
+            button.type = 'button'; button.className = 'missing-item'; button.textContent = item.label;
+            button.dataset.target = item.target; missingList.append(button);
+          });
+        }
+        $('#register-button').disabled = !basicComplete;
+        $('#register-help').textContent = basicComplete ? '필수 입력이 완료되었습니다. 등록 전 미리보기를 확인할 수 있습니다.' : `필수 항목 ${missing.length}개를 더 입력해야 합니다.`;
+      }
+
+      function expandSection(sectionName) {
+        const section = $(`[data-section="${sectionName}"]`);
+        const header = section.querySelector('.accordion-header');
+        const panel = section.querySelector('.accordion-panel');
+        if (header.getAttribute('aria-expanded') === 'false') { header.setAttribute('aria-expanded', 'true'); panel.classList.remove('collapsed'); }
+        return section;
+      }
+
+      function scrollToTarget(targetId) {
+        const section = expandSection('basic');
+        const target = $(`#${targetId}`);
+        window.setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.classList.add('highlight');
+          window.setTimeout(() => target.classList.remove('highlight'), 1050);
+          const focusable = target.querySelector('button, input, textarea');
+          if (focusable) window.setTimeout(() => focusable.focus({ preventScroll: true }), 450);
+        }, section === target ? 0 : 80);
+      }
+
+      $$('.accordion-header').forEach((header) => header.addEventListener('click', () => {
+        const panel = $(`#${header.getAttribute('aria-controls')}`);
+        const expanded = header.getAttribute('aria-expanded') === 'true';
+        header.setAttribute('aria-expanded', String(!expanded));
+        panel.classList.toggle('collapsed', expanded);
+      }));
+
+      $$('.plan-card').forEach((card) => card.addEventListener('click', () => {
+        state.planType = card.dataset.planType;
+        $$('.plan-card').forEach((item) => { const selected = item === card; item.classList.toggle('selected', selected); item.setAttribute('aria-pressed', String(selected)); });
+        update();
+      }));
+
+      [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.instantDiscount, inputs.firstDiscount, inputs.capacity].forEach((input) => input.addEventListener('input', update));
+      $$('input[name="instant-discount"], input[name="first-discount"]').forEach((input) => input.addEventListener('change', update));
+      $$('input[name="renewal-mode"], input[name="multi-month"]').forEach((input) => input.addEventListener('change', update));
+      $$('input[name="capacity"]').forEach((input) => input.addEventListener('change', update));
+      inputs.image.addEventListener('change', (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) { $('#image-meta').textContent = '10MB 이하의 이미지를 선택해야 합니다.'; $('#image-meta').style.color = 'var(--danger)'; inputs.image.value = ''; return; }
+        state.imageName = file.name;
+        $('#image-meta').textContent = `${file.name} 선택됨`;
+        $('#image-meta').className = 'image-meta selected';
+        const reader = new FileReader();
+        reader.onload = () => { state.imageUrl = reader.result; $('#image-preview').innerHTML = `<img src="${reader.result}" alt="선택한 대표 이미지" />`; };
+        reader.readAsDataURL(file); update();
+      });
+
+      function openModal(id) { $(`#${id}`).classList.add('open'); }
+      function closeModal(id) { $(`#${id}`).classList.remove('open'); }
+      $$('.modal-close').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.closeModal)));
+      $$('.modal-backdrop').forEach((modal) => modal.addEventListener('click', (event) => { if (event.target === modal) modal.classList.remove('open'); }));
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape') $$('.modal-backdrop.open').forEach((modal) => modal.classList.remove('open')); });
+
+      const settingData = {
+        dm: { title: '다이렉트 메시지 이용 권한', copy: '멤버십 가입자에게 다이렉트 메시지 이용 권한을 제공할지 선택할 수 있습니다.', on: '제공함', off: '제공하지 않음' },
+        badge: { title: '멤버십 배지', copy: '멤버십 가입자에게 채널 내 전용 배지를 제공할지 선택할 수 있습니다.', on: '제공함', off: '제공하지 않음' }
+      };
+      $$('.reward-config').forEach((button) => button.addEventListener('click', () => {
+        const key = button.dataset.setting; const data = settingData[key];
+        $('#setting-modal-title').textContent = data.title;
+        $('#setting-modal-copy').textContent = data.copy;
+        const choices = $('#setting-choices'); choices.innerHTML = '';
+        [{ value: true, label: data.on, desc: '멤버십 가입자에게 제공' }, { value: false, label: data.off, desc: '이번 멤버십에서는 미제공' }].forEach((choice) => {
+          const el = document.createElement('button'); el.type = 'button'; el.className = `setting-choice${state[key] === choice.value ? ' active' : ''}`;
+          el.innerHTML = `<span><strong>${choice.label}</strong><span>${choice.desc}</span></span><span>${state[key] === choice.value ? '✓' : ''}</span>`;
+          el.addEventListener('click', () => { state[key] = choice.value; $(`#${key}-state`).textContent = choice.value ? data.on : data.off; $(`#${key}-state`).className = `reward-state${choice.value ? ' on' : ''}`; closeModal('setting-modal'); update(); });
+          choices.append(el);
+        });
+        openModal('setting-modal');
+      }));
+
+      const rewardForm = $('#reward-form');
+      function showRewardForm() { rewardForm.classList.add('visible'); $('#reward-name').focus(); }
+      $('#open-reward-form').addEventListener('click', showRewardForm);
+      $('#open-reward-form-bottom').addEventListener('click', showRewardForm);
+      $('#cancel-reward').addEventListener('click', () => { rewardForm.classList.remove('visible'); $('#reward-name').value = ''; $('#reward-description').value = ''; });
+      $('#save-reward').addEventListener('click', () => {
+        const name = $('#reward-name').value.trim(); const description = $('#reward-description').value.trim();
+        if (!name) { $('#reward-name').focus(); return; }
+        state.rewards.push({ id: Date.now(), name, description }); $('#reward-name').value = ''; $('#reward-description').value = ''; rewardForm.classList.remove('visible'); renderRewards(); update();
+      });
+      function renderRewards() {
+        $('#reward-count').textContent = state.rewards.length;
+        const list = $('#reward-list'); list.innerHTML = ''; $('#reward-empty').style.display = state.rewards.length ? 'none' : 'grid';
+        state.rewards.forEach((reward) => { const card = document.createElement('div'); card.className = 'custom-card'; card.innerHTML = `<span><strong>${reward.name}</strong>${reward.description ? `<p>${reward.description}</p>` : ''}</span><button class="delete-reward" type="button" aria-label="${reward.name} 삭제">×</button>`; card.querySelector('button').addEventListener('click', () => { state.rewards = state.rewards.filter((item) => item.id !== reward.id); renderRewards(); update(); }); list.append(card); });
+      }
+
+      $$('.editor-tool').forEach((button) => button.addEventListener('click', () => {
+        const editor = $('#detail-editor'); editor.focus();
+        if (button.dataset.command === 'image-placeholder') document.execCommand('insertHTML', false, '<div class="demo-image">▧ 이미지 영역</div><p><br></p>');
+        else document.execCommand(button.dataset.command, false, button.dataset.value || null);
+        update();
+      }));
+      $('#detail-editor').addEventListener('input', update);
+
+      $$('.summary-section-link').forEach((button) => button.addEventListener('click', () => {
+        const name = button.dataset.summarySection; const section = expandSection(name);
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (name === 'basic') { const firstMissing = required.find((item) => !validValues()[item.key]); if (firstMissing) window.setTimeout(() => scrollToTarget(firstMissing.target), 300); }
+      }));
+      $('#missing-list').addEventListener('click', (event) => { const button = event.target.closest('.missing-item'); if (button) scrollToTarget(button.dataset.target); });
+
+      $('#preview-button').addEventListener('click', () => {
+        $('#preview-name').textContent = inputs.name.value.trim() || '새 멤버십';
+        $('#preview-summary').textContent = inputs.summary.value.trim() || '플랜 한 줄 설명이 여기에 표시됩니다.';
+        const price = Number(inputs.price.value); $('#preview-price').textContent = Number.isFinite(price) && price > 0 ? `${price.toLocaleString('ko-KR')}원 / ${inputs.duration.value || '—'}개월` : '판매가 미정';
+        $('#preview-hero').innerHTML = state.imageUrl ? `<img src="${state.imageUrl}" alt="대표 이미지" style="width:100%;height:100%;object-fit:cover" />` : '대표 이미지';
+        openModal('preview-modal');
+      });
+      $('#register-button').addEventListener('click', () => { $('#toast').classList.add('show'); window.setTimeout(() => $('#toast').classList.remove('show'), 3200); });
+      update();
+    })();
+  </script>
+</body>
+</html>
