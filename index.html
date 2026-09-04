@@ -155,6 +155,9 @@
     .compact-options { display: flex; align-items: center; flex-wrap: wrap; gap: 11px 22px; min-height: 46px; padding: 0 0 1px; }
     .compact-options .option-row { align-items: center; min-height: 20px; }
     .compact-options .radio { margin-top: 0; }
+    .recruitment-options { display: grid; gap: 6px; min-height: 0; padding: 0; }
+    .recruitment-options .option-row { min-height: 36px; padding: 8px 10px; border-radius: 7px; }
+    .recruitment-options .option-row:has(input:checked) { background: #303035; }
     .discount-description { margin: -2px 0 12px; color: var(--subtle); font-size: 12px; line-height: 1.5; }
     .discount-options { min-height: 32px; gap: 10px 20px; }
     .discount-details { display: grid; grid-template-rows: 0fr; margin-top: 0; opacity: 0; transition: grid-template-rows .24s ease, margin-top .24s ease, opacity .18s ease; }
@@ -468,11 +471,11 @@
                     </div>
                     <div class="field full" id="recruitment-period-field">
                       <span class="group-label" id="recruitment-period-label">모집 기간</span>
-                      <div class="compact-options discount-options" role="radiogroup" aria-labelledby="recruitment-period-label">
+                      <div class="compact-options discount-options recruitment-options" role="radiogroup" aria-labelledby="recruitment-period-label">
                         <label class="option-row"><input type="radio" name="recruitment-period" value="always" checked /><span class="radio"></span><span>상시 모집</span></label>
                         <label class="option-row"><input type="radio" name="recruitment-period" value="limited" aria-controls="recruitment-period-details" /><span class="radio"></span><span>특정 기간 모집</span></label>
                       </div>
-                      <div class="discount-details" id="recruitment-period-details" aria-hidden="true"><div class="discount-details-inner"><div class="field-grid two"><div class="field"><label class="group-label" for="recruitment-start-date">모집 시작일</label><input class="text-input" id="recruitment-start-date" type="date" disabled /></div><div class="field"><label class="group-label" for="recruitment-end-date">모집 종료일</label><input class="text-input" id="recruitment-end-date" type="date" disabled /></div></div></div></div>
+                      <div class="discount-details" id="recruitment-period-details" aria-hidden="true"><div class="discount-details-inner"><div class="field-grid two"><div class="field"><label class="group-label" for="recruitment-start-date">모집 시작일 <span class="required-mark">*</span></label><input class="text-input" id="recruitment-start-date" type="date" disabled /></div><div class="field"><label class="group-label" for="recruitment-end-date">모집 종료일 <span class="required-mark">*</span></label><input class="text-input" id="recruitment-end-date" type="date" disabled /></div></div></div></div>
                     </div>
                   </div>
                 </div>
