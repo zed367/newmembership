@@ -479,27 +479,6 @@
                     </div>
                   </div>
                 </div>
-                <div class="benefit-settings" id="benefit-settings" hidden>
-                  <h2 class="group-title">2-2. 혜택 이용 설정</h2>
-                  <div class="field-grid two">
-                    <div class="field full">
-                      <span class="group-label" id="benefit-regular-price-label">플랜 정가 설정</span>
-                      <div class="option-stack" role="radiogroup" aria-labelledby="benefit-regular-price-label">
-                        <label class="option-row"><input type="radio" name="benefit-regular-price" value="none" checked /><span class="radio"></span><span>설정 안 함</span></label>
-                        <label class="option-row"><input type="radio" name="benefit-regular-price" value="set" /><span class="radio"></span><span>설정함</span></label>
-                      </div>
-                    </div>
-                    <div class="field full">
-                      <span class="group-label" id="benefit-renewal-limit-label">플랜 갱신 제한</span>
-                      <p class="discount-description">한 멤버가 플랜을 갱신하여 연속 이용할 수 없도록 설정합니다.</p>
-                      <div class="option-stack" role="radiogroup" aria-labelledby="benefit-renewal-limit-label">
-                        <label class="option-row"><input type="radio" name="benefit-renewal-limit" value="none" checked /><span class="radio"></span><span>설정 안 함</span></label>
-                        <label class="option-row"><input type="radio" name="benefit-renewal-limit" value="set" /><span class="radio"></span><span>설정함</span></label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="operation-note" id="operation-extension-copy"></div>
               </div>
 
               <div class="form-group" id="join-settings">
@@ -511,7 +490,7 @@
               </div>
 
               <div class="form-group">
-                <h2 class="group-title" id="visibility-title">2-4. 공개 상태</h2>
+                <h2 class="group-title">2-4. 공개 상태</h2>
                 <div class="option-stack"><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>공개</span></span></label><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>일부 공개</span><span class="option-sub">링크를 통해 페이지에 접근한 사용자에게만 공개됩니다.</span></span></label><label class="option-row"><input type="radio" name="visibility" checked /><span class="radio"></span><span class="option-content"><span>나에게만 공개</span><span class="option-sub">나에게만 공개됩니다.</span></span></label></div>
               </div>
             </div>
@@ -628,13 +607,14 @@
         const price = Number(inputs.price.value);
         const duration = Number(inputs.duration.value);
         const recruitment = getRecruitmentValidity();
+        const usesDurationSettings = state.planType === 'subscription' || state.planType === 'deduction';
         return {
           planType: Boolean(state.planType),
           name: inputs.name.value.trim().length > 0,
           summary: inputs.summary.value.trim().length > 0,
           image: Boolean(state.imageName),
           price: Number.isFinite(price) && price >= 1000 && price <= 5000000,
-          duration: state.planType === 'subscription'
+          duration: usesDurationSettings
             ? Number.isFinite(duration) && duration >= 1
             : state.planType === 'cohort'
               ? Boolean(inputs.endDate.value)
@@ -729,7 +709,8 @@
       }
 
       function updateLongPassSettings() {
-        const isOneMonth = state.planType === 'subscription' && Number(inputs.duration.value) === 1;
+        const usesDurationSettings = state.planType === 'subscription' || state.planType === 'deduction';
+        const isOneMonth = usesDurationSettings && Number(inputs.duration.value) === 1;
         const termOptions = $$('input[name="long-pass-term"]');
         const sellingLongPass = isOneMonth && $('input[name="multi-month"]:checked').value === 'sell';
         const longPassField = $('#long-pass-field');
@@ -794,21 +775,17 @@
         const isSubscription = state.planType === 'subscription';
         const isCohort = state.planType === 'cohort';
         const isBenefit = state.planType === 'deduction';
+        const usesDurationSettings = isSubscription || isBenefit;
         const operationNames = { subscription: '가입일 기준', cohort: '종료일 기준', deduction: '혜택 이용 기준' };
         const configuration = $('#configuration');
 
         configuration.classList.toggle('visible', selected);
         configuration.setAttribute('aria-hidden', String(!selected));
-        $('#subscription-settings').hidden = !isSubscription;
-        $('#operation-extension').hidden = !selected || isSubscription;
+        $('#subscription-settings').hidden = !usesDurationSettings;
+        $('#operation-extension').hidden = !isCohort;
         $('#cohort-settings').hidden = !isCohort;
-        $('#benefit-settings').hidden = !isBenefit;
-        $('#operation-extension-copy').hidden = true;
-        $('#discount-settings').hidden = isBenefit;
         $('#first-discount-field').hidden = isCohort || isBenefit;
-        $('#instant-discount-field').classList.toggle('full', isCohort);
-        $('#join-settings').hidden = isBenefit;
-        $('#visibility-title').textContent = isBenefit ? '2-3. 공개 상태' : '2-4. 공개 상태';
+        $('#instant-discount-field').classList.toggle('full', isCohort || isBenefit);
         $('#operation-status').classList.toggle('visible', selected);
 
         if (!selected) {
@@ -992,8 +969,7 @@
       function getPreviewPricing() {
         const price = Number(inputs.price.value);
         const validPrice = Number.isFinite(price) && price >= 1000 && price <= 5000000;
-        const discountAvailable = state.planType !== 'deduction';
-        const instantApplied = discountAvailable && isDiscountApplied('instant-discount');
+        const instantApplied = isDiscountApplied('instant-discount');
         const firstApplied = state.planType === 'subscription' && isDiscountApplied('first-discount');
         const instant = readAmount(inputs.instantDiscount);
         const first = readAmount(inputs.firstDiscount);
@@ -1027,15 +1003,15 @@
         $('#preview-discount-summary').hidden = totalDiscount === 0;
         $('#preview-discount-label').textContent = firstDiscount > 0 ? '첫 결제 시 총 할인' : '즉시 할인 혜택';
         $('#preview-discount-total').textContent = `${formatWon(totalDiscount)} 할인`;
-        $('#preview-period').textContent = state.planType === 'subscription' && hasDuration
+        $('#preview-period').textContent = (state.planType === 'subscription' || state.planType === 'deduction') && hasDuration
           ? `${duration}개월 이용`
           : state.planType === 'cohort' ? inputs.endDate.value ? `${inputs.endDate.value} 종료` : '종료일 미정'
           : state.planType === 'deduction' ? '혜택 이용 기준'
           : '이용 기간 미정';
         $('#preview-usage').textContent = state.planType === 'subscription'
           ? hasDuration ? `${duration}개월 이용 · ${$('input[name="renewal-mode"]:checked').value === 'auto' ? '자동 갱신' : '1회 이용'}` : '기본 이용 기간을 입력해주세요.'
+          : state.planType === 'deduction' ? hasDuration ? `혜택 이용 기준 · ${duration}개월 이용 · ${$('input[name="renewal-mode"]:checked').value === 'auto' ? '자동 갱신' : '1회 이용'}` : '기본 이용 기간을 입력해주세요.'
           : state.planType === 'cohort' ? inputs.endDate.value ? `${inputs.endDate.value}에 이용이 종료됩니다.` : '이용 종료일을 선택해주세요.'
-          : state.planType === 'deduction' ? '제공된 혜택을 모두 사용하면 이용이 종료됩니다.'
           : '운영 방식을 선택하면 이용 안내가 표시됩니다.';
 
         const benefits = [];
