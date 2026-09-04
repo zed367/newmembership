@@ -182,6 +182,11 @@
     .custom-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
     .custom-count { color: #f3f2f6; font-size: 15px; font-weight: 700; }
     .custom-count span { color: #a9a7b3; font-weight: 500; }
+    .reward-example { display: flex; align-items: flex-start; gap: 9px; margin: -3px 0 12px; padding: 10px 11px; border: 1px solid rgba(111, 108, 130, .42); border-radius: 8px; background: rgba(43, 42, 49, .48); color: #aaa8b4; }
+    .reward-example-label { flex: 0 0 auto; margin-top: 1px; color: #85828f; font-size: 10px; font-weight: 700; }
+    .reward-example-copy { min-width: 0; }
+    .reward-example-name { display: block; color: #c4c1cc; font-size: 11px; font-weight: 650; line-height: 1.45; }
+    .reward-example-description { display: block; margin-top: 2px; color: #8f8c99; font-size: 11px; line-height: 1.45; }
     .empty-reward { display: grid; place-items: center; min-height: 160px; padding: 26px; border: 1px dashed #44434b; border-radius: 10px; background: rgba(37,37,39,.52); text-align: center; }
     .empty-illustration { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 10px; border-radius: 14px; background: var(--purple-weak); color: #a8a3ff; }
     .empty-illustration svg { width: 22px; height: 22px; }
@@ -465,6 +470,7 @@
               </div>
               <div class="form-group">
                 <div class="custom-head"><h2 class="group-title" style="margin:0;">B. 추가 혜택</h2><span class="custom-count">등록된 혜택 <span id="reward-count">0</span>개</span></div>
+                <div class="reward-example" role="note" aria-label="추가 혜택 등록 예시"><span class="reward-example-label">등록 예시</span><span class="reward-example-copy"><span class="reward-example-name">포트폴리오 피드백 1회권</span><span class="reward-example-description">멤버십 구매 시 1회 이용할 수 있는 추가 혜택입니다.</span></span></div>
                 <div id="reward-content"><div class="empty-reward" id="reward-empty"><span class="empty-illustration"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18"/></svg></span><strong>아직 추가한 혜택이 없습니다.</strong><p>멤버십 가입자에게 제공할 혜택을 추가해주세요.</p><button class="primary-button" id="open-reward-form" type="button">＋ 혜택 추가</button></div><div class="reward-list" id="reward-list"></div></div>
                 <div class="add-reward-form" id="reward-form"><label class="group-label" for="reward-name">혜택 이름</label><input class="text-input" id="reward-name" type="text" maxlength="40" placeholder="예) 1:1 드로잉 피드백" /><label class="group-label" for="reward-description" style="margin-top:14px;">혜택 설명 <span class="field-help">선택</span></label><input class="text-input" id="reward-description" type="text" maxlength="100" placeholder="예) 월 4회 이용" /><div class="form-actions"><button class="secondary-button" id="cancel-reward" type="button">취소</button><button class="primary-button" id="save-reward" type="button">혜택 추가</button></div></div>
                 <button class="secondary-button" id="open-reward-form-bottom" type="button" style="margin-top:12px;">＋ 혜택 추가</button>
