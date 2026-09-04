@@ -475,7 +475,7 @@
                         <label class="option-row"><input type="radio" name="recruitment-period" value="always" checked /><span class="radio"></span><span>상시 모집</span></label>
                         <label class="option-row"><input type="radio" name="recruitment-period" value="limited" aria-controls="recruitment-period-details" /><span class="radio"></span><span>특정 기간 모집</span></label>
                       </div>
-                      <div class="discount-details" id="recruitment-period-details" aria-hidden="true"><div class="discount-details-inner"><div class="field-grid two"><div class="field"><label class="group-label" for="recruitment-start-date">모집 시작일 <span class="required-mark">*</span></label><input class="text-input" id="recruitment-start-date" type="date" disabled /></div><div class="field"><label class="group-label" for="recruitment-end-date">모집 종료일 <span class="required-mark">*</span></label><input class="text-input" id="recruitment-end-date" type="date" disabled /></div></div></div></div>
+                      <div class="discount-details" id="recruitment-period-details" aria-hidden="true"><div class="discount-details-inner"><div class="field-grid two"><div class="field" id="recruitment-start-date-field"><label class="group-label" for="recruitment-start-date">모집 시작일 <span class="required-mark">*</span></label><input class="text-input" id="recruitment-start-date" type="date" disabled /><div class="input-error" id="recruitment-start-date-error"></div></div><div class="field" id="recruitment-end-date-field"><label class="group-label" for="recruitment-end-date">모집 종료일 <span class="required-mark">*</span></label><input class="text-input" id="recruitment-end-date" type="date" disabled /><div class="input-error" id="recruitment-end-date-error"></div></div></div></div></div>
                     </div>
                   </div>
                 </div>
@@ -565,7 +565,7 @@
   <script>
     (() => {
       const state = { planType: '', imageName: '', imageUrl: '', dm: null, badge: null, rewards: [] };
-      const required = [
+      const baseRequired = [
         { key: 'planType', label: '멤버십 운영 방식', target: 'plan-type-field' },
         { key: 'name', label: '멤버십 이름', target: 'plan-name-field' },
         { key: 'summary', label: '멤버십 한 줄 설명', target: 'plan-summary-field' },
@@ -585,9 +585,29 @@
         return item.key === 'duration' && state.planType === 'cohort' ? 'cohort-end-date-field' : item.target;
       }
 
+      function getRecruitmentValidity() {
+        const limited = state.planType === 'cohort' && $('input[name="recruitment-period"]:checked').value === 'limited';
+        const start = inputs.recruitmentStart.value;
+        const end = inputs.recruitmentEnd.value;
+        const membershipEnd = inputs.endDate.value;
+        const startAfterEnd = Boolean(start && end && start > end);
+        const endAfterMembership = Boolean(end && membershipEnd && end > membershipEnd);
+        const startValid = !limited || (Boolean(start) && !startAfterEnd);
+        const endValid = !limited || (Boolean(end) && !startAfterEnd && !endAfterMembership);
+        return { limited, start, end, membershipEnd, startAfterEnd, endAfterMembership, startValid, endValid, valid: startValid && endValid };
+      }
+
+      function getRequiredItems() {
+        const items = [...baseRequired];
+        const recruitment = getRecruitmentValidity();
+        if (recruitment.limited) items.push({ key: 'recruitmentPeriod', label: '모집 기간', target: recruitment.startValid ? 'recruitment-end-date-field' : 'recruitment-start-date-field' });
+        return items;
+      }
+
       function validValues() {
         const price = Number(inputs.price.value);
         const duration = Number(inputs.duration.value);
+        const recruitment = getRecruitmentValidity();
         return {
           planType: Boolean(state.planType),
           name: inputs.name.value.trim().length > 0,
@@ -598,7 +618,8 @@
             ? Number.isFinite(duration) && duration >= 1
             : state.planType === 'cohort'
               ? Boolean(inputs.endDate.value)
-              : Boolean(state.planType)
+              : Boolean(state.planType),
+          recruitmentPeriod: recruitment.valid
         };
       }
 
@@ -714,12 +735,25 @@
       }
 
       function updateRecruitmentPeriodSettings() {
-        const limited = $('input[name="recruitment-period"]:checked').value === 'limited';
+        const validation = getRecruitmentValidity();
+        const { limited } = validation;
         const details = $('#recruitment-period-details');
         details.classList.toggle('open', limited);
         details.setAttribute('aria-hidden', String(!limited));
         inputs.recruitmentStart.disabled = !limited;
         inputs.recruitmentEnd.disabled = !limited;
+
+        $('#recruitment-start-date-field').classList.toggle('invalid', !validation.startValid);
+        $('#recruitment-end-date-field').classList.toggle('invalid', !validation.endValid);
+        $('#recruitment-start-date-error').textContent = !validation.start
+          ? '모집 시작일을 선택해주세요.'
+          : validation.startAfterEnd ? '모집 시작일은 모집 종료일보다 늦을 수 없습니다.'
+          : '';
+        $('#recruitment-end-date-error').textContent = !validation.end
+          ? '모집 종료일을 선택해주세요.'
+          : validation.startAfterEnd ? '모집 종료일은 모집 시작일보다 빨라질 수 없습니다.'
+          : validation.endAfterMembership ? '모집 종료일은 이용 종료일보다 늦을 수 없습니다.'
+          : '';
       }
 
       function setStatus(el, text, type = '') {
@@ -764,6 +798,7 @@
       function update() {
         updateOperationSettings();
         const values = validValues();
+        const required = getRequiredItems();
         const missing = required.filter((item) => !values[item.key]);
         const done = required.length - missing.length;
         const percent = Math.round((done / required.length) * 100);
@@ -926,7 +961,7 @@
       $$('.summary-section-link').forEach((button) => button.addEventListener('click', () => {
         const name = button.dataset.summarySection; const section = expandSection(name);
         section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        if (name === 'basic') { const firstMissing = required.find((item) => !validValues()[item.key]); if (firstMissing) window.setTimeout(() => scrollToTarget(getRequiredTarget(firstMissing)), 300); }
+        if (name === 'basic') { const firstMissing = getRequiredItems().find((item) => !validValues()[item.key]); if (firstMissing) window.setTimeout(() => scrollToTarget(getRequiredTarget(firstMissing)), 300); }
       }));
       $('#missing-list').addEventListener('click', (event) => { const button = event.target.closest('.missing-item'); if (button) scrollToTarget(button.dataset.target); });
 
