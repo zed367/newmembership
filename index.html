@@ -287,7 +287,7 @@
   <main class="page">
     <div class="page-intro">
       <div>
-        <div class="eyebrow"><span class="dot"></span>MEMBERSHIP PLAN</div>
+        <div class="eyebrow"><span class="dot"></span>MEMBERSHIP</div>
         <h1>새 멤버십 등록</h1>
         <p class="intro-copy">한 화면에서 멤버십의 모든 설정을 확인하고 완성할 수 있습니다. 필요한 항목을 입력하면 등록 준비 상태가 실시간으로 갱신됩니다.</p>
       </div>
@@ -303,23 +303,23 @@
           </button>
           <div class="accordion-panel" id="basic-panel">
             <div class="section-body">
-              <p class="section-description">플랜의 판매 방식, 소개, 이용 조건과 가입 방식을 한 번에 설정합니다.</p>
+              <p class="section-description">멤버십의 판매 방식, 소개, 이용 조건과 가입 방식을 한 번에 설정합니다.</p>
 
               <div class="form-group" id="plan-type-field">
-                <h2 class="group-title">A. 플랜 운영 방식 <span class="required-mark">*</span></h2>
+                <h2 class="group-title">A. 멤버십 운영 방식 <span class="required-mark">*</span></h2>
                 <p class="group-help">멤버십 이용이 종료되는 기준을 선택할 수 있습니다.</p>
-                <div class="plan-grid" role="radiogroup" aria-label="플랜 운영 방식">
-                  <button class="plan-card" type="button" data-plan-type="subscription" aria-pressed="false"><span><span class="plan-name">가입일 기준</span><span class="plan-copy">가입한 날부터 설정된 기간 동안 이용하는 플랜입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
-                  <button class="plan-card" type="button" data-plan-type="cohort" aria-pressed="false"><span><span class="plan-name">종료일 고정</span><span class="plan-copy">가입일과 관계없이 설정된 종료일에 모두 이용이 종료되는 플랜입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
-                  <button class="plan-card" type="button" data-plan-type="deduction" aria-pressed="false"><span><span class="plan-name">혜택 이용 기준</span><span class="plan-copy">가입 시 제공되는 혜택이 모두 사용 완료되면 이용이 종료되는 플랜입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
+                <div class="plan-grid" role="radiogroup" aria-label="멤버십 운영 방식">
+                  <button class="plan-card" type="button" data-plan-type="subscription" aria-pressed="false"><span><span class="plan-name">가입일 기준</span><span class="plan-copy">가입한 날부터 설정된 기간 동안 이용하는 멤버십입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
+                  <button class="plan-card" type="button" data-plan-type="cohort" aria-pressed="false"><span><span class="plan-name">종료일 기준</span><span class="plan-copy">가입일과 관계없이 설정된 종료일을 기준으로 이용이 종료되는 멤버십입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
+                  <button class="plan-card" type="button" data-plan-type="deduction" aria-pressed="false"><span><span class="plan-name">혜택 이용 기준</span><span class="plan-copy">가입 시 제공되는 혜택이 모두 사용 완료되면 이용이 종료되는 멤버십입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
                 </div>
               </div>
 
               <div class="form-group">
-                <h2 class="group-title">B. 플랜 정보</h2>
+                <h2 class="group-title">B. 멤버십 정보</h2>
                 <div class="field-grid two">
                   <div class="field" id="plan-name-field">
-                    <label class="group-label" for="plan-name">플랜 이름 <span class="required-mark">*</span> <span class="field-help">최대 60자</span></label>
+                    <label class="group-label" for="plan-name">멤버십 이름 <span class="required-mark">*</span> <span class="field-help">최대 60자</span></label>
                     <input class="text-input required-input" id="plan-name" type="text" maxlength="60" placeholder="예) 팬더들을 위한 브론즈 멤버십" />
                     <div class="character-count"><span id="name-count">0</span>/60</div>
                   </div>
@@ -329,7 +329,7 @@
                     <div class="input-error">1,000원~5,000,000원 사이로 입력해야 합니다.</div>
                   </div>
                   <div class="field full" id="plan-summary-field">
-                    <label class="group-label" for="plan-summary">플랜 한 줄 설명 <span class="required-mark">*</span> <span class="field-help">최대 400자</span></label>
+                    <label class="group-label" for="plan-summary">멤버십 한 줄 설명 <span class="required-mark">*</span> <span class="field-help">최대 400자</span></label>
                     <textarea class="textarea required-input" id="plan-summary" maxlength="400" placeholder="예) 매월 새로운 콘텐츠와 멤버 전용 소식을 전해 드립니다."></textarea>
                     <div class="character-count"><span id="summary-count">0</span>/400</div>
                   </div>
@@ -422,7 +422,7 @@
 
               <div class="form-group">
                 <h2 class="group-title">E. 공개 상태</h2>
-                <div class="option-stack"><label class="option-row"><input type="radio" name="visibility" checked /><span class="radio"></span><span class="option-content"><span>공개</span></span></label><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>일부 공개</span><span class="option-sub">링크를 통해 페이지에 접근한 사용자에게만 공개됩니다.</span></span></label><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>비공개</span><span class="option-sub">크리에이터에게만 공개됩니다.</span></span></label></div>
+                <div class="option-stack"><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>공개</span></span></label><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>일부 공개</span><span class="option-sub">링크를 통해 페이지에 접근한 사용자에게만 공개됩니다.</span></span></label><label class="option-row"><input type="radio" name="visibility" checked /><span class="radio"></span><span class="option-content"><span>나에게만 공개</span><span class="option-sub">나에게만 공개됩니다.</span></span></label></div>
               </div>
             </div>
           </div>
@@ -487,16 +487,16 @@
   </main>
 
   <div class="modal-backdrop" id="setting-modal" role="dialog" aria-modal="true" aria-labelledby="setting-modal-title"><div class="modal"><div class="modal-header"><h2 id="setting-modal-title">기본 혜택 설정</h2><button class="modal-close" data-close-modal="setting-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p id="setting-modal-copy"></p><div class="setting-choices" id="setting-choices"></div></div></div></div>
-  <div class="modal-backdrop" id="preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title"><div class="modal"><div class="modal-header"><h2 id="preview-modal-title">멤버십 미리보기</h2><button class="modal-close" data-close-modal="preview-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>입력한 내용을 기준으로 멤버십 상세 페이지의 첫 화면을 확인할 수 있습니다.</p><div class="preview-card"><div class="preview-hero" id="preview-hero">대표 이미지</div><div class="preview-copy"><b id="preview-name">새 멤버십</b><p id="preview-summary">플랜 한 줄 설명이 여기에 표시됩니다.</p><span class="preview-price" id="preview-price">판매가 미정</span></div></div></div></div></div>
+  <div class="modal-backdrop" id="preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title"><div class="modal"><div class="modal-header"><h2 id="preview-modal-title">멤버십 미리보기</h2><button class="modal-close" data-close-modal="preview-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>입력한 내용을 기준으로 멤버십 상세 페이지의 첫 화면을 확인할 수 있습니다.</p><div class="preview-card"><div class="preview-hero" id="preview-hero">대표 이미지</div><div class="preview-copy"><b id="preview-name">새 멤버십</b><p id="preview-summary">멤버십 한 줄 설명이 여기에 표시됩니다.</p><span class="preview-price" id="preview-price">판매가 미정</span></div></div></div></div></div>
   <div class="toast" id="toast">멤버십 등록 요청이 준비되었습니다.</div>
 
   <script>
     (() => {
       const state = { planType: '', imageName: '', imageUrl: '', dm: null, badge: null, rewards: [] };
       const required = [
-        { key: 'planType', label: '플랜 운영 방식', target: 'plan-type-field' },
-        { key: 'name', label: '플랜 이름', target: 'plan-name-field' },
-        { key: 'summary', label: '플랜 한 줄 설명', target: 'plan-summary-field' },
+        { key: 'planType', label: '멤버십 운영 방식', target: 'plan-type-field' },
+        { key: 'name', label: '멤버십 이름', target: 'plan-name-field' },
+        { key: 'summary', label: '멤버십 한 줄 설명', target: 'plan-summary-field' },
         { key: 'image', label: '대표 이미지', target: 'image-field' },
         { key: 'price', label: '판매가', target: 'price-field' },
         { key: 'duration', label: '기본 이용 기간', target: 'duration-field' }
@@ -796,7 +796,7 @@
 
       $('#preview-button').addEventListener('click', () => {
         $('#preview-name').textContent = inputs.name.value.trim() || '새 멤버십';
-        $('#preview-summary').textContent = inputs.summary.value.trim() || '플랜 한 줄 설명이 여기에 표시됩니다.';
+        $('#preview-summary').textContent = inputs.summary.value.trim() || '멤버십 한 줄 설명이 여기에 표시됩니다.';
         const price = Number(inputs.price.value); $('#preview-price').textContent = Number.isFinite(price) && price > 0 ? `${price.toLocaleString('ko-KR')}원 / ${inputs.duration.value || '—'}개월` : '판매가 미정';
         $('#preview-hero').innerHTML = state.imageUrl ? `<img src="${state.imageUrl}" alt="대표 이미지" style="width:100%;height:100%;object-fit:cover" />` : '대표 이미지';
         openModal('preview-modal');
