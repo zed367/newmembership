@@ -64,6 +64,31 @@
     .layout { display: grid; grid-template-columns: minmax(680px, 1fr) 326px; align-items: start; gap: 28px; }
     .form-column { min-width: 0; }
 
+    .operation-stage { position: relative; overflow: hidden; margin-bottom: 20px; padding: 27px; border: 1px solid #5a568d; border-radius: var(--radius); background: linear-gradient(132deg, #29273c 0%, #222226 57%, #202022 100%); box-shadow: 0 16px 35px rgba(0, 0, 0, .16); }
+    .operation-stage::after { position: absolute; top: -98px; right: -90px; width: 255px; height: 255px; border: 1px solid rgba(157, 151, 255, .15); border-radius: 50%; box-shadow: 0 0 0 42px rgba(157, 151, 255, .035), 0 0 0 84px rgba(157, 151, 255, .02); content: ""; pointer-events: none; }
+    .step-caption { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #a8a3ff; font-size: 12px; font-weight: 800; }
+    .step-number { display: grid; width: 21px; height: 21px; place-items: center; border: 1px solid rgba(176, 171, 255, .44); border-radius: 50%; color: #d7d4ff; font-size: 11px; }
+    .operation-title { position: relative; z-index: 1; margin: 0; font-size: 20px; letter-spacing: -.45px; }
+    .operation-copy { position: relative; z-index: 1; max-width: 640px; margin: 8px 0 22px; color: #c2c0cb; font-size: 13px; line-height: 1.65; }
+    .operation-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .operation-card { min-height: 144px; padding: 18px; border: 1px solid #4a485d; border-radius: 11px; background: rgba(32, 32, 36, .78); color: var(--text); cursor: pointer; text-align: left; transition: transform .16s ease, border-color .16s ease, background .16s ease; }
+    .operation-card:hover { border-color: #6c6790; background: #2a2933; }
+    .operation-card:active { transform: scale(.99); }
+    .operation-card.selected { border-color: #8881ff; background: #393664; box-shadow: inset 0 0 0 1px rgba(169, 164, 255, .18); }
+    .operation-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .operation-name { display: block; color: #f0eff7; font-size: 15px; font-weight: 750; letter-spacing: -.2px; }
+    .operation-card.selected .operation-name { color: #b8b3ff; }
+    .operation-dot { display: grid; flex: 0 0 auto; width: 19px; height: 19px; place-items: center; border: 1px solid #5b5967; border-radius: 50%; background: #25252a; }
+    .operation-card.selected .operation-dot { border-color: #8179ff; background: #8179ff; }
+    .operation-card.selected .operation-dot::after { width: 7px; height: 7px; border-radius: 50%; background: #fff; content: ""; }
+    .operation-description { display: block; margin-top: 11px; color: #b5b3bf; font-size: 12px; line-height: 1.58; }
+    .operation-status { position: relative; z-index: 1; display: none; align-items: center; gap: 7px; margin-top: 18px; color: #c0baff; font-size: 12px; font-weight: 650; }
+    .operation-status.visible { display: flex; }
+    .operation-status::before { width: 6px; height: 6px; border-radius: 50%; background: #8d86ff; content: ""; }
+    .configuration { display: none; }
+    .configuration.visible { display: block; animation: reveal .28s ease-out; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
     .form-section { scroll-margin-top: 92px; margin-bottom: 18px; border: 1px solid var(--line); border-radius: var(--radius); overflow: clip; background: var(--surface); box-shadow: 0 5px 18px rgba(0,0,0,.08); transition: border-color .2s ease; }
     .form-section:has(.accordion-panel:not(.collapsed)) { border-color: #46464d; }
     .form-section.highlight { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(108,99,255,.12); }
@@ -87,18 +112,6 @@
     .group-help { margin: 0 0 18px; color: var(--subtle); font-size: 12px; line-height: 1.5; }
     .group-label { display: block; margin: 0 0 9px; font-size: 13px; font-weight: 650; color: #e3e2e8; }
     .field-help { color: var(--subtle); font-size: 12px; font-weight: 400; }
-
-    .plan-grid { display: grid; gap: 10px; }
-    .plan-card { position: relative; display: flex; justify-content: space-between; align-items: start; width: 100%; min-height: 96px; padding: 18px 19px; border: 1px solid #3b3b40; border-radius: 10px; background: var(--card); color: var(--text); text-align: left; cursor: pointer; transition: background .16s, border-color .16s, transform .16s; }
-    .plan-card:hover { background: var(--card-hover); border-color: #55545e; }
-    .plan-card.selected { border-color: #7670ff; background: var(--purple-soft); }
-    .plan-card.selected .plan-name { color: #9691ff; }
-    .plan-card:active { transform: scale(.998); }
-    .plan-name { display: block; margin-bottom: 7px; font-size: 15px; font-weight: 750; letter-spacing: -.2px; }
-    .plan-copy { display: block; padding-right: 30px; color: #c3c1cb; font-size: 13px; line-height: 1.55; }
-    .choice-dot { flex: 0 0 auto; width: 20px; height: 20px; border: 1px solid #4d4d55; border-radius: 50%; background: #202024; margin: 1px 0 0 16px; }
-    .selected .choice-dot { display: grid; place-items: center; border-color: #726aff; background: #726aff; }
-    .selected .choice-dot::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: white; }
 
     .field-grid { display: grid; gap: 20px; }
     .field-grid.two { grid-template-columns: 1fr 1fr; }
@@ -160,6 +173,10 @@
     .long-pass-details.open { grid-template-rows: 1fr; margin-top: 15px; opacity: 1; }
     .long-pass-details-inner { min-height: 0; overflow: hidden; }
     .long-pass-note { margin: 10px 0 0; color: var(--subtle); font-size: 12px; line-height: 1.5; }
+    .operation-extension { display: block; }
+    .operation-extension[hidden] { display: none; }
+    .operation-note { display: flex; align-items: flex-start; gap: 9px; padding: 13px; border: 1px dashed #5b5868; border-radius: 9px; background: rgba(43, 42, 48, .64); color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .operation-note::before { display: grid; flex: 0 0 auto; width: 18px; height: 18px; place-items: center; border-radius: 50%; background: #3c394b; color: #b7b2ff; content: "i"; font-size: 12px; font-weight: 800; }
     .ticket-options { display: flex; flex-wrap: wrap; gap: 9px 16px; }
     .checkbox-option { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; cursor: pointer; color: #e0dfe5; font-size: 13px; }
     .checkbox-option input { position: absolute; opacity: 0; pointer-events: none; }
@@ -300,7 +317,7 @@
 
     @media (max-width: 1180px) { body { min-width: 0; } .page { padding: 32px 24px 72px; } .layout { grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; } }
     @media (max-width: 940px) { .topbar { padding: 0 20px; } .page-intro { align-items: flex-start; flex-direction: column; gap: 16px; } .layout { grid-template-columns: 1fr; } .summary-wrap { position: static; order: -1; } .summary-statuses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; } .summary-section-link { min-height: 34px; } }
-    @media (max-width: 620px) { .page { padding: 24px 14px 56px; } .topbar { height: 56px; } .crumb { display: none; } h1 { font-size: 24px; } .section-body { padding: 22px 17px 26px; } .accordion-header { padding: 17px; } .section-status { display: none; } .field-grid.two, .field-grid.price-grid { grid-template-columns: 1fr; } .summary-statuses { grid-template-columns: 1fr; } .image-field { align-items: flex-start; flex-direction: column; } }
+    @media (max-width: 620px) { .page { padding: 24px 14px 56px; } .topbar { height: 56px; } .crumb { display: none; } h1 { font-size: 24px; } .operation-stage, .section-body { padding: 20px 17px; } .operation-grid { grid-template-columns: 1fr; } .operation-card { min-height: auto; } .accordion-header { padding: 17px; } .section-status { display: none; } .field-grid.two, .field-grid.price-grid { grid-template-columns: 1fr; } .summary-statuses { grid-template-columns: 1fr; } .image-field { align-items: flex-start; flex-direction: column; } }
   </style>
 </head>
 <body>
@@ -321,27 +338,30 @@
 
     <div class="layout">
       <div class="form-column">
+        <section class="operation-stage" id="plan-type-field" aria-labelledby="operation-title">
+          <div class="step-caption"><span class="step-number">1</span> 먼저 선택해주세요</div>
+          <h2 class="operation-title" id="operation-title">멤버십 운영 방식 <span class="required-mark">*</span></h2>
+          <p class="operation-copy">멤버십 운영 방식을 먼저 선택해주세요. 선택한 방식에 따라 아래 설정 항목이 달라집니다.</p>
+          <div class="operation-grid" role="radiogroup" aria-label="멤버십 운영 방식">
+            <button class="operation-card" type="button" data-plan-type="subscription" aria-pressed="false"><span class="operation-card-top"><span class="operation-name">가입일 기준</span><span class="operation-dot" aria-hidden="true"></span></span><span class="operation-description">가입한 날부터 설정된 기간 동안 이용하는 멤버십입니다.</span></button>
+            <button class="operation-card" type="button" data-plan-type="cohort" aria-pressed="false"><span class="operation-card-top"><span class="operation-name">종료일 기준</span><span class="operation-dot" aria-hidden="true"></span></span><span class="operation-description">가입일과 관계없이 설정된 종료일을 기준으로 이용이 종료되는 멤버십입니다.</span></button>
+            <button class="operation-card" type="button" data-plan-type="deduction" aria-pressed="false"><span class="operation-card-top"><span class="operation-name">혜택 이용 기준</span><span class="operation-dot" aria-hidden="true"></span></span><span class="operation-description">가입 시 제공되는 혜택이 모두 사용 완료되면 이용이 종료되는 멤버십입니다.</span></button>
+          </div>
+          <div class="operation-status" id="operation-status" aria-live="polite"></div>
+        </section>
+
+        <div class="configuration" id="configuration" aria-hidden="true">
         <section class="form-section" id="basic-section" data-section="basic">
           <button class="accordion-header" type="button" aria-expanded="true" aria-controls="basic-panel">
-            <span class="section-title"><span class="section-num">1</span><span class="section-heading">기본 설정</span></span>
-            <span class="header-right"><span class="section-status" id="basic-header-status">기본 설정 · 6개 항목 미완료</span><span class="chevron" aria-hidden="true"></span></span>
+            <span class="section-title"><span class="section-num">2</span><span class="section-heading">멤버십 설정</span></span>
+            <span class="header-right"><span class="section-status" id="basic-header-status">멤버십 설정 · 6개 항목 미완료</span><span class="chevron" aria-hidden="true"></span></span>
           </button>
           <div class="accordion-panel" id="basic-panel">
             <div class="section-body">
-              <p class="section-description">멤버십의 판매 방식, 소개, 이용 조건과 가입 방식을 한 번에 설정합니다.</p>
+              <p class="section-description">운영 방식에 맞춰 멤버십 소개, 판매 조건, 가입 방식을 설정합니다.</p>
 
-              <div class="form-group" id="plan-type-field">
-                <h2 class="group-title">A. 멤버십 운영 방식 <span class="required-mark">*</span></h2>
-                <p class="group-help">멤버십 이용이 종료되는 기준을 선택할 수 있습니다.</p>
-                <div class="plan-grid" role="radiogroup" aria-label="멤버십 운영 방식">
-                  <button class="plan-card" type="button" data-plan-type="subscription" aria-pressed="false"><span><span class="plan-name">가입일 기준</span><span class="plan-copy">가입한 날부터 설정된 기간 동안 이용하는 멤버십입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
-                  <button class="plan-card" type="button" data-plan-type="cohort" aria-pressed="false"><span><span class="plan-name">종료일 기준</span><span class="plan-copy">가입일과 관계없이 설정된 종료일을 기준으로 이용이 종료되는 멤버십입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
-                  <button class="plan-card" type="button" data-plan-type="deduction" aria-pressed="false"><span><span class="plan-name">혜택 이용 기준</span><span class="plan-copy">가입 시 제공되는 혜택이 모두 사용 완료되면 이용이 종료되는 멤버십입니다.</span></span><span class="choice-dot" aria-hidden="true"></span></button>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <h2 class="group-title">B. 멤버십 정보</h2>
+              <div class="form-group" style="margin-top: 0; padding-top: 0; border-top: 0;">
+                <h2 class="group-title">2-1. 멤버십 정보</h2>
                 <div class="field-grid two">
                   <div class="field" id="plan-name-field">
                     <label class="group-label" for="plan-name">멤버십 이름 <span class="required-mark">*</span> <span class="field-help">최대 60자</span></label>
@@ -400,8 +420,8 @@
                 </div>
               </div>
 
-              <div class="form-group">
-                <h2 class="group-title">C. 결제 설정</h2>
+              <div class="form-group" id="subscription-settings">
+                <h2 class="group-title">2-2. 이용 및 갱신 설정</h2>
                 <div class="field-grid two">
                   <div class="field full" id="duration-field">
                     <label class="group-label" for="duration">기본 이용 기간 <span class="required-mark">*</span></label>
@@ -437,8 +457,10 @@
                 </div>
               </div>
 
+              <div class="form-group operation-extension" id="operation-extension" hidden><div class="operation-note" id="operation-extension-copy"></div></div>
+
               <div class="form-group">
-                <h2 class="group-title">D. 가입 설정</h2>
+                <h2 class="group-title">2-3. 가입 설정</h2>
                 <div class="field-grid two">
                   <div class="field" id="capacity-field"><span class="group-label" id="capacity-label">가입 인원</span><div class="compact-options" role="radiogroup" aria-labelledby="capacity-label"><label class="option-row"><input type="radio" name="capacity" value="limited" aria-controls="capacity-details" /><span class="radio"></span><span>제한 있음</span></label><label class="option-row"><input type="radio" name="capacity" value="unlimited" checked /><span class="radio"></span><span>제한 없음</span></label></div><div class="discount-details" id="capacity-details" aria-hidden="true"><div class="discount-details-inner"><label class="group-label" for="capacity-limit">최대 가입 인원</label><div class="input-wrap"><input class="number-input with-suffix" id="capacity-limit" type="number" min="1" max="9999" inputmode="numeric" placeholder="1" disabled /><span class="input-suffix">명</span></div><div class="input-error" id="capacity-error">가입 인원은 1명 ~ 9,999명 사이로 입력해야 합니다.</div><p class="capacity-range">1명 ~ 9,999명</p></div></div></div>
                   <div class="field"><span class="group-label">가입 승인 방식</span><div class="compact-options"><label class="option-row"><input type="radio" name="approval" checked /><span class="radio"></span><span>자동 승인</span></label><label class="option-row"><input type="radio" name="approval" /><span class="radio"></span><span>직접 승인</span></label></div></div>
@@ -446,7 +468,7 @@
               </div>
 
               <div class="form-group">
-                <h2 class="group-title">E. 공개 상태</h2>
+                <h2 class="group-title">2-4. 공개 상태</h2>
                 <div class="option-stack"><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>공개</span></span></label><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>일부 공개</span><span class="option-sub">링크를 통해 페이지에 접근한 사용자에게만 공개됩니다.</span></span></label><label class="option-row"><input type="radio" name="visibility" checked /><span class="radio"></span><span class="option-content"><span>나에게만 공개</span><span class="option-sub">나에게만 공개됩니다.</span></span></label></div>
               </div>
             </div>
@@ -455,21 +477,21 @@
 
         <section class="form-section" id="benefit-section" data-section="benefit">
           <button class="accordion-header" type="button" aria-expanded="true" aria-controls="benefit-panel">
-            <span class="section-title"><span class="section-num">2</span><span class="section-heading">혜택 설정</span></span>
+            <span class="section-title"><span class="section-num">3</span><span class="section-heading">혜택 설정</span></span>
             <span class="header-right"><span class="section-status optional" id="benefit-header-status">선택 항목 · 아직 설정하지 않음</span><span class="chevron" aria-hidden="true"></span></span>
           </button>
           <div class="accordion-panel" id="benefit-panel">
             <div class="section-body">
               <p class="section-description">멤버십 가입자에게 제공하는 기본 혜택과 추가 혜택을 설정합니다.</p>
               <div class="form-group" style="margin-top: 0; padding-top: 0; border-top: 0;">
-                <h2 class="group-title">A. 기본 혜택</h2>
+                <h2 class="group-title">3-1. 기본 혜택</h2>
                 <div class="reward-stack">
                   <div class="reward-setting"><div class="reward-left"><span class="reward-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11.5a7.2 7.2 0 0 1-7.5 7A8.2 8.2 0 0 1 9 17.7L4 19l1.4-4.1A6.5 6.5 0 0 1 4 11.3a7.2 7.2 0 0 1 7.5-7A7.2 7.2 0 0 1 20 11.5Z"/><path d="M8.4 11.4h.1m3.3 0h.1m3.3 0h.1"/></svg></span><span><span class="reward-name">다이렉트 메시지 이용 권한</span><span class="reward-state" id="dm-state">아직 설정하지 않음</span></span></div><button class="text-button reward-config" data-setting="dm" type="button">설정</button></div>
                   <div class="reward-setting"><div class="reward-left"><span class="reward-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.8 14.2 6l3.1-.4.4 3.1 2.2 2.2-2.2 2.2.4 3.1-3.1.4-2.2 2.2-2.2-2.2-3.1.4.4-3.1L7.6 12l2.2-2.2-.4-3.1 3.1-.4L12 3.8Z"/><path d="m9.5 12 1.6 1.6 3.5-3.5"/></svg></span><span><span class="reward-name">멤버십 배지</span><span class="reward-state" id="badge-state">아직 설정하지 않음</span></span></div><button class="text-button reward-config" data-setting="badge" type="button">설정</button></div>
                 </div>
               </div>
               <div class="form-group">
-                <div class="custom-head"><h2 class="group-title" style="margin:0;">B. 추가 혜택</h2><span class="custom-count">등록된 혜택 <span id="reward-count">0</span>개</span></div>
+                <div class="custom-head"><h2 class="group-title" style="margin:0;">3-2. 추가 혜택</h2><span class="custom-count">등록된 혜택 <span id="reward-count">0</span>개</span></div>
                 <div class="reward-example" role="note" aria-label="추가 혜택 등록 예시"><span class="reward-example-label">등록 예시</span><span class="reward-example-copy"><span class="reward-example-name">포트폴리오 피드백 1회권</span><span class="reward-example-description">멤버십 구매 시 1회 이용할 수 있는 추가 혜택입니다.</span></span></div>
                 <div id="reward-content"><div class="empty-reward" id="reward-empty"><span class="empty-illustration"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18"/></svg></span><strong>아직 추가한 혜택이 없습니다.</strong><p>멤버십 가입자에게 제공할 혜택을 추가해주세요.</p><button class="primary-button" id="open-reward-form" type="button">＋ 혜택 추가</button></div><div class="reward-list" id="reward-list"></div></div>
                 <div class="add-reward-form" id="reward-form"><label class="group-label" for="reward-name">혜택 이름</label><input class="text-input" id="reward-name" type="text" maxlength="40" placeholder="예) 1:1 드로잉 피드백" /><label class="group-label" for="reward-description" style="margin-top:14px;">혜택 설명 <span class="field-help">선택</span></label><input class="text-input" id="reward-description" type="text" maxlength="100" placeholder="예) 월 4회 이용" /><div class="form-actions"><button class="secondary-button" id="cancel-reward" type="button">취소</button><button class="primary-button" id="save-reward" type="button">혜택 추가</button></div></div>
@@ -481,7 +503,7 @@
 
         <section class="form-section" id="detail-section" data-section="detail">
           <button class="accordion-header" type="button" aria-expanded="true" aria-controls="detail-panel">
-            <span class="section-title"><span class="section-num">3</span><span class="section-heading">상세 소개</span></span>
+            <span class="section-title"><span class="section-num">4</span><span class="section-heading">상세 소개</span></span>
             <span class="header-right"><span class="section-status optional" id="detail-header-status">선택 항목 · 아직 작성하지 않음</span><span class="chevron" aria-hidden="true"></span></span>
           </button>
           <div class="accordion-panel" id="detail-panel">
@@ -495,13 +517,14 @@
             </div>
           </div>
         </section>
+        </div>
       </div>
 
       <aside class="summary-wrap" aria-label="멤버십 등록 준비 상태">
         <div class="summary">
-          <div class="summary-top"><h2 class="summary-title">등록 준비 상태</h2><p class="summary-caption">필수 입력 항목을 모두 입력해야 등록할 수 있습니다.</p><div class="progress-row"><div class="progress-ring" id="progress-ring"><strong id="progress-percent">0%</strong></div><div class="progress-copy"><b id="progress-title">필수 항목 0 / 6 완료</b><span id="progress-subtitle">기본 설정의 필수 항목을 입력해야 합니다.</span></div></div></div>
+          <div class="summary-top"><h2 class="summary-title">등록 준비 상태</h2><p class="summary-caption">필수 입력 항목을 모두 입력해야 등록할 수 있습니다.</p><div class="progress-row"><div class="progress-ring" id="progress-ring"><strong id="progress-percent">0%</strong></div><div class="progress-copy"><b id="progress-title">필수 항목 0 / 6 완료</b><span id="progress-subtitle">멤버십 설정의 필수 항목을 입력해야 합니다.</span></div></div></div>
           <div class="summary-statuses">
-            <button class="summary-section-link" data-summary-section="basic" type="button"><span class="summary-indicator" id="basic-indicator">✓</span><span class="summary-label">기본 설정</span><span class="summary-state" id="basic-summary-state">6개 미완료</span></button>
+            <button class="summary-section-link" data-summary-section="basic" type="button"><span class="summary-indicator" id="basic-indicator">✓</span><span class="summary-label">멤버십 설정</span><span class="summary-state" id="basic-summary-state">6개 미완료</span></button>
             <button class="summary-section-link" data-summary-section="benefit" type="button"><span class="summary-indicator optional" id="benefit-indicator">✓</span><span class="summary-label">혜택 설정</span><span class="summary-state optional" id="benefit-summary-state">선택</span></button>
             <button class="summary-section-link" data-summary-section="detail" type="button"><span class="summary-indicator optional" id="detail-indicator">✓</span><span class="summary-label">상세 소개</span><span class="summary-state optional" id="detail-summary-state">선택</span></button>
           </div>
@@ -540,7 +563,7 @@
           summary: inputs.summary.value.trim().length > 0,
           image: Boolean(state.imageName),
           price: Number.isFinite(price) && price >= 1000 && price <= 5000000,
-          duration: Number.isFinite(duration) && duration >= 1
+          duration: Boolean(state.planType) && (state.planType !== 'subscription' || (Number.isFinite(duration) && duration >= 1))
         };
       }
 
@@ -630,7 +653,7 @@
       }
 
       function updateLongPassSettings() {
-        const isOneMonth = Number(inputs.duration.value) === 1;
+        const isOneMonth = state.planType === 'subscription' && Number(inputs.duration.value) === 1;
         const termOptions = $$('input[name="long-pass-term"]');
         const sellingLongPass = isOneMonth && $('input[name="multi-month"]:checked').value === 'sell';
         const longPassField = $('#long-pass-field');
@@ -668,7 +691,31 @@
         label.textContent = text;
       }
 
+      function updateOperationSettings() {
+        const selected = Boolean(state.planType);
+        const isSubscription = state.planType === 'subscription';
+        const operationNames = { subscription: '가입일 기준', cohort: '종료일 기준', deduction: '혜택 이용 기준' };
+        const configuration = $('#configuration');
+
+        configuration.classList.toggle('visible', selected);
+        configuration.setAttribute('aria-hidden', String(!selected));
+        $('#subscription-settings').hidden = !isSubscription;
+        $('#operation-extension').hidden = !selected || isSubscription;
+        $('#operation-status').classList.toggle('visible', selected);
+
+        if (!selected) {
+          $('#operation-status').textContent = '';
+          return;
+        }
+
+        $('#operation-status').textContent = `${operationNames[state.planType]} 멤버십으로 설정하고 있습니다.`;
+        $('#operation-extension-copy').textContent = state.planType === 'cohort'
+          ? '종료일 기준 멤버십의 시작일과 종료일은 세부 정책이 확정되면 이 영역에서 설정할 수 있습니다.'
+          : '혜택 이용 기준 멤버십의 이용 횟수와 종료 조건은 세부 정책이 확정되면 이 영역에서 설정할 수 있습니다.';
+      }
+
       function update() {
+        updateOperationSettings();
         const values = validValues();
         const missing = required.filter((item) => !values[item.key]);
         const done = required.length - missing.length;
@@ -687,14 +734,14 @@
         updateLongPassSettings();
         updateCapacitySettings();
 
-        setStatus($('#basic-header-status'), basicComplete ? '✓ 기본 설정 완료' : `기본 설정 · ${missing.length}개 항목 미완료`, basicComplete ? 'complete' : '');
+        setStatus($('#basic-header-status'), basicComplete ? '✓ 멤버십 설정 완료' : `멤버십 설정 · ${missing.length}개 항목 미완료`, basicComplete ? 'complete' : '');
         setStatus($('#benefit-header-status'), benefitComplete ? '✓ 혜택 설정 완료' : '선택 항목 · 아직 설정하지 않음', benefitComplete ? 'complete' : 'optional');
         setStatus($('#detail-header-status'), detailComplete ? '✓ 상세 소개 완료' : '선택 항목 · 아직 작성하지 않음', detailComplete ? 'complete' : 'optional');
 
         $('#progress-ring').style.setProperty('--progress', `${percent}%`);
         $('#progress-percent').textContent = `${percent}%`;
         $('#progress-title').textContent = `필수 항목 ${done} / ${required.length} 완료`;
-        $('#progress-subtitle').textContent = basicComplete ? '등록 가능한 상태입니다.' : '기본 설정의 필수 항목을 입력해야 합니다.';
+        $('#progress-subtitle').textContent = basicComplete ? '등록 가능한 상태입니다.' : '멤버십 설정의 필수 항목을 입력해야 합니다.';
         setSummaryStatus('basic', basicComplete, basicComplete ? '완료' : `${missing.length}개 미완료`);
         setSummaryStatus('benefit', benefitComplete, benefitComplete ? '완료' : '선택', !benefitComplete);
         setSummaryStatus('detail', detailComplete, detailComplete ? '작성 완료' : '선택', !detailComplete);
@@ -718,6 +765,7 @@
 
       function expandSection(sectionName) {
         const section = $(`[data-section="${sectionName}"]`);
+        if (!section) return null;
         const header = section.querySelector('.accordion-header');
         const panel = section.querySelector('.accordion-panel');
         if (header.getAttribute('aria-expanded') === 'false') { header.setAttribute('aria-expanded', 'true'); panel.classList.remove('collapsed'); }
@@ -725,15 +773,17 @@
       }
 
       function scrollToTarget(targetId) {
-        const section = expandSection('basic');
         const target = $(`#${targetId}`);
+        const section = target ? target.closest('[data-section]') : null;
+        if (section) expandSection(section.dataset.section);
+        if (!target) return;
         window.setTimeout(() => {
           target.scrollIntoView({ behavior: 'smooth', block: 'center' });
           target.classList.add('highlight');
           window.setTimeout(() => target.classList.remove('highlight'), 1050);
           const focusable = target.querySelector('button, input, textarea');
           if (focusable) window.setTimeout(() => focusable.focus({ preventScroll: true }), 450);
-        }, section === target ? 0 : 80);
+        }, section ? 80 : 0);
       }
 
       $$('.accordion-header').forEach((header) => header.addEventListener('click', () => {
@@ -743,9 +793,9 @@
         panel.classList.toggle('collapsed', expanded);
       }));
 
-      $$('.plan-card').forEach((card) => card.addEventListener('click', () => {
+      $$('.operation-card').forEach((card) => card.addEventListener('click', () => {
         state.planType = card.dataset.planType;
-        $$('.plan-card').forEach((item) => { const selected = item === card; item.classList.toggle('selected', selected); item.setAttribute('aria-pressed', String(selected)); });
+        $$('.operation-card').forEach((item) => { const selected = item === card; item.classList.toggle('selected', selected); item.setAttribute('aria-pressed', String(selected)); });
         update();
       }));
 
@@ -857,7 +907,11 @@
         $('#preview-discount-summary').hidden = totalDiscount === 0;
         $('#preview-discount-label').textContent = firstDiscount > 0 ? '첫 결제 시 총 할인' : '즉시 할인 혜택';
         $('#preview-discount-total').textContent = `${formatWon(totalDiscount)} 할인`;
-        $('#preview-period').textContent = hasDuration ? `${duration}개월 이용` : '이용 기간 미정';
+        $('#preview-period').textContent = state.planType === 'subscription' && hasDuration
+          ? `${duration}개월 이용`
+          : state.planType === 'cohort' ? '종료일 기준 이용'
+          : state.planType === 'deduction' ? '혜택 이용 기준'
+          : '이용 기간 미정';
         $('#preview-usage').textContent = state.planType === 'subscription'
           ? hasDuration ? `${duration}개월 이용 · ${$('input[name="renewal-mode"]:checked').value === 'auto' ? '자동 갱신' : '1회 이용'}` : '기본 이용 기간을 입력해주세요.'
           : state.planType === 'cohort' ? '설정된 종료일을 기준으로 이용이 종료됩니다.'
