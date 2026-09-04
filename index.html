@@ -263,12 +263,32 @@
     .setting-choice:hover, .setting-choice.active { border-color: #736bff; background: #37355b; }
     .setting-choice strong { font-size: 13px; }
     .setting-choice span { color: #aaa7b2; font-size: 12px; }
-    .preview-card { overflow: hidden; margin-top: 14px; border: 1px solid #45444c; border-radius: 10px; background: #212123; }
-    .preview-hero { height: 110px; display: grid; place-items: center; background: linear-gradient(130deg, #48427d, #2f2b42); color: #b4afff; font-size: 12px; }
-    .preview-copy { padding: 16px; }
-    .preview-copy b { display: block; font-size: 17px; }
-    .preview-copy p { margin: 6px 0 0; color: #b7b4c1; font-size: 12px; line-height: 1.5; }
-    .preview-price { display: block; margin-top: 14px; color: #b3aeff; font-size: 16px; font-weight: 800; }
+    #preview-modal .modal { width: min(500px, 100%); }
+    .preview-card { overflow: hidden; margin-top: 14px; border: 1px solid #45444c; border-radius: 11px; background: #1d1d20; }
+    .preview-hero { display: grid; height: 184px; place-items: center; overflow: hidden; border-bottom: 1px solid #45434d; background: linear-gradient(135deg, #4a456d, #2c2a36 58%, #242429); color: #c5c0ff; font-size: 12px; }
+    .preview-hero img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-copy { padding: 17px 18px 19px; }
+    .preview-first-benefit { display: flex; align-items: center; gap: 7px; margin-bottom: 11px; padding: 8px 10px; border: 1px solid rgba(133, 125, 255, .45); border-radius: 8px; background: #37345e; color: #e2e0ff; font-size: 11px; font-weight: 750; }
+    .preview-first-benefit::before { color: #bcb7ff; content: "◆"; font-size: 10px; }
+    .preview-operation { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; background: #34314a; color: #beb9ff; font-size: 10px; font-weight: 750; }
+    .preview-operation::before { width: 5px; height: 5px; border-radius: 50%; background: #938dff; content: ""; }
+    .preview-copy h3 { margin: 10px 0 0; font-size: 20px; line-height: 1.35; letter-spacing: -.45px; word-break: break-word; }
+    .preview-copy > p { min-height: 36px; margin: 7px 0 0; color: #aaa8b3; font-size: 12px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+    .preview-price-row { display: flex; align-items: end; justify-content: space-between; gap: 10px; margin-top: 17px; padding-top: 16px; border-top: 1px solid #38383e; }
+    .preview-price-caption { color: var(--subtle); font-size: 10px; }
+    .preview-price { margin-top: 3px; color: #f4f3f9; font-size: 19px; font-weight: 800; letter-spacing: -.35px; }
+    .preview-price del { display: block; margin-bottom: 3px; color: #77757f; font-size: 10px; font-weight: 500; }
+    .preview-period { color: var(--muted); font-size: 11px; text-align: right; }
+    .preview-discount-summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding: 9px 10px; border: 1px solid rgba(255, 137, 148, .16); border-radius: 8px; background: rgba(130, 48, 55, .36); }
+    .preview-discount-summary span { color: #d7b8bc; font-size: 10px; font-weight: 650; }
+    .preview-discount-summary strong { color: #ff9ba5; font-size: 12px; }
+    .preview-divider { height: 1px; margin: 16px 0; background: #38383e; }
+    .preview-block + .preview-block { margin-top: 14px; }
+    .preview-block-title { display: block; margin-bottom: 7px; color: #c9c7d0; font-size: 11px; font-weight: 750; }
+    .preview-detail { color: #9896a2; font-size: 11px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+    .preview-benefits { display: flex; flex-wrap: wrap; gap: 6px; }
+    .benefit-tag { padding: 5px 7px; border: 1px solid #44434c; border-radius: 6px; background: #2a2a2e; color: #c8c6d0; font-size: 10px; }
+    .preview-placeholder { padding: 11px; border: 1px dashed #45444d; border-radius: 8px; color: #777681; font-size: 11px; line-height: 1.5; }
     .toast { position: fixed; right: 30px; bottom: 30px; display: flex; align-items: center; gap: 9px; transform: translateY(20px); padding: 13px 15px; border: 1px solid rgba(115,216,167,.4); border-radius: 9px; background: #26362f; color: #dff9e9; box-shadow: 0 12px 30px rgba(0,0,0,.3); opacity: 0; pointer-events: none; transition: .25s; z-index: 120; font-size: 13px; }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast::before { content: "✓"; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #53b983; font-size: 12px; font-weight: 800; }
@@ -487,7 +507,7 @@
   </main>
 
   <div class="modal-backdrop" id="setting-modal" role="dialog" aria-modal="true" aria-labelledby="setting-modal-title"><div class="modal"><div class="modal-header"><h2 id="setting-modal-title">기본 혜택 설정</h2><button class="modal-close" data-close-modal="setting-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p id="setting-modal-copy"></p><div class="setting-choices" id="setting-choices"></div></div></div></div>
-  <div class="modal-backdrop" id="preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title"><div class="modal"><div class="modal-header"><h2 id="preview-modal-title">멤버십 미리보기</h2><button class="modal-close" data-close-modal="preview-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>입력한 내용을 기준으로 멤버십 상세 페이지의 첫 화면을 확인할 수 있습니다.</p><div class="preview-card"><div class="preview-hero" id="preview-hero">대표 이미지</div><div class="preview-copy"><b id="preview-name">새 멤버십</b><p id="preview-summary">멤버십 한 줄 설명이 여기에 표시됩니다.</p><span class="preview-price" id="preview-price">판매가 미정</span></div></div></div></div></div>
+  <div class="modal-backdrop" id="preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title"><div class="modal"><div class="modal-header"><h2 id="preview-modal-title">멤버십 미리보기</h2><button class="modal-close" data-close-modal="preview-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>입력한 내용을 기준으로 사용자에게 보이는 멤버십 정보를 확인할 수 있습니다.</p><div class="preview-card"><div class="preview-hero" id="preview-hero">대표 이미지</div><div class="preview-copy"><div class="preview-first-benefit" id="preview-first-benefit" hidden>첫 결제 혜택 적용</div><span class="preview-operation" id="preview-operation">운영 방식</span><h3 id="preview-name">새 멤버십</h3><p id="preview-summary">멤버십 한 줄 설명이 여기에 표시됩니다.</p><div class="preview-price-row"><div><div class="preview-price-caption">판매가</div><div class="preview-price" id="preview-price">판매가 미정</div></div><div class="preview-period" id="preview-period">이용 기간 미정</div></div><div class="preview-discount-summary" id="preview-discount-summary" hidden><span id="preview-discount-label">첫 결제 시 총 할인</span><strong id="preview-discount-total">0원 할인</strong></div><div class="preview-divider"></div><div class="preview-block"><span class="preview-block-title">이용 안내</span><div class="preview-detail" id="preview-usage">운영 방식을 선택하면 이용 안내가 표시됩니다.</div></div><div class="preview-block"><span class="preview-block-title">혜택</span><div class="preview-benefits" id="preview-benefits"><span class="preview-placeholder">설정한 혜택이 표시됩니다.</span></div></div><div class="preview-block"><span class="preview-block-title">상세 소개</span><div class="preview-detail" id="preview-detail">작성한 상세 소개 일부가 표시됩니다.</div></div></div></div></div></div></div>
   <div class="toast" id="toast">멤버십 등록 요청이 준비되었습니다.</div>
 
   <script>
@@ -794,11 +814,63 @@
       }));
       $('#missing-list').addEventListener('click', (event) => { const button = event.target.closest('.missing-item'); if (button) scrollToTarget(button.dataset.target); });
 
-      $('#preview-button').addEventListener('click', () => {
+      function getPreviewPricing() {
+        const price = Number(inputs.price.value);
+        const validPrice = Number.isFinite(price) && price >= 1000 && price <= 5000000;
+        const instantApplied = isDiscountApplied('instant-discount');
+        const firstApplied = isDiscountApplied('first-discount');
+        const instant = readAmount(inputs.instantDiscount);
+        const first = readAmount(inputs.firstDiscount);
+        const validInstant = !instantApplied || (validPrice && instant.isPositiveNumber && instant.value <= price);
+        const instantPrice = instantApplied && validInstant ? price - instant.value : price;
+        const validFirst = !firstApplied || (validPrice && validInstant && first.isPositiveNumber && first.value <= instantPrice);
+        const firstPrice = firstApplied && validFirst ? instantPrice - first.value : instantPrice;
+        return { price, validPrice, instantApplied, firstApplied, instant, first, validInstant, validFirst, instantPrice, firstPrice };
+      }
+
+      function renderMembershipPreview() {
+        const pricing = getPreviewPricing();
+        const operationNames = { subscription: '가입일 기준', cohort: '종료일 기준', deduction: '혜택 이용 기준' };
+        const duration = Number(inputs.duration.value);
+        const hasDuration = Number.isFinite(duration) && duration >= 1;
+        const instantDiscount = pricing.instantApplied && pricing.validInstant ? pricing.instant.value : 0;
+        const firstDiscount = pricing.firstApplied && pricing.validFirst ? pricing.first.value : 0;
+        const totalDiscount = instantDiscount + firstDiscount;
+
+        $('#preview-operation').textContent = operationNames[state.planType] || '운영 방식';
         $('#preview-name').textContent = inputs.name.value.trim() || '새 멤버십';
         $('#preview-summary').textContent = inputs.summary.value.trim() || '멤버십 한 줄 설명이 여기에 표시됩니다.';
-        const price = Number(inputs.price.value); $('#preview-price').textContent = Number.isFinite(price) && price > 0 ? `${price.toLocaleString('ko-KR')}원 / ${inputs.duration.value || '—'}개월` : '판매가 미정';
-        $('#preview-hero').innerHTML = state.imageUrl ? `<img src="${state.imageUrl}" alt="대표 이미지" style="width:100%;height:100%;object-fit:cover" />` : '대표 이미지';
+        $('#preview-hero').innerHTML = state.imageUrl ? `<img src="${state.imageUrl}" alt="선택한 대표 이미지" />` : '대표 이미지';
+
+        if (!pricing.validPrice) $('#preview-price').textContent = '판매가 미정';
+        else if (firstDiscount > 0) $('#preview-price').innerHTML = `<del>${formatWon(pricing.price)}</del>${formatWon(pricing.firstPrice)}`;
+        else if (instantDiscount > 0) $('#preview-price').innerHTML = `<del>${formatWon(pricing.price)}</del>${formatWon(pricing.instantPrice)}`;
+        else $('#preview-price').textContent = formatWon(pricing.price);
+
+        $('#preview-first-benefit').hidden = firstDiscount === 0;
+        $('#preview-discount-summary').hidden = totalDiscount === 0;
+        $('#preview-discount-label').textContent = firstDiscount > 0 ? '첫 결제 시 총 할인' : '즉시 할인 혜택';
+        $('#preview-discount-total').textContent = `${formatWon(totalDiscount)} 할인`;
+        $('#preview-period').textContent = hasDuration ? `${duration}개월 이용` : '이용 기간 미정';
+        $('#preview-usage').textContent = state.planType === 'subscription'
+          ? hasDuration ? `${duration}개월 이용 · ${$('input[name="renewal-mode"]:checked').value === 'auto' ? '자동 갱신' : '1회 이용'}` : '기본 이용 기간을 입력해주세요.'
+          : state.planType === 'cohort' ? '설정된 종료일을 기준으로 이용이 종료됩니다.'
+          : state.planType === 'deduction' ? '제공된 혜택을 모두 사용하면 이용이 종료됩니다.'
+          : '운영 방식을 선택하면 이용 안내가 표시됩니다.';
+
+        const benefits = [];
+        if (state.dm) benefits.push('다이렉트 메시지');
+        if (state.badge) benefits.push('멤버십 배지');
+        state.rewards.forEach((reward) => benefits.push(reward.name));
+        const list = $('#preview-benefits'); list.innerHTML = '';
+        if (!benefits.length) list.innerHTML = '<span class="preview-placeholder">설정한 혜택이 표시됩니다.</span>';
+        else benefits.forEach((benefit) => { const tag = document.createElement('span'); tag.className = 'benefit-tag'; tag.textContent = benefit; list.append(tag); });
+        const detail = $('#detail-editor').innerText.trim();
+        $('#preview-detail').textContent = detail ? `${detail.slice(0, 140)}${detail.length > 140 ? '…' : ''}` : '작성한 상세 소개 일부가 표시됩니다.';
+      }
+
+      $('#preview-button').addEventListener('click', () => {
+        renderMembershipPreview();
         openModal('preview-modal');
       });
       $('#register-button').addEventListener('click', () => { $('#toast').classList.add('show'); window.setTimeout(() => $('#toast').classList.remove('show'), 3200); });
