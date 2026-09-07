@@ -559,6 +559,7 @@
 
   <div class="modal-backdrop" id="setting-modal" role="dialog" aria-modal="true" aria-labelledby="setting-modal-title"><div class="modal"><div class="modal-header"><h2 id="setting-modal-title">기본 혜택 설정</h2><button class="modal-close" data-close-modal="setting-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p id="setting-modal-copy"></p><div class="setting-choices" id="setting-choices"></div></div></div></div>
   <div class="modal-backdrop" id="preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title"><div class="modal"><div class="modal-header"><h2 id="preview-modal-title">멤버십 미리보기</h2><button class="modal-close" data-close-modal="preview-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>입력한 내용을 기준으로 사용자에게 보이는 멤버십 정보를 확인할 수 있습니다.</p><div class="preview-card"><div class="preview-hero" id="preview-hero">대표 이미지</div><div class="preview-copy"><div class="preview-first-benefit" id="preview-first-benefit" hidden>첫 결제 혜택 적용</div><span class="preview-operation" id="preview-operation">운영 방식</span><h3 id="preview-name">새 멤버십</h3><p id="preview-summary">멤버십 한 줄 설명이 여기에 표시됩니다.</p><div class="preview-price-row"><div><div class="preview-price-caption">판매가</div><div class="preview-price" id="preview-price">판매가 미정</div></div><div class="preview-period" id="preview-period">이용 기간 미정</div></div><div class="preview-discount-summary" id="preview-discount-summary" hidden><span id="preview-discount-label">첫 결제 시 총 할인</span><strong id="preview-discount-total">0원 할인</strong></div><div class="preview-divider"></div><div class="preview-block"><span class="preview-block-title">이용 안내</span><div class="preview-detail" id="preview-usage">운영 방식을 선택하면 이용 안내가 표시됩니다.</div></div><div class="preview-block"><span class="preview-block-title">혜택</span><div class="preview-benefits" id="preview-benefits"><span class="preview-placeholder">설정한 혜택이 표시됩니다.</span></div></div><div class="preview-block"><span class="preview-block-title">상세 소개</span><div class="preview-detail" id="preview-detail">작성한 상세 소개 일부가 표시됩니다.</div></div></div></div></div></div></div>
+  <div class="modal-backdrop" id="operation-change-modal" role="dialog" aria-modal="true" aria-labelledby="operation-change-modal-title"><div class="modal"><div class="modal-header"><h2 id="operation-change-modal-title">운영 방식 변경</h2></div><div class="modal-content"><p>멤버십 운영 방식을 변경하면 입력한 내용이 모두 삭제됩니다.<br />운영 방식을 정말 변경하시겠어요?</p><div class="form-actions"><button class="secondary-button" id="cancel-operation-change" type="button">취소</button><button class="primary-button" id="confirm-operation-change" type="button">변경</button></div></div></div></div>
   <div class="toast" id="toast">멤버십 등록 요청이 준비되었습니다.</div>
 
   <script>
@@ -575,6 +576,10 @@
       const $ = (selector) => document.querySelector(selector);
       const $$ = (selector) => [...document.querySelectorAll(selector)];
       const inputs = { name: $('#plan-name'), summary: $('#plan-summary'), price: $('#plan-price'), duration: $('#duration'), endDate: $('#cohort-end-date'), recruitmentStart: $('#recruitment-start-date'), recruitmentEnd: $('#recruitment-end-date'), image: $('#plan-image'), instantDiscount: $('#instant-discount-amount'), firstDiscount: $('#first-discount-amount'), capacity: $('#capacity-limit') };
+      const defaultImagePreview = $('#image-preview').innerHTML;
+      const defaultImageMeta = $('#image-meta').textContent;
+      let pendingPlanType = '';
+      let imageLoadSequence = 0;
 
       function getRequiredLabel(item) {
         return item.key === 'duration' && state.planType === 'cohort' ? '이용 종료일' : item.label;
@@ -879,10 +884,79 @@
         panel.classList.toggle('collapsed', expanded);
       }));
 
-      $$('.operation-card').forEach((card) => card.addEventListener('click', () => {
-        state.planType = card.dataset.planType;
-        $$('.operation-card').forEach((item) => { const selected = item === card; item.classList.toggle('selected', selected); item.setAttribute('aria-pressed', String(selected)); });
+      function selectPlanType(planType) {
+        state.planType = planType;
+        $$('.operation-card').forEach((item) => { const selected = item.dataset.planType === planType; item.classList.toggle('selected', selected); item.setAttribute('aria-pressed', String(selected)); });
         update();
+      }
+
+      function hasMembershipFormContent() {
+        const hasInputValue = [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.instantDiscount, inputs.firstDiscount, inputs.capacity]
+          .some((input) => input.value.trim() !== '');
+        const hasChangedSetting = $('input[name="instant-discount"]:checked').value !== 'none'
+          || $('input[name="first-discount"]:checked').value !== 'none'
+          || $('input[name="renewal-mode"]:checked').value !== 'auto'
+          || $('input[name="multi-month"]:checked').value !== 'none'
+          || $('input[name="capacity"]:checked').value !== 'unlimited'
+          || $('input[name="recruitment-period"]:checked').value !== 'always'
+          || $$("input[name='long-pass-term']").some((input) => !input.checked)
+          || !$$('input[name="approval"]')[0].checked
+          || !$$('input[name="visibility"]')[2].checked;
+        return hasInputValue
+          || Boolean(state.imageName)
+          || state.dm !== null
+          || state.badge !== null
+          || state.rewards.length > 0
+          || $('#reward-name').value.trim() !== ''
+          || $('#reward-description').value.trim() !== ''
+          || $('#detail-editor').innerText.trim() !== ''
+          || hasChangedSetting;
+      }
+
+      function resetMembershipForm() {
+        state.planType = '';
+        state.imageName = '';
+        state.imageUrl = '';
+        imageLoadSequence += 1;
+        state.dm = null;
+        state.badge = null;
+        state.rewards = [];
+        [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.image, inputs.instantDiscount, inputs.firstDiscount, inputs.capacity].forEach((input) => { input.value = ''; });
+        $('#reward-name').value = '';
+        $('#reward-description').value = '';
+        $('#detail-editor').innerHTML = '';
+        $('#image-preview').innerHTML = defaultImagePreview;
+        $('#image-meta').textContent = defaultImageMeta;
+        $('#image-meta').className = 'image-meta';
+        $('#image-meta').style.color = '';
+        $('#dm-state').textContent = '아직 설정하지 않음';
+        $('#dm-state').className = 'reward-state';
+        $('#badge-state').textContent = '아직 설정하지 않음';
+        $('#badge-state').className = 'reward-state';
+        $('#reward-form').classList.remove('visible');
+        $('input[name="instant-discount"][value="none"]').checked = true;
+        $('input[name="first-discount"][value="none"]').checked = true;
+        $('input[name="renewal-mode"][value="auto"]').checked = true;
+        $('input[name="multi-month"][value="none"]').checked = true;
+        $('input[name="capacity"][value="unlimited"]').checked = true;
+        $('input[name="recruitment-period"][value="always"]').checked = true;
+        $$('input[name="long-pass-term"]').forEach((input) => { input.checked = true; });
+        $$('input[name="approval"]')[0].checked = true;
+        $$('input[name="visibility"]')[2].checked = true;
+        $$('.operation-card').forEach((card) => { card.classList.remove('selected'); card.setAttribute('aria-pressed', 'false'); });
+        renderRewards();
+        update();
+      }
+
+      $$('.operation-card').forEach((card) => card.addEventListener('click', () => {
+        const planType = card.dataset.planType;
+        if (planType === state.planType) return;
+        if (state.planType && hasMembershipFormContent()) {
+          pendingPlanType = planType;
+          openModal('operation-change-modal');
+          return;
+        }
+        selectPlanType(planType);
       }));
 
       [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.instantDiscount, inputs.firstDiscount, inputs.capacity].forEach((input) => input.addEventListener('input', update));
@@ -907,8 +981,13 @@
         state.imageName = file.name;
         $('#image-meta').textContent = `${file.name} 선택됨`;
         $('#image-meta').className = 'image-meta selected';
+        const imageLoadId = ++imageLoadSequence;
         const reader = new FileReader();
-        reader.onload = () => { state.imageUrl = reader.result; $('#image-preview').innerHTML = `<img src="${reader.result}" alt="선택한 대표 이미지" />`; };
+        reader.onload = () => {
+          if (imageLoadId !== imageLoadSequence) return;
+          state.imageUrl = reader.result;
+          $('#image-preview').innerHTML = `<img src="${reader.result}" alt="선택한 대표 이미지" />`;
+        };
         reader.readAsDataURL(file); update();
       });
 
@@ -916,7 +995,17 @@
       function closeModal(id) { $(`#${id}`).classList.remove('open'); }
       $$('.modal-close').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.closeModal)));
       $$('.modal-backdrop').forEach((modal) => modal.addEventListener('click', (event) => { if (event.target === modal) modal.classList.remove('open'); }));
-      document.addEventListener('keydown', (event) => { if (event.key === 'Escape') $$('.modal-backdrop.open').forEach((modal) => modal.classList.remove('open')); });
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { pendingPlanType = ''; $$('.modal-backdrop.open').forEach((modal) => modal.classList.remove('open')); } });
+      $('#operation-change-modal').addEventListener('click', (event) => { if (event.target === event.currentTarget) pendingPlanType = ''; });
+      $('#cancel-operation-change').addEventListener('click', () => { pendingPlanType = ''; closeModal('operation-change-modal'); });
+      $('#confirm-operation-change').addEventListener('click', () => {
+        const nextPlanType = pendingPlanType;
+        pendingPlanType = '';
+        closeModal('operation-change-modal');
+        if (!nextPlanType) return;
+        resetMembershipForm();
+        selectPlanType(nextPlanType);
+      });
 
       const settingData = {
         dm: { title: '다이렉트 메시지 이용 권한', copy: '멤버십 가입자에게 다이렉트 메시지 이용 권한을 제공할지 선택할 수 있습니다.', on: '제공함', off: '제공하지 않음' },
