@@ -709,15 +709,16 @@
       }
 
       function updateLongPassSettings() {
-        const usesDurationSettings = state.planType === 'subscription' || state.planType === 'deduction';
-        const isOneMonth = usesDurationSettings && Number(inputs.duration.value) === 1;
+        const isEligibleForLongPass = state.planType === 'subscription'
+          && Number(inputs.duration.value) === 1
+          && $('input[name="renewal-mode"]:checked').value === 'auto';
         const termOptions = $$('input[name="long-pass-term"]');
-        const sellingLongPass = isOneMonth && $('input[name="multi-month"]:checked').value === 'sell';
+        const sellingLongPass = isEligibleForLongPass && $('input[name="multi-month"]:checked').value === 'sell';
         const longPassField = $('#long-pass-field');
         const details = $('#long-pass-details');
 
         termOptions.forEach((option) => { option.disabled = !sellingLongPass; });
-        longPassField.hidden = !isOneMonth;
+        longPassField.hidden = !isEligibleForLongPass;
         details.classList.toggle('open', sellingLongPass);
         details.setAttribute('aria-hidden', String(!sellingLongPass));
       }
