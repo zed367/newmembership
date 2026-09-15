@@ -407,16 +407,17 @@
                   </div>
                   <div class="field" id="first-discount-field">
                     <span class="group-label" id="first-discount-label">첫 결제 할인</span>
-                    <p class="discount-description">멤버십 첫 결제에만 추가로 할인할 금액을 설정합니다.</p>
+                    <p class="discount-description">멤버십 첫 결제에만 추가로 적용할 할인 방식을 설정합니다.</p>
                     <div class="compact-options discount-options" role="radiogroup" aria-labelledby="first-discount-label">
-                      <label class="option-row"><input type="radio" name="first-discount" value="apply" aria-controls="first-discount-details" /><span class="radio"></span><span>적용</span></label>
+                      <label class="option-row"><input type="radio" name="first-discount" value="fixed" aria-controls="first-discount-details" /><span class="radio"></span><span>정액 할인</span></label>
+                      <label class="option-row"><input type="radio" name="first-discount" value="rate" aria-controls="first-discount-details" /><span class="radio"></span><span>정률 할인</span></label>
                       <label class="option-row"><input type="radio" name="first-discount" value="none" checked /><span class="radio"></span><span>적용 안 함</span></label>
                     </div>
                     <div class="discount-details" id="first-discount-details" aria-hidden="true"><div class="discount-details-inner">
-                      <label class="group-label" for="first-discount-amount">할인 금액</label>
-                      <div class="input-wrap"><input class="number-input with-suffix" id="first-discount-amount" type="number" min="1" max="5000000" inputmode="numeric" placeholder="1,000" disabled /><span class="input-suffix">원</span></div>
+                      <div id="first-discount-fixed-input"><label class="group-label" for="first-discount-amount">할인 금액</label><div class="input-wrap"><input class="number-input with-suffix" id="first-discount-amount" type="number" min="1" max="5000000" inputmode="numeric" placeholder="1,000" disabled /><span class="input-suffix">원</span></div></div>
+                      <div id="first-discount-rate-input" hidden><label class="group-label" for="first-discount-rate">할인율</label><div class="input-wrap"><input class="number-input with-suffix" id="first-discount-rate" type="number" min="1" max="100" step="1" inputmode="numeric" placeholder="10" disabled /><span class="input-suffix">%</span></div></div>
                       <div class="input-error" id="first-discount-error">할인 금액은 즉시 할인 적용가 이하로 입력해야 합니다.</div>
-                      <p class="discount-note">원 단위 정액 할인만 지원합니다.</p>
+                      <p class="discount-note" id="first-discount-note">원 단위 정액 할인으로 적용됩니다.</p>
                       <div class="discount-result" aria-live="polite"><span class="discount-result-label">첫 결제 적용가</span><strong class="discount-result-value" id="first-discount-price">—</strong><span class="discount-result-copy muted" id="first-discount-copy">판매가를 입력하면 첫 결제 적용가가 표시됩니다.</span></div>
                     </div></div>
                   </div>
@@ -575,7 +576,7 @@
       ];
       const $ = (selector) => document.querySelector(selector);
       const $$ = (selector) => [...document.querySelectorAll(selector)];
-      const inputs = { name: $('#plan-name'), summary: $('#plan-summary'), price: $('#plan-price'), duration: $('#duration'), endDate: $('#cohort-end-date'), recruitmentStart: $('#recruitment-start-date'), recruitmentEnd: $('#recruitment-end-date'), image: $('#plan-image'), instantDiscount: $('#instant-discount-amount'), firstDiscount: $('#first-discount-amount'), capacity: $('#capacity-limit') };
+      const inputs = { name: $('#plan-name'), summary: $('#plan-summary'), price: $('#plan-price'), duration: $('#duration'), endDate: $('#cohort-end-date'), recruitmentStart: $('#recruitment-start-date'), recruitmentEnd: $('#recruitment-end-date'), image: $('#plan-image'), instantDiscount: $('#instant-discount-amount'), firstDiscount: $('#first-discount-amount'), firstDiscountRate: $('#first-discount-rate'), capacity: $('#capacity-limit') };
       const defaultImagePreview = $('#image-preview').innerHTML;
       const defaultImageMeta = $('#image-meta').textContent;
       let pendingPlanType = '';
@@ -636,7 +637,18 @@
         return { hasValue: raw !== '', value, isPositiveNumber: Number.isFinite(value) && value >= 1 };
       }
 
-      function isDiscountApplied(name) { return $(`input[name="${name}"]:checked`).value === 'apply'; }
+      function readRate(input) {
+        const raw = input.value.trim();
+        const value = Number(raw);
+        return { hasValue: raw !== '', value, isValidRate: Number.isInteger(value) && value >= 1 && value <= 100 };
+      }
+
+      function getFirstDiscountType() { return $('input[name="first-discount"]:checked').value; }
+
+      function isDiscountApplied(name) {
+        const selected = $(`input[name="${name}"]:checked`).value;
+        return name === 'first-discount' ? selected !== 'none' : selected === 'apply';
+      }
 
       function setDiscountDetails(name, applied) {
         const details = $(`#${name}-discount-details`);
@@ -644,6 +656,22 @@
         details.classList.toggle('open', applied);
         details.setAttribute('aria-hidden', String(!applied));
         input.disabled = !applied;
+      }
+
+      function setFirstDiscountDetails(type) {
+        const applied = type !== 'none';
+        const details = $('#first-discount-details');
+        const isFixed = type === 'fixed';
+        const isRate = type === 'rate';
+        details.classList.toggle('open', applied);
+        details.setAttribute('aria-hidden', String(!applied));
+        $('#first-discount-fixed-input').hidden = !isFixed;
+        $('#first-discount-rate-input').hidden = !isRate;
+        inputs.firstDiscount.disabled = !isFixed;
+        inputs.firstDiscountRate.disabled = !isRate;
+        $('#first-discount-note').textContent = isRate
+          ? '할인율은 즉시 할인 적용가를 기준으로 계산됩니다.'
+          : '원 단위 정액 할인으로 적용됩니다.';
       }
 
       function setDiscountResult(name, value, copy, muted = false) {
@@ -657,20 +685,24 @@
         const price = Number(inputs.price.value);
         const validPrice = Number.isFinite(price) && price >= 1000 && price <= 5000000;
         const instantApplied = isDiscountApplied('instant-discount');
-        const firstApplied = isDiscountApplied('first-discount');
+        const firstType = getFirstDiscountType();
+        const firstApplied = firstType !== 'none';
         const instant = readAmount(inputs.instantDiscount);
         const first = readAmount(inputs.firstDiscount);
+        const firstRate = readRate(inputs.firstDiscountRate);
 
         setDiscountDetails('instant', instantApplied);
-        setDiscountDetails('first', firstApplied);
+        setFirstDiscountDetails(firstType);
 
         const validInstant = instantApplied && instant.isPositiveNumber && validPrice && instant.value <= price;
         const instantReady = !instantApplied || validInstant;
         const instantPrice = validInstant ? price - instant.value : price;
-        const validFirst = firstApplied && first.isPositiveNumber && validPrice && instantReady && first.value <= instantPrice;
+        const firstInput = firstType === 'rate' ? firstRate : first;
+        const firstDiscountAmount = firstType === 'rate' ? Math.floor(instantPrice * firstRate.value / 100) : first.value;
+        const validFirst = firstApplied && (firstType === 'rate' ? firstRate.isValidRate : first.isPositiveNumber) && validPrice && instantReady && firstDiscountAmount <= instantPrice;
 
         const instantInvalid = instantApplied && instant.hasValue && !validInstant;
-        const firstInvalid = firstApplied && first.hasValue && !validFirst;
+        const firstInvalid = firstApplied && firstInput.hasValue && !validFirst;
         $('#instant-discount-field').classList.toggle('invalid', instantInvalid);
         $('#first-discount-field').classList.toggle('invalid', firstInvalid);
 
@@ -681,7 +713,9 @@
           ? '즉시 할인 금액을 먼저 확인해야 합니다.'
           : !validPrice
             ? '판매가를 먼저 올바르게 입력해야 합니다.'
-            : '할인 금액은 즉시 할인 적용가 이하의 1원 이상으로 입력해야 합니다.';
+            : firstType === 'rate'
+              ? '할인율은 1% 이상 100% 이하의 정수로 입력해야 합니다.'
+              : '할인 금액은 즉시 할인 적용가 이하의 1원 이상으로 입력해야 합니다.';
 
         if (!validPrice) {
           setDiscountResult('instant', '—', '판매가를 입력하면 할인 적용가가 표시됩니다.', true);
@@ -697,12 +731,15 @@
           setDiscountResult('first', '—', '판매가를 입력하면 첫 결제 적용가가 표시됩니다.', true);
         } else if (!instantReady) {
           setDiscountResult('first', '—', '즉시 할인 금액을 입력하면 첫 결제 적용가가 표시됩니다.', true);
-        } else if (!first.hasValue) {
-          setDiscountResult('first', '—', '할인 금액을 입력하면 첫 결제 적용가가 표시됩니다.', true);
+        } else if (!firstInput.hasValue) {
+          setDiscountResult('first', '—', firstType === 'rate' ? '할인율을 입력하면 첫 결제 적용가가 표시됩니다.' : '할인 금액을 입력하면 첫 결제 적용가가 표시됩니다.', true);
         } else if (!validFirst) {
-          setDiscountResult('first', '—', '할인 금액을 확인해야 합니다.', true);
+          setDiscountResult('first', '—', firstType === 'rate' ? '할인율을 확인해야 합니다.' : '할인 금액을 확인해야 합니다.', true);
         } else {
-          setDiscountResult('first', formatWon(instantPrice - first.value), `${formatWon(first.value)} 첫 결제 할인`);
+          const copy = firstType === 'rate'
+            ? `${firstRate.value}% 첫 결제 할인 · ${formatWon(firstDiscountAmount)} 할인 적용`
+            : `${formatWon(firstDiscountAmount)} 첫 결제 할인`;
+          setDiscountResult('first', formatWon(instantPrice - firstDiscountAmount), copy);
         }
       }
 
@@ -891,7 +928,7 @@
       }
 
       function hasMembershipFormContent() {
-        const hasInputValue = [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.instantDiscount, inputs.firstDiscount, inputs.capacity]
+        const hasInputValue = [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.instantDiscount, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity]
           .some((input) => input.value.trim() !== '');
         const hasChangedSetting = $('input[name="instant-discount"]:checked').value !== 'none'
           || $('input[name="first-discount"]:checked').value !== 'none'
@@ -921,7 +958,7 @@
         state.dm = null;
         state.badge = null;
         state.rewards = [];
-        [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.image, inputs.instantDiscount, inputs.firstDiscount, inputs.capacity].forEach((input) => { input.value = ''; });
+        [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.image, inputs.instantDiscount, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity].forEach((input) => { input.value = ''; });
         $('#reward-name').value = '';
         $('#reward-description').value = '';
         $('#detail-editor').innerHTML = '';
@@ -959,7 +996,7 @@
         selectPlanType(planType);
       }));
 
-      [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.instantDiscount, inputs.firstDiscount, inputs.capacity].forEach((input) => input.addEventListener('input', update));
+      [inputs.name, inputs.summary, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.instantDiscount, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity].forEach((input) => input.addEventListener('input', update));
       $$('input[name="instant-discount"], input[name="first-discount"]').forEach((input) => input.addEventListener('change', update));
       $$('input[name="renewal-mode"], input[name="multi-month"]').forEach((input) => input.addEventListener('change', update));
       $$('input[name="capacity"]').forEach((input) => input.addEventListener('change', update));
@@ -1060,14 +1097,18 @@
         const price = Number(inputs.price.value);
         const validPrice = Number.isFinite(price) && price >= 1000 && price <= 5000000;
         const instantApplied = isDiscountApplied('instant-discount');
-        const firstApplied = state.planType === 'subscription' && isDiscountApplied('first-discount');
+        const firstType = getFirstDiscountType();
+        const firstApplied = state.planType === 'subscription' && firstType !== 'none';
         const instant = readAmount(inputs.instantDiscount);
         const first = readAmount(inputs.firstDiscount);
+        const firstRate = readRate(inputs.firstDiscountRate);
         const validInstant = !instantApplied || (validPrice && instant.isPositiveNumber && instant.value <= price);
         const instantPrice = instantApplied && validInstant ? price - instant.value : price;
-        const validFirst = !firstApplied || (validPrice && validInstant && first.isPositiveNumber && first.value <= instantPrice);
-        const firstPrice = firstApplied && validFirst ? instantPrice - first.value : instantPrice;
-        return { price, validPrice, instantApplied, firstApplied, instant, first, validInstant, validFirst, instantPrice, firstPrice };
+        const firstDiscountAmount = firstType === 'rate' ? Math.floor(instantPrice * firstRate.value / 100) : first.value;
+        const firstInputValid = firstType === 'rate' ? firstRate.isValidRate : first.isPositiveNumber;
+        const validFirst = !firstApplied || (validPrice && validInstant && firstInputValid && firstDiscountAmount <= instantPrice);
+        const firstPrice = firstApplied && validFirst ? instantPrice - firstDiscountAmount : instantPrice;
+        return { price, validPrice, instantApplied, firstApplied, firstType, instant, first, firstRate, firstDiscountAmount, validInstant, validFirst, instantPrice, firstPrice };
       }
 
       function renderMembershipPreview() {
@@ -1076,7 +1117,7 @@
         const duration = Number(inputs.duration.value);
         const hasDuration = Number.isFinite(duration) && duration >= 1;
         const instantDiscount = pricing.instantApplied && pricing.validInstant ? pricing.instant.value : 0;
-        const firstDiscount = pricing.firstApplied && pricing.validFirst ? pricing.first.value : 0;
+        const firstDiscount = pricing.firstApplied && pricing.validFirst ? pricing.firstDiscountAmount : 0;
         const totalDiscount = instantDiscount + firstDiscount;
 
         $('#preview-operation').textContent = operationNames[state.planType] || '운영 방식';
@@ -1090,6 +1131,9 @@
         else $('#preview-price').textContent = formatWon(pricing.price);
 
         $('#preview-first-benefit').hidden = firstDiscount === 0;
+        $('#preview-first-benefit').textContent = firstDiscount > 0
+          ? `첫 결제 ${pricing.firstType === 'rate' ? `${pricing.firstRate.value}%` : formatWon(firstDiscount)} 할인`
+          : '첫 결제 혜택 적용';
         $('#preview-discount-summary').hidden = totalDiscount === 0;
         $('#preview-discount-label').textContent = firstDiscount > 0 ? '첫 결제 시 총 할인' : '즉시 할인 혜택';
         $('#preview-discount-total').textContent = `${formatWon(totalDiscount)} 할인`;
