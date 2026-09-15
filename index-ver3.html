@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>멤버십 생성 | Fanding Studio</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #181818;
+      --surface: #202022;
+      --card: #252527;
+      --card-hover: #2b2b2f;
+      --input: #303034;
+      --line: #3b3b40;
+      --line-soft: #303034;
+      --text: #f2f1f6;
+      --muted: #aaa9b4;
+      --subtle: #777681;
+      --purple: #6c63ff;
+      --purple-soft: #383664;
+      --purple-weak: rgba(108, 99, 255, .12);
+      --success: #73d8a7;
+      --warning: #f3bf64;
+      --danger: #ff7c8a;
+      --radius: 12px;
+      --shadow: 0 18px 40px rgba(0, 0, 0, .18);
+      font-family: Inter, Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--bg); }
+    body { margin: 0; min-width: 1160px; background: var(--bg); color: var(--text); }
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+    button, label { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, [contenteditable]:focus-visible {
+      outline: 2px solid #9b95ff; outline-offset: 2px;
+    }
+
+    .topbar {
+      height: 64px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 36px; border-bottom: 1px solid var(--line); background: #1b1b1c;
+      position: sticky; top: 0; z-index: 20;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; font-size: 14px; font-weight: 700; letter-spacing: -.2px; }
+    .brand-mark { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: linear-gradient(145deg, #847bff, #554cff); box-shadow: 0 5px 15px rgba(92, 82, 255, .32); }
+    .brand-mark::before { content: "F"; font-size: 14px; font-weight: 800; color: #fff; }
+    .crumb { color: var(--subtle); font-weight: 500; }
+    .crumb strong { color: #dad9e0; font-weight: 600; }
+    .top-actions { display: flex; gap: 10px; align-items: center; }
+    .saved { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; }
+    .saved::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px rgba(115,216,167,.1); }
+
+    .page { max-width: 1480px; padding: 42px 44px 84px; margin: 0 auto; }
+    .page-intro { display: flex; justify-content: space-between; align-items: end; margin: 0 0 30px; }
+    .eyebrow { display: flex; gap: 8px; align-items: center; color: #a59fff; font-size: 13px; font-weight: 700; }
+    .eyebrow .dot { width: 5px; height: 5px; background: var(--purple); border-radius: 50%; }
+    h1 { margin: 9px 0 0; letter-spacing: -.8px; font-size: 28px; line-height: 1.3; }
+    .intro-copy { max-width: 660px; margin: 9px 0 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .required-note { padding: 9px 12px; border: 1px solid var(--line); background: #202021; color: var(--muted); border-radius: 8px; font-size: 12px; }
+    .required-mark { color: #ff717f; }
+
+    .layout { display: grid; grid-template-columns: minmax(680px, 1fr) 326px; align-items: start; gap: 28px; }
+    .form-column { min-width: 0; }
+
+    .operation-stage { position: relative; overflow: hidden; margin-bottom: 20px; padding: 27px; border: 1px solid #5a568d; border-radius: var(--radius); background: linear-gradient(132deg, #29273c 0%, #222226 57%, #202022 100%); box-shadow: 0 16px 35px rgba(0, 0, 0, .16); }
+    .operation-stage::after { position: absolute; top: -98px; right: -90px; width: 255px; height: 255px; border: 1px solid rgba(157, 151, 255, .15); border-radius: 50%; box-shadow: 0 0 0 42px rgba(157, 151, 255, .035), 0 0 0 84px rgba(157, 151, 255, .02); content: ""; pointer-events: none; }
+    .step-caption { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #a8a3ff; font-size: 12px; font-weight: 800; }
+    .step-number { display: grid; width: 21px; height: 21px; place-items: center; border: 1px solid rgba(176, 171, 255, .44); border-radius: 50%; color: #d7d4ff; font-size: 11px; }
+    .operation-title { position: relative; z-index: 1; margin: 0; font-size: 20px; letter-spacing: -.45px; }
+    .operation-copy { position: relative; z-index: 1; max-width: 640px; margin: 8px 0 22px; color: #c2c0cb; font-size: 13px; line-height: 1.65; }
+    .operation-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .operation-card { min-height: 144px; padding: 18px; border: 1px solid #4a485d; border-radius: 11px; background: rgba(32, 32, 36, .78); color: var(--text); cursor: pointer; text-align: left; transition: transform .16s ease, border-color .16s ease, background .16s ease; }
+    .operation-card:hover { border-color: #6c6790; background: #2a2933; }
+    .operation-card:active { transform: scale(.99); }
+    .operation-card.selected { border-color: #8881ff; background: #393664; box-shadow: inset 0 0 0 1px rgba(169, 164, 255, .18); }
+    .operation-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .operation-name { display: block; color: #f0eff7; font-size: 15px; font-weight: 750; letter-spacing: -.2px; }
+    .operation-card.selected .operation-name { color: #b8b3ff; }
+    .operation-dot { display: grid; flex: 0 0 auto; width: 19px; height: 19px; place-items: center; border: 1px solid #5b5967; border-radius: 50%; background: #25252a; }
+    .operation-card.selected .operation-dot { border-color: #8179ff; background: #8179ff; }
+    .operation-card.selected .operation-dot::after { width: 7px; height: 7px; border-radius: 50%; background: #fff; content: ""; }
+    .operation-description { display: block; margin-top: 11px; color: #b5b3bf; font-size: 12px; line-height: 1.58; }
+    .operation-status { position: relative; z-index: 1; display: none; align-items: center; gap: 7px; margin-top: 18px; color: #c0baff; font-size: 12px; font-weight: 650; }
+    .operation-status.visible { display: flex; }
+    .operation-status::before { width: 6px; height: 6px; border-radius: 50%; background: #8d86ff; content: ""; }
+    .configuration { display: none; }
+    .configuration.visible { display: block; animation: reveal .28s ease-out; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .form-section { scroll-margin-top: 92px; margin-bottom: 18px; border: 1px solid var(--line); border-radius: var(--radius); overflow: clip; background: var(--surface); box-shadow: 0 5px 18px rgba(0,0,0,.08); transition: border-color .2s ease; }
+    .form-section:has(.accordion-panel:not(.collapsed)) { border-color: #46464d; }
+    .form-section.highlight { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(108,99,255,.12); }
+    .accordion-header { width: 100%; border: 0; padding: 20px 22px; background: transparent; display: flex; align-items: center; justify-content: space-between; gap: 20px; cursor: pointer; text-align: left; }
+    .section-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .section-num { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; background: #34343a; color: #cac9d3; font-size: 12px; font-weight: 700; }
+    .section-heading { font-size: 17px; letter-spacing: -.3px; font-weight: 700; }
+    .section-status { margin-left: 3px; color: var(--warning); font-size: 13px; white-space: nowrap; }
+    .section-status.complete { color: var(--success); }
+    .section-status.optional { color: var(--subtle); }
+    .header-right { display: flex; align-items: center; gap: 14px; }
+    .chevron { width: 9px; height: 9px; border-right: 2px solid #a6a5b0; border-bottom: 2px solid #a6a5b0; transform: rotate(45deg) translateY(-2px); transition: transform .2s ease; }
+    .accordion-header[aria-expanded="false"] .chevron { transform: rotate(225deg) translate(-2px, -2px); }
+    .accordion-panel { overflow: hidden; border-top: 1px solid var(--line); max-height: 4000px; opacity: 1; transition: max-height .35s ease, opacity .2s ease, border .25s ease; }
+    .accordion-panel.collapsed { max-height: 0; opacity: 0; border-top-color: transparent; }
+    .section-body { padding: 28px 28px 32px; }
+    .section-description { margin: -2px 0 24px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+    .form-group + .form-group { margin-top: 34px; padding-top: 32px; border-top: 1px solid var(--line-soft); }
+    .group-title { display: flex; align-items: center; gap: 8px; margin: 0 0 7px; font-size: 15px; font-weight: 700; }
+    .group-help { margin: 0 0 18px; color: var(--subtle); font-size: 12px; line-height: 1.5; }
+    .group-label { display: block; margin: 0 0 9px; font-size: 13px; font-weight: 650; color: #e3e2e8; }
+    .field-help { color: var(--subtle); font-size: 12px; font-weight: 400; }
+    .cycle-badge { display: inline-flex; align-items: center; min-height: 20px; padding: 0 7px; border: 1px solid rgba(142, 136, 255, .4); border-radius: 999px; background: rgba(96, 90, 201, .14); color: #bcb7ff; font-size: 10px; font-weight: 700; white-space: nowrap; }
+
+    .field-grid { display: grid; gap: 20px; }
+    .field-grid.two { grid-template-columns: 1fr 1fr; }
+    .field-grid.price-grid { grid-template-columns: 1.15fr .85fr; align-items: end; }
+    .field { min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .input-wrap { position: relative; }
+    .text-input, .textarea, .number-input { width: 100%; border: 1px solid transparent; border-radius: 8px; background: var(--input); color: #f2f1f5; padding: 12px 13px; line-height: 20px; outline: none; transition: border-color .16s, box-shadow .16s, background .16s; }
+    .text-input::placeholder, .textarea::placeholder { color: #777681; }
+    .text-input:hover, .textarea:hover, .number-input:hover { background: #35353a; }
+    .text-input:focus, .textarea:focus, .number-input:focus { border-color: #7770ff; box-shadow: 0 0 0 3px rgba(108,99,255,.14); background: #323238; }
+    .text-input, .number-input { height: 46px; }
+    .textarea { height: 88px; min-height: 88px; resize: vertical; }
+    .character-count { margin-top: 6px; color: var(--subtle); font-size: 11px; text-align: right; }
+    .input-suffix { position: absolute; top: 50%; right: 13px; transform: translateY(-50%); pointer-events: none; color: #dad9e1; font-size: 13px; font-weight: 650; }
+    .with-suffix { padding-right: 64px; }
+    .input-error { display: none; margin-top: 7px; color: var(--danger); font-size: 12px; }
+    .invalid .text-input, .invalid .number-input { border-color: rgba(255,124,138,.8); }
+    .invalid .input-error { display: block; }
+
+    .image-field { display: flex; gap: 15px; align-items: center; }
+    .image-preview { width: 86px; height: 86px; overflow: hidden; display: grid; place-items: center; border: 1px solid #44444b; border-radius: 10px; background: linear-gradient(135deg, #3c3a61, #27272c); color: #b4b0ff; }
+    .image-preview svg { width: 38px; height: 38px; }
+    .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .image-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .image-picker { position: relative; display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 0 12px; border: 1px solid #4a4952; border-radius: 7px; background: #313137; color: #e0dfe6; cursor: pointer; font-size: 12px; font-weight: 650; transition: .16s; }
+    .image-picker:hover { background: #3a3940; border-color: #62616b; }
+    .image-meta { margin: 7px 0 0; color: var(--subtle); font-size: 11px; }
+    .image-meta.selected { color: var(--success); }
+
+    .option-stack { display: grid; gap: 8px; }
+    .option-row { display: flex; align-items: flex-start; gap: 10px; min-height: 30px; cursor: pointer; color: #e0dfe5; font-size: 13px; line-height: 1.45; }
+    .option-row input { position: absolute; opacity: 0; pointer-events: none; }
+    .radio { display: grid; flex: 0 0 auto; place-items: center; width: 20px; height: 20px; border: 1px solid #4a4952; border-radius: 50%; background: #27272c; margin-top: -1px; }
+    .option-row input:checked + .radio { border-color: #736bff; background: #736bff; }
+    .option-row input:checked + .radio::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+    .option-row:has(input:disabled) { cursor: not-allowed; color: #777681; }
+    .option-row:has(input:disabled) .radio { border-color: #3b3b40; background: #242428; }
+    .option-content { display: grid; gap: 2px; }
+    .option-sub { color: var(--subtle); font-size: 12px; }
+    .compact-options { display: flex; align-items: center; flex-wrap: wrap; gap: 11px 22px; min-height: 46px; padding: 0 0 1px; }
+    .compact-options .option-row { align-items: center; min-height: 20px; }
+    .compact-options .radio { margin-top: 0; }
+    .recruitment-options { display: grid; gap: 6px; min-height: 0; padding: 0; }
+    .recruitment-options .option-row { min-height: 36px; padding: 8px 10px; border-radius: 7px; }
+    .recruitment-options .option-row:has(input:checked) { background: #303035; }
+    .discount-description { margin: -2px 0 12px; color: var(--subtle); font-size: 12px; line-height: 1.5; }
+    .discount-options { min-height: 32px; gap: 10px 20px; }
+    .discount-details { display: grid; grid-template-rows: 0fr; margin-top: 0; opacity: 0; transition: grid-template-rows .24s ease, margin-top .24s ease, opacity .18s ease; }
+    .discount-details.open { grid-template-rows: 1fr; margin-top: 15px; opacity: 1; }
+    .discount-details-inner { min-height: 0; overflow: hidden; }
+    .capacity-range { margin: 7px 0 0; color: var(--subtle); font-size: 12px; }
+    .discount-note { margin: 7px 0 0; color: var(--subtle); font-size: 11px; line-height: 1.45; }
+    .discount-warning { color: #ffc875; }
+    .discount-result { display: grid; gap: 4px; margin-top: 12px; padding: 12px; border: 1px solid #414049; border-radius: 8px; background: #29292d; }
+    .discount-result-label { color: var(--muted); font-size: 11px; font-weight: 650; }
+    .discount-result-value { color: #f3f2f8; font-size: 16px; letter-spacing: -.2px; }
+    .discount-result-copy { color: var(--success); font-size: 12px; font-weight: 650; }
+    .discount-result-copy.muted { color: var(--subtle); font-weight: 400; }
+    .price-summary { display: grid; gap: 1px; margin-top: 20px; overflow: hidden; border: 1px solid #43424b; border-radius: 9px; background: #29292d; }
+    .price-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 34px; padding: 0 12px; border-bottom: 1px solid #3c3b42; color: #d9d7e0; font-size: 12px; }
+    .price-summary-row:last-child { border-bottom: 0; }
+    .price-summary-row strong { color: #f4f3f8; font-size: 13px; }
+    .price-summary-row.muted { color: #85838e; }
+    .price-summary-row.muted strong { color: #85838e; font-weight: 550; }
+    .payment-amounts { display: grid; gap: 6px; margin-top: 10px; padding: 10px 12px; border: 1px solid rgba(125, 119, 235, .28); border-radius: 8px; background: rgba(77, 72, 137, .16); }
+    .payment-amount-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #bbb8c7; font-size: 11px; }
+    .payment-amount-row strong { color: #e7e5ef; font-size: 12px; }
+    .benefit-expiry-notice { display: flex; align-items: flex-start; gap: 9px; margin-top: 13px; padding: 12px 13px; border: 1px solid rgba(255, 189, 98, .32); border-radius: 9px; background: rgba(120, 84, 29, .2); color: #e0c697; font-size: 12px; line-height: 1.55; }
+    .benefit-expiry-notice::before { display: grid; flex: 0 0 auto; width: 18px; height: 18px; place-items: center; border-radius: 50%; background: rgba(255, 189, 98, .18); color: #ffd186; content: "!"; font-size: 12px; font-weight: 800; }
+    .renewal-description { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .long-pass-description { margin: -2px 0 12px; color: var(--subtle); font-size: 12px; line-height: 1.5; }
+    .long-pass-details { display: grid; grid-template-rows: 0fr; margin-top: 0; opacity: 0; transition: grid-template-rows .24s ease, margin-top .24s ease, opacity .18s ease; }
+    .long-pass-details.open { grid-template-rows: 1fr; margin-top: 15px; opacity: 1; }
+    .long-pass-details-inner { min-height: 0; overflow: hidden; }
+    .long-pass-note { margin: 10px 0 0; color: var(--subtle); font-size: 12px; line-height: 1.5; }
+    .operation-extension { display: block; }
+    .operation-extension[hidden] { display: none; }
+    .operation-note { display: flex; align-items: flex-start; gap: 9px; padding: 13px; border: 1px dashed #5b5868; border-radius: 9px; background: rgba(43, 42, 48, .64); color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .operation-note::before { display: grid; flex: 0 0 auto; width: 18px; height: 18px; place-items: center; border-radius: 50%; background: #3c394b; color: #b7b2ff; content: "i"; font-size: 12px; font-weight: 800; }
+    .ticket-options { display: flex; flex-wrap: wrap; gap: 9px 16px; }
+    .checkbox-option { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; cursor: pointer; color: #e0dfe5; font-size: 13px; }
+    .checkbox-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .checkbox { display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid #4a4952; border-radius: 5px; background: #27272c; }
+    .checkbox-option input:checked + .checkbox { border-color: #736bff; background: #736bff; }
+    .checkbox-option input:checked + .checkbox::after { content: "✓"; color: #fff; font-size: 12px; font-weight: 800; }
+    .checkbox-option:has(input:disabled) { cursor: not-allowed; color: #777681; }
+    .checkbox-option:has(input:disabled) .checkbox { border-color: #3b3b40; background: #242428; }
+
+    .reward-stack { display: grid; gap: 10px; }
+    .reward-setting { display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 13px 14px; border: 1px solid #35353a; border-radius: 10px; background: var(--card); }
+    .reward-left { display: flex; align-items: center; gap: 12px; }
+    .reward-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: #37373e; color: #dedce7; }
+    .reward-icon svg { width: 19px; height: 19px; }
+    .reward-name { display: block; font-size: 13px; font-weight: 700; }
+    .reward-state { display: block; margin-top: 4px; color: var(--subtle); font-size: 12px; }
+    .reward-state.on { color: var(--success); }
+    .reward-policy-note { display: block; margin-top: 5px; color: #85838e; font-size: 10px; line-height: 1.45; }
+    .text-button { height: 33px; padding: 0 12px; border: 1px solid #4b4a52; border-radius: 7px; background: #303037; color: #e4e2eb; cursor: pointer; font-size: 12px; font-weight: 650; }
+    .text-button:hover { background: #3b3a42; }
+    .custom-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .custom-count { color: #f3f2f6; font-size: 15px; font-weight: 700; }
+    .custom-count span { color: #a9a7b3; font-weight: 500; }
+    .reward-connection-copy { margin: 5px 0 0; color: var(--subtle); font-size: 11px; }
+    .reward-example { display: flex; align-items: flex-start; gap: 9px; margin: -3px 0 12px; padding: 10px 11px; border: 1px solid rgba(111, 108, 130, .42); border-radius: 8px; background: rgba(43, 42, 49, .48); color: #aaa8b4; }
+    .reward-example-label { flex: 0 0 auto; margin-top: 1px; color: #85828f; font-size: 10px; font-weight: 700; }
+    .reward-example-copy { min-width: 0; }
+    .reward-example-name { display: block; color: #c4c1cc; font-size: 11px; font-weight: 650; line-height: 1.45; }
+    .reward-example-description { display: block; margin-top: 2px; color: #8f8c99; font-size: 11px; line-height: 1.45; }
+    .empty-reward { display: grid; place-items: center; min-height: 160px; padding: 26px; border: 1px dashed #44434b; border-radius: 10px; background: rgba(37,37,39,.52); text-align: center; }
+    .empty-illustration { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 10px; border-radius: 14px; background: var(--purple-weak); color: #a8a3ff; }
+    .empty-illustration svg { width: 22px; height: 22px; }
+    .empty-reward strong { font-size: 13px; }
+    .empty-reward p { margin: 5px 0 14px; color: var(--subtle); font-size: 12px; }
+    .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 38px; padding: 0 15px; border: 0; border-radius: 8px; background: #6259ef; color: #fff; cursor: pointer; font-size: 12px; font-weight: 700; box-shadow: 0 5px 15px rgba(88,78,234,.18); transition: transform .15s, background .15s, opacity .15s; }
+    .primary-button:hover:not(:disabled) { background: #746cff; }
+    .primary-button:active:not(:disabled) { transform: translateY(1px); }
+    .primary-button:disabled { cursor: not-allowed; opacity: .45; box-shadow: none; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+    .secondary-button { height: 36px; padding: 0 12px; border: 1px solid #4b4a52; border-radius: 7px; background: transparent; color: #d7d5df; cursor: pointer; font-size: 12px; font-weight: 650; }
+    .secondary-button:hover { background: #323238; }
+    .reward-list { display: grid; gap: 8px; }
+    .custom-card { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 14px; border: 1px solid #3d3d43; border-radius: 9px; background: #28282b; }
+    .custom-card-copy { min-width: 0; }
+    .custom-card strong { display: block; font-size: 13px; }
+    .custom-card p { margin: 4px 0 0; color: var(--subtle); font-size: 12px; }
+    .reward-meta { display: inline-flex; margin-top: 6px; padding: 3px 6px; border-radius: 5px; background: #383740; color: #b6b2ca; font-size: 10px; font-weight: 700; }
+    .reward-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 4px; }
+    .reward-action { min-width: 29px; height: 29px; padding: 0 7px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #aaa8b2; cursor: pointer; font-size: 12px; }
+    .reward-action:hover:not(:disabled) { border-color: #4a4953; background: #34343a; color: #e1dfe8; }
+    .reward-action:disabled { cursor: not-allowed; opacity: .3; }
+    .reward-action.delete:hover:not(:disabled) { border-color: rgba(255,124,138,.24); background: rgba(255,124,138,.12); color: #ff9aa4; }
+    .reward-menu-wrap { position: relative; }
+    .reward-menu { position: absolute; z-index: 8; top: 35px; right: 0; display: none; min-width: 144px; padding: 5px; border: 1px solid #50505a; border-radius: 8px; background: #2f2f34; box-shadow: 0 12px 28px rgba(0,0,0,.34); }
+    .reward-menu.open { display: grid; }
+    .reward-menu button { min-height: 31px; padding: 0 9px; border: 0; border-radius: 5px; background: transparent; color: #e5e3eb; cursor: pointer; text-align: left; font-size: 11px; }
+    .reward-menu button:hover:not(:disabled) { background: #414047; }
+    .reward-menu button:disabled { color: #77757f; cursor: not-allowed; }
+    .reward-menu .remove-reward { color: #ffabb4; }
+
+    .editor { overflow: hidden; border: 1px solid #404047; border-radius: 10px; background: #28282c; transition: border-color .16s, box-shadow .16s; }
+    .editor:focus-within { border-color: #7770ff; box-shadow: 0 0 0 3px rgba(108,99,255,.13); }
+    .editor-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 3px; padding: 8px 10px; border-bottom: 1px solid #3b3b40; background: #303035; }
+    .editor-tool { width: 30px; height: 30px; border: 0; border-radius: 5px; background: transparent; color: #d5d3dc; cursor: pointer; font-size: 13px; font-weight: 750; }
+    .editor-tool:hover { background: #424149; }
+    .editor-divider { width: 1px; height: 17px; margin: 0 5px; background: #515057; }
+    .editor-body { min-height: 260px; padding: 22px; outline: none; color: #e2e0e7; font-size: 14px; line-height: 1.75; }
+    .editor-body:empty::before { content: attr(data-placeholder); color: #777681; pointer-events: none; }
+    .editor-body h2 { margin: 0 0 10px; font-size: 22px; line-height: 1.35; }
+    .editor-body .demo-image { display: grid; place-items: center; height: 138px; margin: 16px 0; border: 1px dashed #5a576d; border-radius: 8px; color: #aaa4f7; background: #302f3d; font-size: 12px; }
+    .optional-banner { display: flex; align-items: center; gap: 8px; margin-bottom: 17px; padding: 10px 12px; border-radius: 8px; background: #29292c; color: #aaa9b4; font-size: 12px; }
+    .optional-banner b { color: #d1cfda; }
+
+    .summary-wrap { position: sticky; top: 88px; }
+    .summary { overflow: hidden; border: 1px solid #494850; border-radius: 12px; background: #242426; box-shadow: var(--shadow); }
+    .summary-top { padding: 21px 20px 18px; border-bottom: 1px solid #3b3b40; }
+    .resolved-type { display: grid; gap: 3px; margin-bottom: 15px; padding: 11px 12px; border: 1px solid rgba(137, 130, 255, .42); border-radius: 9px; background: rgba(83, 78, 158, .21); }
+    .resolved-type span { color: #aaa5ff; font-size: 10px; font-weight: 750; }
+    .resolved-type strong { color: #eeecff; font-size: 13px; letter-spacing: -.15px; }
+    .resolved-type small { color: #b7b3d9; font-size: 10px; }
+    .summary-title { margin: 0; font-size: 15px; font-weight: 750; letter-spacing: -.2px; }
+    .summary-caption { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+    .summary-pricing { display: grid; gap: 0; margin-top: 16px; overflow: hidden; border: 1px solid #414049; border-radius: 8px; background: #29292d; }
+    .summary-pricing > div { display: flex; align-items: center; justify-content: space-between; gap: 9px; min-height: 28px; padding: 0 9px; border-bottom: 1px solid #3b3b41; color: #aaa8b2; font-size: 10px; }
+    .summary-pricing > div:last-child { border-bottom: 0; }
+    .summary-pricing strong { color: #e8e6ed; font-size: 11px; font-weight: 700; text-align: right; }
+    .progress-row { display: flex; align-items: center; gap: 14px; margin-top: 20px; }
+    .progress-ring { --progress: 0%; position: relative; display: grid; place-items: center; width: 65px; height: 65px; border-radius: 50%; background: conic-gradient(var(--purple) var(--progress), #38383d var(--progress)); }
+    .progress-ring::before { content: ""; position: absolute; width: 54px; height: 54px; border-radius: 50%; background: #242426; }
+    .progress-ring strong { position: relative; font-size: 13px; }
+    .progress-copy b { display: block; font-size: 13px; }
+    .progress-copy span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .summary-statuses { padding: 14px 20px; border-bottom: 1px solid #3b3b40; }
+    .summary-section-link { display: flex; align-items: center; width: 100%; min-height: 38px; padding: 0; border: 0; background: transparent; color: #e1e0e6; cursor: pointer; text-align: left; font-size: 13px; }
+    .summary-section-link:hover .summary-label { color: #a9a4ff; }
+    .summary-indicator { width: 17px; height: 17px; display: grid; place-items: center; margin-right: 9px; border: 1px solid #5a5961; border-radius: 50%; color: transparent; font-size: 11px; }
+    .summary-indicator.done { border-color: rgba(115,216,167,.65); background: rgba(115,216,167,.15); color: var(--success); }
+    .summary-indicator.optional { border-style: dashed; }
+    .summary-label { min-width: 0; flex: 1; transition: color .15s; }
+    .summary-state { margin-left: 8px; color: var(--warning); font-size: 11px; white-space: nowrap; }
+    .summary-state.done { color: var(--success); }
+    .summary-state.optional { color: var(--subtle); }
+    .missing { padding: 18px 20px; }
+    .missing h3 { margin: 0 0 9px; color: #d8d6df; font-size: 12px; }
+    .missing-list { display: grid; gap: 4px; }
+    .missing-item { display: flex; align-items: center; width: 100%; min-height: 28px; padding: 3px 0; border: 0; background: transparent; color: #b8b6c2; cursor: pointer; text-align: left; font-size: 12px; }
+    .missing-item::before { content: ""; width: 5px; height: 5px; margin-right: 8px; border-radius: 50%; background: var(--warning); }
+    .missing-item:hover { color: #aba6ff; text-decoration: underline; text-underline-offset: 3px; }
+    .missing-complete { display: flex; gap: 7px; align-items: center; color: var(--success); font-size: 12px; }
+    .missing-complete::before { content: "✓"; font-weight: 800; }
+    .summary-actions { display: grid; gap: 8px; padding: 0 20px 20px; }
+    .wide { width: 100%; }
+    .register-help { margin: 4px 0 0; color: var(--subtle); font-size: 11px; text-align: center; line-height: 1.4; }
+
+    .modal-backdrop { position: fixed; inset: 0; display: none; place-items: center; padding: 20px; background: rgba(0,0,0,.62); z-index: 100; }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(460px, 100%); overflow: hidden; border: 1px solid #52515a; border-radius: 13px; background: #28282c; box-shadow: 0 24px 70px rgba(0,0,0,.48); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #414148; }
+    .modal-header h2 { margin: 0; font-size: 16px; }
+    .modal-close { width: 30px; height: 30px; border: 0; border-radius: 7px; background: transparent; color: #c5c3cc; cursor: pointer; font-size: 22px; line-height: 1; }
+    .modal-close:hover { background: #38383e; }
+    .modal-content { padding: 20px; }
+    .modal-content > p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .setting-choices { display: grid; gap: 9px; margin-top: 16px; }
+    .setting-choice { display: flex; align-items: center; justify-content: space-between; padding: 14px; border: 1px solid #46454e; border-radius: 9px; background: #303035; color: #eceaf1; cursor: pointer; text-align: left; }
+    .setting-choice:hover, .setting-choice.active { border-color: #736bff; background: #37355b; }
+    .setting-choice strong { font-size: 13px; }
+    .setting-choice span { color: #aaa7b2; font-size: 12px; }
+    .modal-wide { width: min(560px, 100%); }
+    .reward-drawer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #e9e7ee; font-size: 13px; font-weight: 750; }
+    .reward-tabs { display: flex; gap: 6px; margin: 16px 0 10px; border-bottom: 1px solid #414048; }
+    .reward-tab { min-height: 34px; padding: 0 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #9996a2; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .reward-tab.active { border-bottom-color: #7c74ff; color: #d9d6ff; }
+    .catalog-list { display: grid; gap: 8px; max-height: 340px; overflow: auto; }
+    .catalog-reward { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid #414048; border-radius: 8px; background: #303035; }
+    .catalog-reward:has(input:disabled) { opacity: .65; }
+    .catalog-reward input { position: absolute; opacity: 0; pointer-events: none; }
+    .catalog-check { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 1px; border: 1px solid #61606a; border-radius: 5px; background: #242429; }
+    .catalog-reward input:checked + .catalog-check { border-color: #756dff; background: #756dff; }
+    .catalog-reward input:checked + .catalog-check::after { display: grid; place-items: center; height: 100%; color: #fff; content: "✓"; font-size: 11px; font-weight: 800; }
+    .catalog-copy { min-width: 0; flex: 1; }
+    .catalog-copy strong { display: block; color: #efedf4; font-size: 13px; }
+    .catalog-copy p { margin: 4px 0 0; color: #aaa8b3; font-size: 11px; line-height: 1.45; }
+    .catalog-type, .reward-edit-type { display: inline-flex; margin-top: 6px; padding: 3px 6px; border-radius: 5px; background: #3c3a4b; color: #c8c3ff; font-size: 10px; font-weight: 700; }
+    .catalog-unavailable { color: #f3bf76 !important; }
+    .reward-type-help { margin: 8px 0 16px; color: var(--subtle); font-size: 11px; line-height: 1.45; }
+    .survey-option { margin-top: 16px; }
+    .shared-reward-count { margin-top: 12px !important; padding: 9px 10px; border-radius: 7px; background: #363442; color: #d4d0ff !important; font-size: 12px !important; font-weight: 700; }
+    #preview-modal .modal { width: min(500px, 100%); }
+    .preview-card { overflow: hidden; margin-top: 14px; border: 1px solid #45444c; border-radius: 11px; background: #1d1d20; }
+    .preview-hero { display: grid; height: 184px; place-items: center; overflow: hidden; border-bottom: 1px solid #45434d; background: linear-gradient(135deg, #4a456d, #2c2a36 58%, #242429); color: #c5c0ff; font-size: 12px; }
+    .preview-hero img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-copy { padding: 17px 18px 19px; }
+    .preview-resolved-type { display: grid; gap: 2px; margin-bottom: 10px; padding: 8px 10px; border: 1px solid rgba(137, 130, 255, .38); border-radius: 8px; background: rgba(82, 77, 156, .2); }
+    .preview-resolved-type strong { color: #e9e7ff; font-size: 11px; }
+    .preview-resolved-type span { color: #b7b3d9; font-size: 10px; }
+    .preview-first-benefit { display: flex; align-items: center; gap: 7px; margin-bottom: 11px; padding: 8px 10px; border: 1px solid rgba(133, 125, 255, .45); border-radius: 8px; background: #37345e; color: #e2e0ff; font-size: 11px; font-weight: 750; }
+    .preview-first-benefit::before { color: #bcb7ff; content: "◆"; font-size: 10px; }
+    .preview-operation { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; background: #34314a; color: #beb9ff; font-size: 10px; font-weight: 750; }
+    .preview-operation::before { width: 5px; height: 5px; border-radius: 50%; background: #938dff; content: ""; }
+    .preview-copy h3 { margin: 10px 0 0; font-size: 20px; line-height: 1.35; letter-spacing: -.45px; word-break: break-word; }
+    .preview-copy > p { min-height: 36px; margin: 7px 0 0; color: #aaa8b3; font-size: 12px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+    .preview-price-row { display: flex; align-items: end; justify-content: space-between; gap: 10px; margin-top: 17px; padding-top: 16px; border-top: 1px solid #38383e; }
+    .preview-price-caption { color: var(--subtle); font-size: 10px; }
+    .preview-price-line { display: flex; align-items: center; gap: 7px; margin-top: 3px; }
+    .preview-price { color: #f4f3f9; font-size: 19px; font-weight: 800; letter-spacing: -.35px; }
+    .preview-price del { display: block; margin-bottom: 3px; color: #77757f; font-size: 10px; font-weight: 500; }
+    .preview-discount-rate { display: inline-flex; align-items: center; min-height: 21px; padding: 0 7px; border-radius: 6px; background: rgba(162, 64, 73, .46); color: #ffabb4; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .preview-period { color: var(--muted); font-size: 11px; text-align: right; }
+    .preview-discount-summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding: 9px 10px; border: 1px solid rgba(255, 137, 148, .16); border-radius: 8px; background: rgba(130, 48, 55, .36); }
+    .preview-discount-summary span { color: #d7b8bc; font-size: 10px; font-weight: 650; }
+    .preview-discount-summary strong { color: #ff9ba5; font-size: 12px; }
+    .preview-divider { height: 1px; margin: 16px 0; background: #38383e; }
+    .preview-block + .preview-block { margin-top: 14px; }
+    .preview-block-title { display: block; margin-bottom: 7px; color: #c9c7d0; font-size: 11px; font-weight: 750; }
+    .preview-detail { color: #9896a2; font-size: 11px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+    .preview-benefits { display: grid; gap: 7px; }
+    .benefit-tag { padding: 5px 7px; border: 1px solid #44434c; border-radius: 6px; background: #2a2a2e; color: #c8c6d0; font-size: 10px; }
+    .preview-reward { padding: 8px 9px; border: 1px solid #44434c; border-radius: 7px; background: #2a2a2e; }
+    .preview-reward strong { display: block; color: #dddbe5; font-size: 11px; }
+    .preview-reward span { display: block; margin-top: 3px; color: #9895a1; font-size: 10px; line-height: 1.4; }
+    .preview-placeholder { padding: 11px; border: 1px dashed #45444d; border-radius: 8px; color: #777681; font-size: 11px; line-height: 1.5; }
+    .toast { position: fixed; right: 30px; bottom: 30px; display: flex; align-items: center; gap: 9px; transform: translateY(20px); padding: 13px 15px; border: 1px solid rgba(115,216,167,.4); border-radius: 9px; background: #26362f; color: #dff9e9; box-shadow: 0 12px 30px rgba(0,0,0,.3); opacity: 0; pointer-events: none; transition: .25s; z-index: 120; font-size: 13px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast::before { content: "✓"; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #53b983; font-size: 12px; font-weight: 800; }
+
+    @media (max-width: 1180px) { body { min-width: 0; } .page { padding: 32px 24px 72px; } .layout { grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; } }
+    @media (max-width: 940px) { .topbar { padding: 0 20px; } .page-intro { align-items: flex-start; flex-direction: column; gap: 16px; } .layout { grid-template-columns: 1fr; } .summary-wrap { position: static; order: -1; } .summary-statuses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; } .summary-section-link { min-height: 34px; } }
+    @media (max-width: 620px) { .page { padding: 24px 14px 56px; } .topbar { height: 56px; } .crumb { display: none; } h1 { font-size: 24px; } .operation-stage, .section-body { padding: 20px 17px; } .operation-grid { grid-template-columns: 1fr; } .operation-card { min-height: auto; } .accordion-header { padding: 17px; } .section-status { display: none; } .field-grid.two, .field-grid.price-grid { grid-template-columns: 1fr; } .summary-statuses { grid-template-columns: 1fr; } .image-field { align-items: flex-start; flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>FANDING STUDIO</span><span class="crumb">멤버십 관리&nbsp; / &nbsp;<strong>새 멤버십 생성</strong></span></div>
+    <div class="top-actions"><span class="saved">작성 내용 저장됨</span></div>
+  </header>
+
+  <main class="page">
+    <div class="page-intro">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>MEMBERSHIP</div>
+        <h1>새 멤버십 생성</h1>
+        <p class="intro-copy">한 화면에서 멤버십의 모든 설정을 확인하고 완성할 수 있습니다. 필요한 항목을 입력하면 생성 준비 상태가 실시간으로 갱신됩니다.</p>
+      </div>
+      <div class="required-note"><span class="required-mark">*</span> 필수 입력 항목</div>
+    </div>
+
+    <div class="layout">
+      <div class="form-column">
+        <section class="operation-stage" id="plan-type-field" aria-labelledby="operation-title">
+          <div class="step-caption"><span class="step-number">1</span> 먼저 선택해주세요</div>
+          <h2 class="operation-title" id="operation-title">멤버십 운영 방식 <span class="required-mark">*</span></h2>
+          <p class="operation-copy">멤버십 이용이 언제 끝날지를 먼저 정합니다.<br />선택한 방식에 따라 아래 설정 항목이 달라집니다.</p>
+          <div class="operation-grid" role="radiogroup" aria-label="멤버십 운영 방식">
+            <button class="operation-card" type="button" data-plan-type="subscription" aria-pressed="false"><span class="operation-card-top"><span class="operation-name">가입일 기준</span><span class="operation-dot" aria-hidden="true"></span></span><span class="operation-description">가입한 날부터 설정한 기간 동안 이용합니다. 회원마다 종료일이 다릅니다.</span></button>
+            <button class="operation-card" type="button" data-plan-type="cohort" aria-pressed="false"><span class="operation-card-top"><span class="operation-name">종료일 기준</span><span class="operation-dot" aria-hidden="true"></span></span><span class="operation-description">가입일과 관계없이 지정한 날에 모든 회원의 이용이 함께 종료됩니다.</span></button>
+            <button class="operation-card" type="button" data-plan-type="deduction" aria-pressed="false"><span class="operation-card-top"><span class="operation-name">혜택 이용 기준</span><span class="operation-dot" aria-hidden="true"></span></span><span class="operation-description">제공한 혜택을 모두 사용하면 이용이 종료됩니다.</span></button>
+          </div>
+          <div class="operation-status" id="operation-status" aria-live="polite"></div>
+        </section>
+
+        <div class="configuration" id="configuration" aria-hidden="true">
+        <section class="form-section" id="basic-section" data-section="basic">
+          <button class="accordion-header" type="button" aria-expanded="true" aria-controls="basic-panel">
+            <span class="section-title"><span class="section-num">2</span><span class="section-heading">멤버십 설정</span></span>
+            <span class="header-right"><span class="section-status" id="basic-header-status">멤버십 설정 · 7개 항목 미완료</span><span class="chevron" aria-hidden="true"></span></span>
+          </button>
+          <div class="accordion-panel" id="basic-panel">
+            <div class="section-body">
+              <p class="section-description">운영 방식에 맞춰 멤버십 소개, 판매 조건, 가입 방식을 설정합니다.</p>
+
+              <div class="form-group" style="margin-top: 0; padding-top: 0; border-top: 0;">
+                <h2 class="group-title">2-1. 멤버십 정보</h2>
+                <div class="field-grid two">
+                  <div class="field full" id="plan-name-field">
+                    <label class="group-label" for="plan-name">멤버십 이름 <span class="required-mark">*</span> <span class="field-help">최대 60자</span></label>
+                    <input class="text-input required-input" id="plan-name" type="text" maxlength="60" placeholder="예) 팬더들을 위한 브론즈 멤버십" />
+                    <div class="character-count"><span id="name-count">0</span>/60</div>
+                  </div>
+                  <div class="field" id="original-price-field">
+                    <label class="group-label" for="plan-original-price">정가 <span class="required-mark">*</span></label>
+                    <div class="input-wrap"><input class="number-input required-input with-suffix" id="plan-original-price" type="number" min="1000" max="5000000" inputmode="numeric" placeholder="10,000" /><span class="input-suffix">원</span></div>
+                    <div class="input-error">1,000원~5,000,000원 사이로 입력해야 합니다.</div>
+                  </div>
+                  <div class="field" id="price-field">
+                    <label class="group-label" for="plan-price">판매가 <span class="required-mark">*</span></label>
+                    <div class="input-wrap"><input class="number-input required-input with-suffix" id="plan-price" type="number" min="1000" max="5000000" inputmode="numeric" placeholder="6,100" /><span class="input-suffix">원</span></div>
+                    <div class="input-error" id="sale-price-error">정가 이하, 1,000원~5,000,000원 사이로 입력해야 합니다.</div>
+                  </div>
+                  <div class="field full" id="plan-summary-field">
+                    <label class="group-label" for="plan-summary">멤버십 한 줄 설명 <span class="required-mark">*</span> <span class="field-help">최대 400자</span></label>
+                    <textarea class="textarea required-input" id="plan-summary" maxlength="400" placeholder="예) 매월 새로운 콘텐츠와 멤버 전용 소식을 전해 드립니다."></textarea>
+                    <div class="character-count"><span id="summary-count">0</span>/400</div>
+                  </div>
+                  <div class="field full" id="image-field">
+                    <span class="group-label">대표 이미지 <span class="required-mark">*</span></span>
+                    <div class="image-field">
+                      <div class="image-preview" id="image-preview" aria-label="대표 이미지 미리보기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.4"/><path d="m4 18 5.2-5.1a1.5 1.5 0 0 1 2.1 0L14 15.5l1.5-1.5a1.5 1.5 0 0 1 2.1 0L21 17.4"/></svg></div>
+                      <div><label class="image-picker" for="plan-image">이미지 선택<input id="plan-image" type="file" accept="image/*" /></label><p class="image-meta" id="image-meta">100px × 100px 이상, 10MB 이하의 이미지를 등록할 수 있습니다.</p></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="field-grid two" id="discount-settings" style="margin-top: 24px;">
+                  <div class="field full" id="first-discount-field">
+                    <span class="group-label" id="first-discount-label">첫 결제 할인 <span class="cycle-badge">최초 1회만 적용</span></span>
+                    <p class="discount-description">멤버십 첫 결제에만 추가로 적용할 할인 방식을 설정합니다.</p>
+                    <div class="compact-options discount-options" role="radiogroup" aria-labelledby="first-discount-label">
+                      <label class="option-row"><input type="radio" name="first-discount" value="rate" aria-controls="first-discount-details" checked /><span class="radio"></span><span>정률 할인</span></label>
+                      <label class="option-row"><input type="radio" name="first-discount" value="fixed" aria-controls="first-discount-details" /><span class="radio"></span><span>정액 할인</span></label>
+                      <label class="option-row"><input type="radio" name="first-discount" value="none" /><span class="radio"></span><span>적용 안 함</span></label>
+                    </div>
+                    <div class="discount-details" id="first-discount-details" aria-hidden="true"><div class="discount-details-inner">
+                      <div id="first-discount-rate-input"><label class="group-label" for="first-discount-rate">할인율</label><div class="input-wrap"><input class="number-input with-suffix" id="first-discount-rate" type="number" min="1" max="100" step="1" inputmode="numeric" placeholder="10" disabled /><span class="input-suffix">%</span></div></div>
+                      <div id="first-discount-fixed-input" hidden><label class="group-label" for="first-discount-amount">할인 금액</label><div class="input-wrap"><input class="number-input with-suffix" id="first-discount-amount" type="number" min="1" max="5000000" inputmode="numeric" placeholder="1,000" disabled /><span class="input-suffix">원</span></div></div>
+                      <div class="input-error" id="first-discount-error">할인 금액은 판매가 이하로 입력해야 합니다.</div><p class="discount-note discount-warning" id="first-discount-warning" hidden>할인율 100%는 첫 결제 금액이 0원이 됩니다.</p>
+                      <p class="discount-note" id="first-discount-note">할인율은 판매가를 기준으로 계산됩니다.</p>
+                      <div class="discount-result" aria-live="polite"><span class="discount-result-label">첫 결제 금액</span><strong class="discount-result-value" id="first-discount-price">—</strong><span class="discount-result-copy muted" id="first-discount-copy">판매가를 입력하면 첫 결제 금액이 표시됩니다.</span></div>
+                      <div class="payment-amounts" id="payment-amounts" hidden><div class="payment-amount-row"><span>첫 결제 금액</span><strong id="first-payment-amount">—</strong></div><div class="payment-amount-row" id="later-payment-row"><span>이후 결제 금액</span><strong id="later-payment-amount">—</strong></div></div>
+                    </div></div>
+                  </div>
+                </div>
+                <div class="price-summary" aria-label="가격 요약"><div class="price-summary-row" id="price-summary-original-row"><span>정가</span><strong id="price-summary-original">—</strong></div><div class="price-summary-row" id="price-summary-sale-row"><span>판매가</span><strong id="price-summary-sale">—</strong></div><div class="price-summary-row muted" id="price-summary-rate-row"><span>정가 대비</span><strong id="price-summary-rate">0% 할인</strong></div><div class="price-summary-row muted" id="price-summary-amount-row"><span>할인 금액</span><strong id="price-summary-amount">0원</strong></div><div class="price-summary-row muted" id="price-summary-first-discount-row"><span>첫 결제 할인</span><strong id="price-summary-first-discount">적용 안 함</strong></div><div class="price-summary-row" id="price-summary-first-row"><span>첫 결제 금액</span><strong id="price-summary-first">—</strong></div></div>
+              </div>
+
+              <div class="form-group" id="subscription-settings">
+                <h2 class="group-title">2-2. 이용 및 갱신 설정</h2>
+                <div class="field-grid two">
+                  <div class="field full" id="duration-field">
+                    <label class="group-label" for="duration">기본 이용 기간 <span class="required-mark">*</span></label>
+                    <p class="discount-description">가입한 회원이 멤버십을 사용할 수 있는 기간입니다.</p>
+                    <div class="input-wrap"><input class="number-input required-input with-suffix" id="duration" type="number" min="1" max="120" inputmode="numeric" placeholder="1" /><span class="input-suffix">개월</span></div>
+                    <div class="input-error">1개월 이상의 이용 기간을 입력해야 합니다.</div>
+                    <div class="benefit-expiry-notice" id="benefit-expiry-notice" hidden><span id="benefit-expiry-copy"></span></div>
+                  </div>
+                  <div class="field full" id="renewal-mode-field">
+                    <span class="group-label" id="renewal-mode-label">갱신 방식 <span class="required-mark">*</span></span>
+                    <div class="compact-options discount-options" role="radiogroup" aria-labelledby="renewal-mode-label">
+                      <label class="option-row"><input type="radio" name="renewal-mode" value="auto" checked /><span class="radio"></span><span>자동 갱신</span></label>
+                      <label class="option-row"><input type="radio" name="renewal-mode" value="one-time" /><span class="radio"></span><span>1회 이용</span></label>
+                    </div>
+                    <p class="renewal-description" id="renewal-description">기본 이용 기간이 끝나면 자동으로 결제되며, 같은 기간만큼 이용 기간이 연장됩니다.<br />결제 금액과 제공 혜택은 최초 결제와 동일합니다.</p>
+                  </div>
+                  <div class="field full" id="long-pass-field" hidden>
+                    <span class="group-label" id="long-pass-label">묶음 이용권 판매</span>
+                    <p class="long-pass-description">1개월 이용권을 3·6·12개월 단위로 묶어 한 번에 판매합니다.</p>
+                    <div class="compact-options discount-options" role="radiogroup" aria-labelledby="long-pass-label">
+                      <label class="option-row"><input type="radio" name="multi-month" value="sell" /><span class="radio"></span><span>판매</span></label>
+                      <label class="option-row"><input type="radio" name="multi-month" value="none" checked /><span class="radio"></span><span>판매 안 함</span></label>
+                    </div>
+                    <div class="long-pass-details" id="long-pass-details" aria-hidden="true"><div class="long-pass-details-inner">
+                      <span class="group-label">판매할 묶음 이용권</span>
+                      <div class="ticket-options" aria-label="판매할 묶음 이용권 선택">
+                        <label class="checkbox-option"><input type="checkbox" name="long-pass-term" value="3" checked disabled /><span class="checkbox"></span><span>3개월권</span></label>
+                        <label class="checkbox-option"><input type="checkbox" name="long-pass-term" value="6" checked disabled /><span class="checkbox"></span><span>6개월권</span></label>
+                        <label class="checkbox-option"><input type="checkbox" name="long-pass-term" value="12" checked disabled /><span class="checkbox"></span><span>12개월권</span></label>
+                      </div>
+                      <p class="long-pass-note">묶음 이용권으로 가입한 회원은 구매한 기간이 끝나면 자동 갱신 없이 종료됩니다.</p>
+                    </div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group operation-extension" id="operation-extension" hidden>
+                <div class="cohort-settings" id="cohort-settings" hidden>
+                  <h2 class="group-title">2-2. 종료일 및 모집 설정</h2>
+                  <div class="field-grid two">
+                    <div class="field full" id="cohort-end-date-field">
+                      <label class="group-label" for="cohort-end-date">이용 종료일 <span class="required-mark">*</span></label>
+                      <div class="input-wrap"><input class="text-input required-input" id="cohort-end-date" type="date" /></div>
+                      <div class="input-error">이용 종료일을 선택해주세요.</div>
+                    </div>
+                    <div class="field full" id="recruitment-period-field">
+                      <span class="group-label" id="recruitment-period-label">모집 기간</span>
+                      <p class="discount-description">새로 가입을 받을 수 있는 기간입니다. 이용 기간과 다릅니다.</p>
+                      <div class="compact-options discount-options recruitment-options" role="radiogroup" aria-labelledby="recruitment-period-label">
+                        <label class="option-row"><input type="radio" name="recruitment-period" value="always" checked /><span class="radio"></span><span>상시 모집</span></label>
+                        <label class="option-row"><input type="radio" name="recruitment-period" value="limited" aria-controls="recruitment-period-details" /><span class="radio"></span><span>특정 기간 모집</span></label>
+                      </div>
+                      <div class="discount-details" id="recruitment-period-details" aria-hidden="true"><div class="discount-details-inner"><div class="field-grid two"><div class="field" id="recruitment-start-date-field"><label class="group-label" for="recruitment-start-date">모집 시작일 <span class="required-mark">*</span></label><input class="text-input" id="recruitment-start-date" type="date" disabled /><div class="input-error" id="recruitment-start-date-error"></div></div><div class="field" id="recruitment-end-date-field"><label class="group-label" for="recruitment-end-date">모집 종료일 <span class="required-mark">*</span></label><input class="text-input" id="recruitment-end-date" type="date" disabled /><div class="input-error" id="recruitment-end-date-error"></div></div></div></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group" id="join-settings">
+                <h2 class="group-title">2-3. 가입 설정</h2>
+                <div class="field-grid two">
+                  <div class="field" id="capacity-field"><span class="group-label" id="capacity-label">가입 인원</span><div class="compact-options" role="radiogroup" aria-labelledby="capacity-label"><label class="option-row"><input type="radio" name="capacity" value="limited" aria-controls="capacity-details" /><span class="radio"></span><span>제한 있음</span></label><label class="option-row"><input type="radio" name="capacity" value="unlimited" checked /><span class="radio"></span><span>제한 없음</span></label></div><div class="discount-details" id="capacity-details" aria-hidden="true"><div class="discount-details-inner"><label class="group-label" for="capacity-limit">최대 가입 인원</label><div class="input-wrap"><input class="number-input with-suffix" id="capacity-limit" type="number" min="1" max="9999" inputmode="numeric" placeholder="1" disabled /><span class="input-suffix">명</span></div><div class="input-error" id="capacity-error">가입 인원은 1명 ~ 9,999명 사이로 입력해야 합니다.</div><p class="capacity-range">1명 ~ 9,999명</p></div></div></div>
+                  <div class="field"><span class="group-label">가입 승인 방식</span><div class="compact-options"><label class="option-row"><input type="radio" name="approval" checked /><span class="radio"></span><span>자동 승인</span></label><label class="option-row"><input type="radio" name="approval" /><span class="radio"></span><span>직접 승인</span></label></div></div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <h2 class="group-title">2-4. 공개 상태</h2>
+                <div class="option-stack"><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>공개</span></span></label><label class="option-row"><input type="radio" name="visibility" /><span class="radio"></span><span class="option-content"><span>일부 공개</span><span class="option-sub">링크를 통해 페이지에 접근한 사용자에게만 공개됩니다.</span></span></label><label class="option-row"><input type="radio" name="visibility" checked /><span class="radio"></span><span class="option-content"><span>나에게만 공개</span><span class="option-sub">나에게만 공개됩니다.</span></span></label></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section" id="benefit-section" data-section="benefit">
+          <button class="accordion-header" type="button" aria-expanded="true" aria-controls="benefit-panel">
+            <span class="section-title"><span class="section-num">3</span><span class="section-heading">혜택 설정</span></span>
+            <span class="header-right"><span class="section-status optional" id="benefit-header-status">선택 항목 · 아직 설정하지 않음</span><span class="chevron" aria-hidden="true"></span></span>
+          </button>
+          <div class="accordion-panel" id="benefit-panel">
+            <div class="section-body">
+              <p class="section-description">멤버십 가입자에게 제공하는 기본 혜택과 추가 혜택을 설정합니다.</p>
+              <div class="form-group" style="margin-top: 0; padding-top: 0; border-top: 0;">
+                <h2 class="group-title">3-1. 기본 혜택</h2>
+                <div class="reward-stack">
+                  <div class="reward-setting"><div class="reward-left"><span class="reward-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11.5a7.2 7.2 0 0 1-7.5 7A8.2 8.2 0 0 1 9 17.7L4 19l1.4-4.1A6.5 6.5 0 0 1 4 11.3a7.2 7.2 0 0 1 7.5-7A7.2 7.2 0 0 1 20 11.5Z"/><path d="M8.4 11.4h.1m3.3 0h.1m3.3 0h.1"/></svg></span><span><span class="reward-name">다이렉트 메시지 이용 권한</span><span class="reward-state" id="dm-state">아직 설정하지 않음</span><span class="reward-policy-note">기존 메시지 수신 설정과의 적용 관계는 별도 정책 확인이 필요합니다.</span></span></div><button class="text-button reward-config" data-setting="dm" type="button">설정</button></div>
+                  <div class="reward-setting"><div class="reward-left"><span class="reward-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3.8 14.2 6l3.1-.4.4 3.1 2.2 2.2-2.2 2.2.4 3.1-3.1.4-2.2 2.2-2.2-2.2-3.1.4.4-3.1L7.6 12l2.2-2.2-.4-3.1 3.1-.4L12 3.8Z"/><path d="m9.5 12 1.6 1.6 3.5-3.5"/></svg></span><span><span class="reward-name">멤버십 배지</span><span class="reward-state" id="badge-state">아직 설정하지 않음</span></span></div><button class="text-button reward-config" data-setting="badge" type="button">설정</button></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="custom-head"><div><h2 class="group-title" style="margin:0;">3-2. 추가 혜택</h2><p class="reward-connection-copy">기존 리워드를 이 멤버십에 연결해 제공합니다.</p></div><button class="text-button" id="open-reward-drawer" type="button">＋ 혜택 추가</button></div>
+                <div id="reward-content"><div class="empty-reward" id="reward-empty"><span class="empty-illustration"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18"/></svg></span><strong>연결한 추가 혜택이 없습니다.</strong><p>기존 리워드를 선택하거나 새 리워드를 생성할 수 있습니다.</p><button class="primary-button" id="open-reward-drawer-empty" type="button">＋ 혜택 추가</button></div><div class="reward-list" id="reward-list"></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section" id="detail-section" data-section="detail">
+          <button class="accordion-header" type="button" aria-expanded="true" aria-controls="detail-panel">
+            <span class="section-title"><span class="section-num">4</span><span class="section-heading">상세 소개</span></span>
+            <span class="header-right"><span class="section-status optional" id="detail-header-status">선택 항목 · 아직 작성하지 않음</span><span class="chevron" aria-hidden="true"></span></span>
+          </button>
+          <div class="accordion-panel" id="detail-panel">
+            <div class="section-body">
+              <p class="section-description">멤버십 상세 페이지에 노출할 소개를 작성할 수 있습니다.</p>
+              <div class="optional-banner"><span>ⓘ</span><span><b>선택 항목</b> · 상세 소개의 필수 여부는 정책 확정 전으로, 현재는 생성 가능 여부에 영향을 주지 않습니다.</span></div>
+              <div class="editor">
+                <div class="editor-toolbar" aria-label="상세 소개 편집 도구"><button class="editor-tool" data-command="bold" type="button" title="굵게">B</button><button class="editor-tool" data-command="italic" type="button" title="기울임꼴"><i>I</i></button><span class="editor-divider"></span><button class="editor-tool" data-command="formatBlock" data-value="h2" type="button" title="제목">T</button><button class="editor-tool" data-command="insertUnorderedList" type="button" title="글머리표">☷</button><button class="editor-tool" data-command="insertOrderedList" type="button" title="번호 목록">☰</button><span class="editor-divider"></span><button class="editor-tool" data-command="image-placeholder" type="button" title="이미지 자리 표시자">▧</button></div>
+                <div class="editor-body" id="detail-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="멤버십을 소개하는 제목, 콘텐츠, 이미지 등을 자유롭게 작성할 수 있습니다."></div>
+              </div>
+            </div>
+          </div>
+        </section>
+        </div>
+      </div>
+
+      <aside class="summary-wrap" aria-label="멤버십 생성 준비 상태">
+        <div class="summary">
+          <div class="summary-top"><div class="resolved-type" id="summary-resolved-type" hidden><span>생성되는 멤버십</span><strong id="summary-resolved-type-name"></strong><small>설정 기준은 운영 방식 선택 영역에서 확인할 수 있습니다.</small></div><h2 class="summary-title">생성 준비 상태</h2><p class="summary-caption">필수 입력 항목을 모두 입력해야 생성할 수 있습니다.</p><div class="progress-row"><div class="progress-ring" id="progress-ring"><strong id="progress-percent">0%</strong></div><div class="progress-copy"><b id="progress-title">필수 항목 0 / 7 완료</b><span id="progress-subtitle">멤버십 설정의 필수 항목을 입력해야 합니다.</span></div></div><div class="summary-pricing" id="summary-pricing" hidden><div><span>이용 기간</span><strong id="summary-duration">—</strong></div><div><span>갱신</span><strong id="summary-renewal">—</strong></div><div><span>정가</span><strong id="summary-original-price">—</strong></div><div><span>판매가</span><strong id="summary-sale-price">—</strong></div><div><span>정가 대비</span><strong id="summary-sale-discount">—</strong></div><div><span>첫 결제</span><strong id="summary-first-price">—</strong></div><div><span>추가 혜택</span><strong id="summary-reward-count">0개</strong></div></div></div>
+          <div class="summary-statuses">
+            <button class="summary-section-link" data-summary-section="basic" type="button"><span class="summary-indicator" id="basic-indicator">✓</span><span class="summary-label">멤버십 설정</span><span class="summary-state" id="basic-summary-state">6개 미완료</span></button>
+            <button class="summary-section-link" data-summary-section="benefit" type="button"><span class="summary-indicator optional" id="benefit-indicator">✓</span><span class="summary-label">혜택 설정</span><span class="summary-state optional" id="benefit-summary-state">선택</span></button>
+            <button class="summary-section-link" data-summary-section="detail" type="button"><span class="summary-indicator optional" id="detail-indicator">✓</span><span class="summary-label">상세 소개</span><span class="summary-state optional" id="detail-summary-state">선택</span></button>
+          </div>
+          <div class="missing"><h3 id="missing-title">미완료 필수 항목</h3><div class="missing-list" id="missing-list"></div></div>
+          <div class="summary-actions"><button class="secondary-button wide" id="preview-button" type="button">미리보기</button><button class="primary-button wide" id="register-button" type="button" disabled>멤버십 생성하기</button><p class="register-help" id="register-help">필수 항목 6개를 모두 입력해야 합니다.</p></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div class="modal-backdrop" id="setting-modal" role="dialog" aria-modal="true" aria-labelledby="setting-modal-title"><div class="modal"><div class="modal-header"><h2 id="setting-modal-title">기본 혜택 설정</h2><button class="modal-close" data-close-modal="setting-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p id="setting-modal-copy"></p><div class="setting-choices" id="setting-choices"></div></div></div></div>
+  <div class="modal-backdrop" id="reward-drawer" role="dialog" aria-modal="true" aria-labelledby="reward-drawer-title"><div class="modal modal-wide"><div class="modal-header"><h2 id="reward-drawer-title">추가 혜택</h2><button class="modal-close" data-close-modal="reward-drawer" type="button" aria-label="닫기">×</button></div><div class="modal-content"><div class="reward-drawer-head"><span>리워드 목록</span><button class="text-button" id="open-new-reward" type="button">＋ 새 리워드</button></div><div class="reward-tabs" role="tablist" aria-label="리워드 사용 가능 상태"><button class="reward-tab active" id="available-reward-tab" data-reward-tab="available" type="button" role="tab" aria-selected="true">사용 가능</button><button class="reward-tab" id="unavailable-reward-tab" data-reward-tab="unavailable" type="button" role="tab" aria-selected="false">사용 불가</button></div><div class="catalog-list" id="reward-catalog-list"></div><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="reward-drawer" type="button">취소</button><button class="primary-button" id="add-selected-rewards" type="button">선택한 혜택 추가</button></div></div></div></div>
+  <div class="modal-backdrop" id="new-reward-modal" role="dialog" aria-modal="true" aria-labelledby="new-reward-modal-title"><div class="modal"><div class="modal-header"><h2 id="new-reward-modal-title">새 리워드 생성</h2><button class="modal-close" data-close-modal="new-reward-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><span class="group-label" id="new-reward-type-label">리워드 타입</span><div class="compact-options" role="radiogroup" aria-labelledby="new-reward-type-label"><label class="option-row"><input type="radio" name="new-reward-type" value="basic" checked /><span class="radio"></span><span>기본형</span></label><label class="option-row"><input type="radio" name="new-reward-type" value="managed" /><span class="radio"></span><span>지급 관리형</span></label></div><p class="reward-type-help" id="new-reward-type-help">상시 제공하거나 비정기적으로 제공하는 리워드입니다.</p><label class="group-label" for="new-reward-title">리워드 타이틀 <span class="required-mark">*</span></label><input class="text-input" id="new-reward-title" type="text" maxlength="40" placeholder="예) 1:1 드로잉 피드백" /><label class="group-label" for="new-reward-description" style="margin-top:14px;">리워드 설명</label><input class="text-input" id="new-reward-description" type="text" maxlength="100" placeholder="예) 월 1회 이용" /><label class="option-row survey-option"><input id="new-reward-survey" type="checkbox" /><span class="checkbox"></span><span>리워드 요청 설문 사용</span></label><div class="form-actions"><button class="secondary-button" id="back-to-reward-drawer" type="button">이전</button><button class="primary-button" id="create-reward" type="button">생성</button></div></div></div></div>
+  <div class="modal-backdrop" id="edit-reward-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="edit-reward-confirm-title"><div class="modal"><div class="modal-header"><h2 id="edit-reward-confirm-title">혜택을 수정하시겠어요?</h2><button class="modal-close" data-close-modal="edit-reward-confirm-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>이 혜택은 다른 멤버십에서도 사용 중입니다.<br />수정하면 이 혜택을 사용하는 다른 멤버십에도 변경 내용이 동일하게 적용됩니다.</p><p class="shared-reward-count" id="shared-reward-count">사용 중인 멤버십 3개</p><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="edit-reward-confirm-modal" type="button">취소</button><button class="primary-button" id="confirm-edit-reward" type="button">수정하기</button></div></div></div></div>
+  <div class="modal-backdrop" id="edit-reward-modal" role="dialog" aria-modal="true" aria-labelledby="edit-reward-modal-title"><div class="modal"><div class="modal-header"><h2 id="edit-reward-modal-title">혜택 수정</h2><button class="modal-close" data-close-modal="edit-reward-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p class="reward-edit-type" id="edit-reward-type">기본형 리워드</p><label class="group-label" for="edit-reward-title">리워드 타이틀 <span class="required-mark">*</span></label><input class="text-input" id="edit-reward-title" type="text" maxlength="40" /><label class="group-label" for="edit-reward-description" style="margin-top:14px;">리워드 설명</label><input class="text-input" id="edit-reward-description" type="text" maxlength="100" /><label class="option-row survey-option"><input id="edit-reward-survey" type="checkbox" /><span class="checkbox"></span><span>리워드 요청 설문 사용</span></label><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="edit-reward-modal" type="button">취소</button><button class="primary-button" id="save-reward-edit" type="button">수정 완료</button></div></div></div></div>
+  <div class="modal-backdrop" id="remove-reward-modal" role="dialog" aria-modal="true" aria-labelledby="remove-reward-modal-title"><div class="modal"><div class="modal-header"><h2 id="remove-reward-modal-title">이 혜택을 멤버십에서 제거하시겠어요?</h2><button class="modal-close" data-close-modal="remove-reward-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>혜택 자체는 삭제되지 않으며 다른 멤버십에서는 계속 사용할 수 있습니다.</p><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="remove-reward-modal" type="button">취소</button><button class="primary-button" id="confirm-remove-reward" type="button">제거</button></div></div></div></div>
+  <div class="modal-backdrop" id="preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title"><div class="modal"><div class="modal-header"><h2 id="preview-modal-title">멤버십 미리보기</h2><button class="modal-close" data-close-modal="preview-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>입력한 내용을 기준으로 사용자에게 보이는 멤버십 정보를 확인할 수 있습니다.</p><div class="preview-card"><div class="preview-hero" id="preview-hero">대표 이미지</div><div class="preview-copy"><div class="preview-resolved-type" id="preview-resolved-type" hidden><strong id="preview-resolved-type-name"></strong><span>이 조합으로 생성됩니다.</span></div><div class="preview-first-benefit" id="preview-first-benefit" hidden>첫 결제 혜택 적용</div><span class="preview-operation" id="preview-operation">운영 방식</span><h3 id="preview-name">새 멤버십</h3><p id="preview-summary">멤버십 한 줄 설명이 여기에 표시됩니다.</p><div class="preview-price-row"><div><div class="preview-price-caption">판매가</div><div class="preview-price-line"><span class="preview-discount-rate" id="preview-discount-rate" hidden>0% 할인</span><div class="preview-price" id="preview-price">판매가 미정</div></div></div><div class="preview-period" id="preview-period">이용 기간 미정</div></div><div class="preview-discount-summary" id="preview-discount-summary" hidden><span id="preview-discount-label">첫 결제 시 총 할인</span><strong id="preview-discount-total">0원 할인</strong></div><div class="preview-divider"></div><div class="preview-block"><span class="preview-block-title">이용 안내</span><div class="preview-detail" id="preview-usage">운영 방식을 선택하면 이용 안내가 표시됩니다.</div></div><div class="preview-block"><span class="preview-block-title">혜택</span><div class="preview-benefits" id="preview-benefits"><span class="preview-placeholder">설정한 혜택이 표시됩니다.</span></div></div><div class="preview-block"><span class="preview-block-title">상세 소개</span><div class="preview-detail" id="preview-detail">작성한 상세 소개 일부가 표시됩니다.</div></div></div></div></div></div></div>
+  <div class="modal-backdrop" id="operation-change-modal" role="dialog" aria-modal="true" aria-labelledby="operation-change-modal-title"><div class="modal"><div class="modal-header"><h2 id="operation-change-modal-title">운영 방식 변경</h2></div><div class="modal-content"><p>멤버십 운영 방식을 변경하면 입력한 내용이 모두 삭제됩니다.<br />운영 방식을 정말 변경하시겠어요?</p><div class="form-actions"><button class="secondary-button" id="cancel-operation-change" type="button">취소</button><button class="primary-button" id="confirm-operation-change" type="button">변경</button></div></div></div></div>
+  <div class="toast" id="toast">멤버십이 생성되었습니다.</div>
+
+  <script>
+    (() => {
+      const state = { planType: '', imageName: '', imageUrl: '', dm: null, badge: null, rewardIds: [] };
+      const rewardCatalog = [
+        { id: 1, type: 'basic', title: '포트폴리오 피드백 1회권', description: '멤버십 가입 시 1회 이용할 수 있는 혜택입니다.', available: true, survey: false, sharedCount: 3 },
+        { id: 2, type: 'basic', title: '이벤트 티켓 참여권', description: '멤버십 전용 이벤트에 참여할 수 있습니다.', available: true, survey: false, sharedCount: 1 },
+        { id: 3, type: 'managed', title: '월간 1:1 피드백', description: '월 1회 제공되는 지급 관리형 리워드입니다.', available: false, unavailableReason: '지급 관리형 리워드는 혜택 이용 기준 멤버십에만 추가할 수 있습니다.', survey: true, sharedCount: 2 }
+      ];
+      const baseRequired = [
+        { key: 'planType', label: '멤버십 운영 방식', target: 'plan-type-field' },
+        { key: 'name', label: '멤버십 이름', target: 'plan-name-field' },
+        { key: 'summary', label: '멤버십 한 줄 설명', target: 'plan-summary-field' },
+        { key: 'image', label: '대표 이미지', target: 'image-field' },
+        { key: 'originalPrice', label: '정가', target: 'original-price-field' },
+        { key: 'price', label: '판매가', target: 'price-field' },
+        { key: 'duration', label: '기본 이용 기간', target: 'duration-field' }
+      ];
+      const $ = (selector) => document.querySelector(selector);
+      const $$ = (selector) => [...document.querySelectorAll(selector)];
+      const inputs = { name: $('#plan-name'), summary: $('#plan-summary'), originalPrice: $('#plan-original-price'), price: $('#plan-price'), duration: $('#duration'), endDate: $('#cohort-end-date'), recruitmentStart: $('#recruitment-start-date'), recruitmentEnd: $('#recruitment-end-date'), image: $('#plan-image'), firstDiscount: $('#first-discount-amount'), firstDiscountRate: $('#first-discount-rate'), capacity: $('#capacity-limit') };
+      const defaultImagePreview = $('#image-preview').innerHTML;
+      const defaultImageMeta = $('#image-meta').textContent;
+      const BENEFIT_EXPIRY_NOTICE = '설정한 이용 기간이 끝나면 제공한 혜택이 남아 있어도 멤버십 이용이 종료됩니다.';
+      const BENEFIT_RENEWAL_NOTICE = '자동 갱신 시 남은 혜택은 이월되지 않으며, 새 기간의 혜택이 다시 제공됩니다.';
+      let pendingPlanType = '';
+      let imageLoadSequence = 0;
+      let rewardTab = 'available';
+      let pendingRewardId = null;
+      let selectedRewardIds = new Set();
+
+      function getRequiredLabel(item) {
+        return item.key === 'duration' && state.planType === 'cohort' ? '이용 종료일' : item.label;
+      }
+
+      function getRequiredTarget(item) {
+        return item.key === 'duration' && state.planType === 'cohort' ? 'cohort-end-date-field' : item.target;
+      }
+
+      function getRecruitmentValidity() {
+        const limited = state.planType === 'cohort' && $('input[name="recruitment-period"]:checked').value === 'limited';
+        const start = inputs.recruitmentStart.value;
+        const end = inputs.recruitmentEnd.value;
+        const membershipEnd = inputs.endDate.value;
+        const startAfterEnd = Boolean(start && end && start > end);
+        const endAfterMembership = Boolean(end && membershipEnd && end > membershipEnd);
+        const startValid = !limited || (Boolean(start) && !startAfterEnd);
+        const endValid = !limited || (Boolean(end) && !startAfterEnd && !endAfterMembership);
+        return { limited, start, end, membershipEnd, startAfterEnd, endAfterMembership, startValid, endValid, valid: startValid && endValid };
+      }
+
+      function getRequiredItems() {
+        const items = [...baseRequired];
+        const recruitment = getRecruitmentValidity();
+        if (recruitment.limited) items.push({ key: 'recruitmentPeriod', label: '모집 기간', target: recruitment.startValid ? 'recruitment-end-date-field' : 'recruitment-start-date-field' });
+        return items;
+      }
+
+      function validValues() {
+        const originalPrice = Number(inputs.originalPrice.value);
+        const price = Number(inputs.price.value);
+        const duration = Number(inputs.duration.value);
+        const recruitment = getRecruitmentValidity();
+        const usesDurationSettings = state.planType === 'subscription' || state.planType === 'deduction';
+        return {
+          planType: Boolean(state.planType),
+          name: inputs.name.value.trim().length > 0,
+          summary: inputs.summary.value.trim().length > 0,
+          image: Boolean(state.imageName),
+          originalPrice: Number.isFinite(originalPrice) && originalPrice >= 1000 && originalPrice <= 5000000,
+          price: Number.isFinite(originalPrice) && originalPrice >= 1000 && originalPrice <= 5000000 && Number.isFinite(price) && price >= 1000 && price <= 5000000 && price <= originalPrice,
+          duration: usesDurationSettings
+            ? Number.isFinite(duration) && duration >= 1
+            : state.planType === 'cohort'
+              ? Boolean(inputs.endDate.value)
+              : Boolean(state.planType),
+          recruitmentPeriod: recruitment.valid
+        };
+      }
+
+      function formatWon(value) { return `${Math.max(0, value).toLocaleString('ko-KR')}원`; }
+
+      function readAmount(input) {
+        const raw = input.value.trim();
+        const value = Number(raw);
+        return { hasValue: raw !== '', value, isPositiveNumber: Number.isFinite(value) && value >= 1 };
+      }
+
+      function readRate(input) {
+        const raw = input.value.trim();
+        const value = Number(raw);
+        return { hasValue: raw !== '', value, isValidRate: Number.isInteger(value) && value >= 1 && value <= 100 };
+      }
+
+      function getDiscountType(name) { return $(`input[name="${name}"]:checked`).value; }
+
+      function getDiscountCalculation() {
+        const originalPrice = Number(inputs.originalPrice.value);
+        const salePrice = Number(inputs.price.value);
+        const validOriginalPrice = Number.isFinite(originalPrice) && originalPrice >= 1000 && originalPrice <= 5000000;
+        const validPrice = validOriginalPrice && Number.isFinite(salePrice) && salePrice >= 1000 && salePrice <= 5000000 && salePrice <= originalPrice;
+        const firstType = getDiscountType('first-discount');
+        const firstApplied = firstType !== 'none';
+        const firstFixed = readAmount(inputs.firstDiscount);
+        const firstRate = readRate(inputs.firstDiscountRate);
+        const firstInput = firstType === 'rate' ? firstRate : firstFixed;
+        const saleDiscount = validPrice ? originalPrice - salePrice : 0;
+        const saleRate = validPrice && saleDiscount > 0 ? Math.round((saleDiscount / originalPrice) * 100) : 0;
+        const firstDiscountAmount = firstType === 'rate' ? Math.floor(salePrice * firstRate.value / 100) : firstFixed.value;
+        const validFirst = !firstApplied || (validPrice && (firstType === 'rate' ? firstRate.isValidRate : firstFixed.isPositiveNumber) && firstDiscountAmount <= salePrice);
+        const firstDiscount = firstApplied && validFirst ? firstDiscountAmount : 0;
+        const firstPrice = firstApplied && validFirst ? salePrice - firstDiscount : salePrice;
+        return { originalPrice, salePrice, validOriginalPrice, validPrice, firstType, firstApplied, firstFixed, firstRate, firstInput, saleDiscount, saleRate, firstDiscountAmount, validFirst, firstDiscount, firstPrice };
+      }
+
+      function setFirstDiscountDetails(type, canInput) {
+        const details = $('#first-discount-details');
+        const isApplied = type !== 'none';
+        const isRate = type === 'rate';
+        details.classList.toggle('open', isApplied);
+        details.setAttribute('aria-hidden', String(!isApplied));
+        $('#first-discount-rate-input').hidden = !isRate;
+        $('#first-discount-fixed-input').hidden = type !== 'fixed';
+        inputs.firstDiscount.disabled = !(canInput && type === 'fixed');
+        inputs.firstDiscountRate.disabled = !(canInput && isRate);
+        $('#first-discount-note').textContent = isRate
+          ? '할인율은 판매가를 기준으로 계산됩니다.'
+          : '원 단위 정액 할인으로 적용됩니다.';
+      }
+
+      function setFirstDiscountResult(value, copy, muted = false) {
+        $('#first-discount-price').textContent = value;
+        const copyElement = $('#first-discount-copy');
+        copyElement.textContent = copy;
+        copyElement.classList.toggle('muted', muted);
+      }
+
+      function updatePriceSummary(discount) {
+        $('#price-summary-original').textContent = discount.validOriginalPrice ? formatWon(discount.originalPrice) : '—';
+        $('#price-summary-sale').textContent = discount.validPrice ? formatWon(discount.salePrice) : '—';
+        $('#price-summary-rate').textContent = `${discount.saleRate}% 할인`;
+        $('#price-summary-amount').textContent = formatWon(discount.saleDiscount);
+        $('#price-summary-first-discount').textContent = discount.firstApplied && discount.validFirst
+          ? discount.firstType === 'rate' ? `${discount.firstRate.value}% · ${formatWon(discount.firstDiscount)}` : formatWon(discount.firstDiscount)
+          : '적용 안 함';
+        $('#price-summary-first').textContent = discount.validPrice ? formatWon(discount.firstPrice) : '—';
+        ['price-summary-rate-row', 'price-summary-amount-row'].forEach((id) => $(`#${id}`).classList.toggle('muted', discount.saleDiscount === 0));
+        $('#price-summary-first-discount-row').classList.toggle('muted', discount.firstDiscount === 0);
+      }
+
+      function updatePaymentAmounts(discount) {
+        const showPaymentAmounts = state.planType === 'subscription' && discount.firstApplied && discount.validFirst;
+        const showLaterPayment = showPaymentAmounts && $('input[name="renewal-mode"]:checked').value === 'auto';
+        $('#payment-amounts').hidden = !showPaymentAmounts;
+        $('#later-payment-row').hidden = !showLaterPayment;
+        $('#first-payment-amount').textContent = showPaymentAmounts ? formatWon(discount.firstPrice) : '—';
+        $('#later-payment-amount').textContent = showLaterPayment ? formatWon(discount.salePrice) : '—';
+      }
+
+      function updateDiscounts() {
+        const discount = getDiscountCalculation();
+        setFirstDiscountDetails(discount.firstType, discount.validPrice);
+        const firstInvalid = discount.firstApplied && discount.firstInput.hasValue && !discount.validFirst;
+        $('#first-discount-field').classList.toggle('invalid', firstInvalid);
+        $('#first-discount-error').textContent = !discount.validPrice
+            ? '판매가를 먼저 올바르게 입력해야 합니다.'
+            : discount.firstType === 'rate'
+              ? '할인율은 1% 이상 100% 이하의 정수로 입력해야 합니다.'
+              : '할인 금액은 판매가 이하의 1원 이상으로 입력해야 합니다.';
+        $('#first-discount-warning').hidden = !(discount.firstType === 'rate' && discount.firstRate.value === 100);
+
+        if (!discount.validPrice) {
+          setFirstDiscountResult('—', '정가와 판매가를 먼저 올바르게 입력해야 합니다.', true);
+        } else if (discount.firstType === 'none') {
+          setFirstDiscountResult(formatWon(discount.salePrice), '첫 결제 할인이 적용되지 않습니다.', true);
+        } else if (!discount.firstInput.hasValue) {
+          setFirstDiscountResult('—', discount.firstType === 'rate' ? '할인율을 입력하면 첫 결제 금액이 표시됩니다.' : '할인 금액을 입력하면 첫 결제 금액이 표시됩니다.', true);
+        } else if (!discount.validFirst) {
+          setFirstDiscountResult('—', discount.firstType === 'rate' ? '할인율을 확인해야 합니다.' : '할인 금액을 확인해야 합니다.', true);
+        } else {
+          const copy = discount.firstType === 'rate' ? `${discount.firstRate.value}% 첫 결제 할인 · ${formatWon(discount.firstDiscount)} 할인 적용` : `${formatWon(discount.firstDiscount)} 첫 결제 할인`;
+          setFirstDiscountResult(formatWon(discount.firstPrice), copy);
+        }
+        updatePriceSummary(discount);
+        updatePaymentAmounts(discount);
+        return discount;
+      }
+
+      function updateRenewalMode(discount) {
+        const autoRenewal = $('input[name="renewal-mode"]:checked').value === 'auto';
+        if (!autoRenewal) {
+          $('#renewal-description').textContent = '기본 이용 기간이 끝나면 자동 갱신 없이 이용이 종료됩니다.';
+          return;
+        }
+        $('#renewal-description').innerHTML = discount.firstApplied && discount.validFirst
+          ? `기본 이용 기간이 끝나면 자동으로 결제되고, 같은 기간만큼 이용 기간이 연장됩니다.<br />첫 결제 할인은 최초 1회만 적용되므로, 이후 결제 금액은 ${formatWon(discount.salePrice)}입니다. 갱신 시 새 이용 기간에 해당하는 멤버십 혜택이 다시 제공됩니다.`
+          : '기본 이용 기간이 끝나면 자동으로 결제되고, 같은 기간만큼 이용 기간이 연장됩니다.<br />갱신 시 새 이용 기간에 해당하는 멤버십 혜택이 다시 제공됩니다.';
+      }
+
+      function updateBenefitExpiryNotice() {
+        const isBenefitMembership = state.planType === 'deduction';
+        const autoRenewal = $('input[name="renewal-mode"]:checked').value === 'auto';
+        $('#benefit-expiry-notice').hidden = !isBenefitMembership;
+        $('#benefit-expiry-copy').textContent = isBenefitMembership
+          ? `${BENEFIT_EXPIRY_NOTICE}${autoRenewal ? ` ${BENEFIT_RENEWAL_NOTICE}` : ''}`
+          : '';
+      }
+
+      function getResolvedTypeName() {
+        const renewalMode = $('input[name="renewal-mode"]:checked').value;
+        const duration = Number(inputs.duration.value);
+        if (state.planType === 'subscription') {
+          if (!Number.isFinite(duration) || duration < 1) return '';
+          if (renewalMode === 'one-time') return `기간 이용 멤버십 · ${duration}개월`;
+          const sellingLongPass = duration === 1 && $('input[name="multi-month"]:checked').value === 'sell';
+          return sellingLongPass ? '정기 구독 멤버십 · 묶음 이용권 판매' : '정기 구독 멤버십';
+        }
+        if (state.planType === 'cohort') return inputs.endDate.value ? `기간 한정 멤버십 · ${inputs.endDate.value} 종료` : '';
+        if (state.planType === 'deduction' && Number.isFinite(duration) && duration >= 1) return renewalMode === 'auto' ? '혜택 소진 멤버십 · 정기 갱신' : '혜택 소진 멤버십 · 단건';
+        return '';
+      }
+
+      function updateResolvedTypeBadges() {
+        const name = getResolvedTypeName();
+        $('#summary-resolved-type').hidden = !name;
+        $('#preview-resolved-type').hidden = !name;
+        $('#summary-resolved-type-name').textContent = name;
+        $('#preview-resolved-type-name').textContent = name;
+      }
+
+      function updateLongPassSettings() {
+        const isEligibleForLongPass = state.planType === 'subscription'
+          && Number(inputs.duration.value) === 1
+          && $('input[name="renewal-mode"]:checked').value === 'auto';
+        const termOptions = $$('input[name="long-pass-term"]');
+        const sellingLongPass = isEligibleForLongPass && $('input[name="multi-month"]:checked').value === 'sell';
+        const longPassField = $('#long-pass-field');
+        const details = $('#long-pass-details');
+
+        termOptions.forEach((option) => { option.disabled = !sellingLongPass; });
+        longPassField.hidden = !isEligibleForLongPass;
+        details.classList.toggle('open', sellingLongPass);
+        details.setAttribute('aria-hidden', String(!sellingLongPass));
+      }
+
+      function updateCapacitySettings() {
+        const limited = $('input[name="capacity"]:checked').value === 'limited';
+        const details = $('#capacity-details');
+        const raw = inputs.capacity.value.trim();
+        const value = Number(raw);
+        const validCapacity = Number.isInteger(value) && value >= 1 && value <= 9999;
+
+        details.classList.toggle('open', limited);
+        details.setAttribute('aria-hidden', String(!limited));
+        inputs.capacity.disabled = !limited;
+        $('#capacity-field').classList.toggle('invalid', limited && raw !== '' && !validCapacity);
+      }
+
+      function updateRecruitmentPeriodSettings() {
+        const validation = getRecruitmentValidity();
+        const { limited } = validation;
+        const details = $('#recruitment-period-details');
+        details.classList.toggle('open', limited);
+        details.setAttribute('aria-hidden', String(!limited));
+        inputs.recruitmentStart.disabled = !limited;
+        inputs.recruitmentEnd.disabled = !limited;
+
+        $('#recruitment-start-date-field').classList.toggle('invalid', !validation.startValid);
+        $('#recruitment-end-date-field').classList.toggle('invalid', !validation.endValid);
+        $('#recruitment-start-date-error').textContent = !validation.start
+          ? '모집 시작일을 선택해주세요.'
+          : validation.startAfterEnd ? '모집 시작일은 모집 종료일보다 늦을 수 없습니다.'
+          : '';
+        $('#recruitment-end-date-error').textContent = !validation.end
+          ? '모집 종료일을 선택해주세요.'
+          : validation.startAfterEnd ? '모집 종료일은 모집 시작일보다 빨라질 수 없습니다.'
+          : validation.endAfterMembership ? '모집 종료일은 이용 종료일보다 늦을 수 없습니다.'
+          : '';
+      }
+
+      function setStatus(el, text, type = '') {
+        el.textContent = text;
+        el.className = `section-status ${type}`.trim();
+      }
+
+      function setSummaryStatus(prefix, complete, text, optional = false) {
+        const indicator = $(`#${prefix}-indicator`);
+        const label = $(`#${prefix}-summary-state`);
+        indicator.className = `summary-indicator${complete ? ' done' : optional ? ' optional' : ''}`;
+        label.className = `summary-state${complete ? ' done' : optional ? ' optional' : ''}`;
+        label.textContent = text;
+      }
+
+      function updateOperationSettings() {
+        const selected = Boolean(state.planType);
+        const isSubscription = state.planType === 'subscription';
+        const isCohort = state.planType === 'cohort';
+        const isBenefit = state.planType === 'deduction';
+        const usesDurationSettings = isSubscription || isBenefit;
+        const operationNames = { subscription: '가입일 기준', cohort: '종료일 기준', deduction: '혜택 이용 기준' };
+        const configuration = $('#configuration');
+
+        configuration.classList.toggle('visible', selected);
+        configuration.setAttribute('aria-hidden', String(!selected));
+        $('#subscription-settings').hidden = !usesDurationSettings;
+        $('#operation-extension').hidden = !isCohort;
+        $('#cohort-settings').hidden = !isCohort;
+        $('#first-discount-field').hidden = isCohort || isBenefit;
+        $('#operation-status').classList.toggle('visible', selected);
+
+        if (!selected) {
+          $('#operation-status').textContent = '';
+          return;
+        }
+
+        $('#operation-status').textContent = `${operationNames[state.planType]}은 설정 기준입니다. 완료 후 생성되는 멤버십 유형을 요약에서 확인할 수 있습니다.`;
+      }
+
+      function updateSummaryPricing(discount) {
+        const duration = Number(inputs.duration.value);
+        const autoRenewal = $('input[name="renewal-mode"]:checked').value === 'auto';
+        const hasPrice = discount.validPrice;
+        $('#summary-pricing').hidden = !state.planType;
+        $('#summary-duration').textContent = (state.planType === 'subscription' || state.planType === 'deduction') && Number.isFinite(duration) && duration >= 1
+          ? `${duration}개월`
+          : state.planType === 'cohort' && inputs.endDate.value ? `${inputs.endDate.value} 종료` : '—';
+        $('#summary-renewal').textContent = state.planType === 'cohort' ? '자동 갱신 없음' : autoRenewal ? '이용 기간마다 자동 결제' : '자동 갱신 없음';
+        $('#summary-original-price').textContent = discount.validOriginalPrice ? formatWon(discount.originalPrice) : '—';
+        $('#summary-sale-price').textContent = hasPrice ? formatWon(discount.salePrice) : '—';
+        $('#summary-sale-discount').textContent = hasPrice && discount.saleDiscount > 0 ? `${discount.saleRate}% 할인` : '—';
+        $('#summary-first-price').textContent = hasPrice ? formatWon(discount.firstPrice) : '—';
+        $('#summary-reward-count').textContent = `${state.rewardIds.length}개`;
+      }
+
+      function update() {
+        updateOperationSettings();
+        const values = validValues();
+        const required = getRequiredItems();
+        const missing = required.filter((item) => !values[item.key]);
+        const done = required.length - missing.length;
+        const percent = Math.round((done / required.length) * 100);
+        const basicComplete = missing.length === 0;
+        const benefitComplete = state.dm !== null || state.badge !== null || state.rewardIds.length > 0;
+        const editorText = $('#detail-editor').innerText.trim();
+        const detailComplete = editorText.length > 0;
+
+        $('#name-count').textContent = inputs.name.value.length;
+        $('#summary-count').textContent = inputs.summary.value.length;
+        $('#original-price-field').classList.toggle('invalid', inputs.originalPrice.value !== '' && !values.originalPrice);
+        $('#price-field').classList.toggle('invalid', inputs.price.value !== '' && !values.price);
+        $('#duration-field').classList.toggle('invalid', (state.planType === 'subscription' || state.planType === 'deduction') && inputs.duration.value !== '' && !values.duration);
+        $('#cohort-end-date-field').classList.toggle('invalid', state.planType === 'cohort' && inputs.endDate.value !== '' && !values.duration);
+        const discount = updateDiscounts();
+        updateRenewalMode(discount);
+        updateBenefitExpiryNotice();
+        updateLongPassSettings();
+        updateCapacitySettings();
+        updateRecruitmentPeriodSettings();
+        updateResolvedTypeBadges();
+        updateSummaryPricing(discount);
+
+        setStatus($('#basic-header-status'), basicComplete ? '✓ 멤버십 설정 완료' : `멤버십 설정 · ${missing.length}개 항목 미완료`, basicComplete ? 'complete' : '');
+        setStatus($('#benefit-header-status'), benefitComplete ? '✓ 혜택 설정 완료' : '선택 항목 · 아직 설정하지 않음', benefitComplete ? 'complete' : 'optional');
+        setStatus($('#detail-header-status'), detailComplete ? '✓ 상세 소개 완료' : '선택 항목 · 아직 작성하지 않음', detailComplete ? 'complete' : 'optional');
+
+        $('#progress-ring').style.setProperty('--progress', `${percent}%`);
+        $('#progress-percent').textContent = `${percent}%`;
+        $('#progress-title').textContent = `필수 항목 ${done} / ${required.length} 완료`;
+        $('#progress-subtitle').textContent = basicComplete ? '생성 가능한 상태입니다.' : '멤버십 설정의 필수 항목을 입력해야 합니다.';
+        setSummaryStatus('basic', basicComplete, basicComplete ? '완료' : `${missing.length}개 미완료`);
+        setSummaryStatus('benefit', benefitComplete, benefitComplete ? '완료' : '선택', !benefitComplete);
+        setSummaryStatus('detail', detailComplete, detailComplete ? '작성 완료' : '선택', !detailComplete);
+
+        const missingList = $('#missing-list');
+        missingList.innerHTML = '';
+        if (basicComplete) {
+          $('#missing-title').textContent = '생성 필수 항목';
+          missingList.innerHTML = '<div class="missing-complete">필수 항목이 모두 입력되었습니다.</div>';
+        } else {
+          $('#missing-title').textContent = '미완료 필수 항목';
+          missing.forEach((item) => {
+            const button = document.createElement('button');
+            button.type = 'button'; button.className = 'missing-item'; button.textContent = getRequiredLabel(item);
+            button.dataset.target = getRequiredTarget(item); missingList.append(button);
+          });
+        }
+        $('#register-button').disabled = !basicComplete;
+        $('#register-help').textContent = basicComplete ? '필수 입력이 완료되었습니다. 생성 전 미리보기를 확인할 수 있습니다.' : `필수 항목 ${missing.length}개를 더 입력해야 합니다.`;
+      }
+
+      function expandSection(sectionName) {
+        const section = $(`[data-section="${sectionName}"]`);
+        if (!section) return null;
+        const header = section.querySelector('.accordion-header');
+        const panel = section.querySelector('.accordion-panel');
+        if (header.getAttribute('aria-expanded') === 'false') { header.setAttribute('aria-expanded', 'true'); panel.classList.remove('collapsed'); }
+        return section;
+      }
+
+      function scrollToTarget(targetId) {
+        const target = $(`#${targetId}`);
+        const section = target ? target.closest('[data-section]') : null;
+        if (section) expandSection(section.dataset.section);
+        if (!target) return;
+        window.setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.classList.add('highlight');
+          window.setTimeout(() => target.classList.remove('highlight'), 1050);
+          const focusable = target.querySelector('button, input, textarea');
+          if (focusable) window.setTimeout(() => focusable.focus({ preventScroll: true }), 450);
+        }, section ? 80 : 0);
+      }
+
+      $$('.accordion-header').forEach((header) => header.addEventListener('click', () => {
+        const panel = $(`#${header.getAttribute('aria-controls')}`);
+        const expanded = header.getAttribute('aria-expanded') === 'true';
+        header.setAttribute('aria-expanded', String(!expanded));
+        panel.classList.toggle('collapsed', expanded);
+      }));
+
+      function selectPlanType(planType) {
+        state.planType = planType;
+        $$('.operation-card').forEach((item) => { const selected = item.dataset.planType === planType; item.classList.toggle('selected', selected); item.setAttribute('aria-pressed', String(selected)); });
+        update();
+      }
+
+      function hasMembershipFormContent() {
+        const hasInputValue = [inputs.name, inputs.summary, inputs.originalPrice, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity]
+          .some((input) => input.value.trim() !== '');
+        const hasChangedSetting = $('input[name="first-discount"]:checked').value !== 'rate'
+          || $('input[name="renewal-mode"]:checked').value !== 'auto'
+          || $('input[name="multi-month"]:checked').value !== 'none'
+          || $('input[name="capacity"]:checked').value !== 'unlimited'
+          || $('input[name="recruitment-period"]:checked').value !== 'always'
+          || $$("input[name='long-pass-term']").some((input) => !input.checked)
+          || !$$('input[name="approval"]')[0].checked
+          || !$$('input[name="visibility"]')[2].checked;
+        return hasInputValue
+          || Boolean(state.imageName)
+          || state.dm !== null
+          || state.badge !== null
+          || state.rewardIds.length > 0
+          || $('#new-reward-title').value.trim() !== ''
+          || $('#new-reward-description').value.trim() !== ''
+          || $('#detail-editor').innerText.trim() !== ''
+          || hasChangedSetting;
+      }
+
+      function resetMembershipForm() {
+        state.planType = '';
+        state.imageName = '';
+        state.imageUrl = '';
+        imageLoadSequence += 1;
+        state.dm = null;
+        state.badge = null;
+        state.rewardIds = [];
+        [inputs.name, inputs.summary, inputs.originalPrice, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.image, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity].forEach((input) => { input.value = ''; });
+        $('#new-reward-title').value = '';
+        $('#new-reward-description').value = '';
+        $('#detail-editor').innerHTML = '';
+        $('#image-preview').innerHTML = defaultImagePreview;
+        $('#image-meta').textContent = defaultImageMeta;
+        $('#image-meta').className = 'image-meta';
+        $('#image-meta').style.color = '';
+        $('#dm-state').textContent = '아직 설정하지 않음';
+        $('#dm-state').className = 'reward-state';
+        $('#badge-state').textContent = '아직 설정하지 않음';
+        $('#badge-state').className = 'reward-state';
+        selectedRewardIds = new Set();
+        pendingRewardId = null;
+        $('input[name="first-discount"][value="rate"]').checked = true;
+        $('input[name="renewal-mode"][value="auto"]').checked = true;
+        $('input[name="multi-month"][value="none"]').checked = true;
+        $('input[name="capacity"][value="unlimited"]').checked = true;
+        $('input[name="recruitment-period"][value="always"]').checked = true;
+        $$('input[name="long-pass-term"]').forEach((input) => { input.checked = true; });
+        $$('input[name="approval"]')[0].checked = true;
+        $$('input[name="visibility"]')[2].checked = true;
+        $$('.operation-card').forEach((card) => { card.classList.remove('selected'); card.setAttribute('aria-pressed', 'false'); });
+        renderRewards();
+        update();
+      }
+
+      $$('.operation-card').forEach((card) => card.addEventListener('click', () => {
+        const planType = card.dataset.planType;
+        if (planType === state.planType) return;
+        if (state.planType && hasMembershipFormContent()) {
+          pendingPlanType = planType;
+          openModal('operation-change-modal');
+          return;
+        }
+        selectPlanType(planType);
+      }));
+
+      [inputs.name, inputs.summary, inputs.originalPrice, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity].forEach((input) => input.addEventListener('input', update));
+      $$('input[name="first-discount"]').forEach((input) => input.addEventListener('change', () => { inputs.firstDiscount.value = ''; inputs.firstDiscountRate.value = ''; update(); }));
+      $$('input[name="renewal-mode"], input[name="multi-month"]').forEach((input) => input.addEventListener('change', update));
+      $$('input[name="capacity"]').forEach((input) => input.addEventListener('change', update));
+      $$('input[name="recruitment-period"]').forEach((input) => input.addEventListener('change', update));
+      $$('input[type="date"]').forEach((input) => {
+        const openDatePicker = () => {
+          if (input.disabled || typeof input.showPicker !== 'function') return;
+          try { input.showPicker(); } catch (_) { /* 브라우저 기본 날짜 입력 동작을 유지합니다. */ }
+        };
+        input.addEventListener('click', openDatePicker);
+        input.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') openDatePicker();
+        });
+      });
+      inputs.image.addEventListener('change', (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) { $('#image-meta').textContent = '10MB 이하의 이미지를 선택해야 합니다.'; $('#image-meta').style.color = 'var(--danger)'; inputs.image.value = ''; return; }
+        state.imageName = file.name;
+        $('#image-meta').textContent = `${file.name} 선택됨`;
+        $('#image-meta').className = 'image-meta selected';
+        const imageLoadId = ++imageLoadSequence;
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (imageLoadId !== imageLoadSequence) return;
+          state.imageUrl = reader.result;
+          $('#image-preview').innerHTML = `<img src="${reader.result}" alt="선택한 대표 이미지" />`;
+        };
+        reader.readAsDataURL(file); update();
+      });
+
+      function openModal(id) { $(`#${id}`).classList.add('open'); }
+      function closeModal(id) { $(`#${id}`).classList.remove('open'); }
+      $$('.modal-close').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.closeModal)));
+      $$('.modal-backdrop').forEach((modal) => modal.addEventListener('click', (event) => { if (event.target === modal) modal.classList.remove('open'); }));
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { pendingPlanType = ''; $$('.modal-backdrop.open').forEach((modal) => modal.classList.remove('open')); } });
+      $('#operation-change-modal').addEventListener('click', (event) => { if (event.target === event.currentTarget) pendingPlanType = ''; });
+      $('#cancel-operation-change').addEventListener('click', () => { pendingPlanType = ''; closeModal('operation-change-modal'); });
+      $('#confirm-operation-change').addEventListener('click', () => {
+        const nextPlanType = pendingPlanType;
+        pendingPlanType = '';
+        closeModal('operation-change-modal');
+        if (!nextPlanType) return;
+        resetMembershipForm();
+        selectPlanType(nextPlanType);
+      });
+
+      const settingData = {
+        dm: { title: '다이렉트 메시지 이용 권한', copy: '멤버십 가입자에게 다이렉트 메시지 이용 권한을 제공할지 선택할 수 있습니다.', on: '제공함', off: '제공하지 않음' },
+        badge: { title: '멤버십 배지', copy: '멤버십 가입자에게 채널 내 전용 배지를 제공할지 선택할 수 있습니다.', on: '제공함', off: '제공하지 않음' }
+      };
+      $$('.reward-config').forEach((button) => button.addEventListener('click', () => {
+        const key = button.dataset.setting; const data = settingData[key];
+        $('#setting-modal-title').textContent = data.title;
+        $('#setting-modal-copy').textContent = data.copy;
+        const choices = $('#setting-choices'); choices.innerHTML = '';
+        [{ value: true, label: data.on }, { value: false, label: data.off }].forEach((choice) => {
+          const el = document.createElement('button'); el.type = 'button'; el.className = `setting-choice${state[key] === choice.value ? ' active' : ''}`;
+          el.innerHTML = `<span><strong>${choice.label}</strong></span><span>${state[key] === choice.value ? '✓' : ''}</span>`;
+          el.addEventListener('click', () => { state[key] = choice.value; $(`#${key}-state`).textContent = choice.value ? data.on : data.off; $(`#${key}-state`).className = `reward-state${choice.value ? ' on' : ''}`; closeModal('setting-modal'); update(); });
+          choices.append(el);
+        });
+        openModal('setting-modal');
+      }));
+
+      function getReward(id) { return rewardCatalog.find((reward) => reward.id === id); }
+      function getConnectedRewards() { return state.rewardIds.map(getReward).filter(Boolean); }
+      function getRewardTypeLabel(type) { return type === 'managed' ? '지급 관리형' : '기본형'; }
+      function isRewardAvailable(reward) { return reward.type !== 'managed' || state.planType === 'deduction'; }
+      function getUnavailableReason(reward) {
+        return reward.type === 'managed'
+          ? reward.unavailableReason
+          : '현재 멤버십 설정에서는 사용할 수 없습니다.';
+      }
+      function closeRewardMenus() { $$('.reward-menu.open').forEach((menu) => menu.classList.remove('open')); }
+      function renderRewardCatalog() {
+        const list = $('#reward-catalog-list'); list.innerHTML = '';
+        const showAvailable = rewardTab === 'available';
+        rewardCatalog.filter((reward) => isRewardAvailable(reward) === showAvailable).forEach((reward) => {
+          const connected = state.rewardIds.includes(reward.id);
+          const available = isRewardAvailable(reward);
+          const row = document.createElement('label'); row.className = 'catalog-reward';
+          const input = document.createElement('input'); input.type = 'checkbox'; input.checked = selectedRewardIds.has(reward.id); input.disabled = !available || connected;
+          const check = document.createElement('span'); check.className = 'catalog-check';
+          const copy = document.createElement('span'); copy.className = 'catalog-copy';
+          const title = document.createElement('strong'); title.textContent = reward.title;
+          const type = document.createElement('span'); type.className = 'catalog-type'; type.textContent = getRewardTypeLabel(reward.type);
+          const description = document.createElement('p'); description.textContent = connected ? '이미 이 멤버십에 연결된 혜택입니다.' : available ? reward.description : getUnavailableReason(reward);
+          if (!available) description.classList.add('catalog-unavailable');
+          input.addEventListener('change', () => { if (input.checked) selectedRewardIds.add(reward.id); else selectedRewardIds.delete(reward.id); });
+          copy.append(title, type, description); row.append(input, check, copy); list.append(row);
+        });
+        if (!list.children.length) list.innerHTML = '<div class="preview-placeholder">표시할 리워드가 없습니다.</div>';
+      }
+      function updateRewardTypeHelp() {
+        const type = $('input[name="new-reward-type"]:checked').value;
+        $('#new-reward-type-help').textContent = type === 'managed'
+          ? state.planType === 'deduction' ? '회차별 지급 횟수와 지급 내역 관리가 필요한 리워드입니다.' : '지급 관리형 리워드는 혜택 이용 기준 멤버십에서만 현재 멤버십에 추가할 수 있습니다.'
+          : '상시 제공하거나 비정기적으로 제공하는 리워드입니다.';
+      }
+      function openRewardEditor(reward) {
+        pendingRewardId = reward.id;
+        $('#edit-reward-type').textContent = `${getRewardTypeLabel(reward.type)} 리워드`;
+        $('#edit-reward-title').value = reward.title;
+        $('#edit-reward-description').value = reward.description;
+        $('#edit-reward-survey').checked = Boolean(reward.survey);
+        openModal('edit-reward-modal');
+      }
+      function requestRewardEdit(id) {
+        const reward = getReward(id); if (!reward) return;
+        pendingRewardId = id;
+        if (reward.sharedCount > 1) {
+          $('#shared-reward-count').textContent = `사용 중인 멤버십 ${reward.sharedCount}개`;
+          openModal('edit-reward-confirm-modal');
+        } else openRewardEditor(reward);
+      }
+      function requestRewardRemoval(id) { pendingRewardId = id; openModal('remove-reward-modal'); }
+      function moveReward(index, direction) {
+        const nextIndex = index + direction;
+        if (nextIndex < 0 || nextIndex >= state.rewardIds.length) return;
+        [state.rewardIds[index], state.rewardIds[nextIndex]] = [state.rewardIds[nextIndex], state.rewardIds[index]];
+        renderRewards(); update();
+      }
+      function renderRewards() {
+        const rewards = getConnectedRewards();
+        const list = $('#reward-list'); list.innerHTML = ''; $('#reward-empty').style.display = rewards.length ? 'none' : 'grid';
+        rewards.forEach((reward, index) => {
+          const card = document.createElement('div'); card.className = 'custom-card';
+          const copy = document.createElement('span'); copy.className = 'custom-card-copy';
+          const title = document.createElement('strong'); title.textContent = reward.title;
+          const meta = document.createElement('span'); meta.className = 'reward-meta'; meta.textContent = getRewardTypeLabel(reward.type);
+          const description = document.createElement('p'); description.textContent = reward.description;
+          copy.append(title, meta, description);
+          const actions = document.createElement('div'); actions.className = 'reward-actions';
+          const menuWrap = document.createElement('div'); menuWrap.className = 'reward-menu-wrap';
+          const menuButton = document.createElement('button'); menuButton.type = 'button'; menuButton.className = 'reward-action'; menuButton.textContent = '⋮'; menuButton.setAttribute('aria-label', `${reward.title} 메뉴`);
+          const menu = document.createElement('div'); menu.className = 'reward-menu';
+          const addMenuItem = (label, handler, disabled = false, className = '') => { const button = document.createElement('button'); button.type = 'button'; button.textContent = label; button.disabled = disabled; if (className) button.className = className; button.addEventListener('click', () => { closeRewardMenus(); handler(); }); menu.append(button); };
+          addMenuItem('혜택 수정', () => requestRewardEdit(reward.id));
+          addMenuItem('위로 이동', () => moveReward(index, -1), index === 0);
+          addMenuItem('아래로 이동', () => moveReward(index, 1), index === rewards.length - 1);
+          addMenuItem('이 멤버십에서 제거', () => requestRewardRemoval(reward.id), false, 'remove-reward');
+          menuButton.addEventListener('click', (event) => { event.stopPropagation(); const opening = !menu.classList.contains('open'); closeRewardMenus(); menu.classList.toggle('open', opening); });
+          menuWrap.append(menuButton, menu); actions.append(menuWrap); card.append(copy, actions); list.append(card);
+        });
+      }
+      $('#open-reward-drawer').addEventListener('click', () => { selectedRewardIds = new Set(); rewardTab = 'available'; renderRewardCatalog(); openModal('reward-drawer'); });
+      $('#open-reward-drawer-empty').addEventListener('click', () => { selectedRewardIds = new Set(); rewardTab = 'available'; renderRewardCatalog(); openModal('reward-drawer'); });
+      $$('.reward-tab').forEach((tab) => tab.addEventListener('click', () => { rewardTab = tab.dataset.rewardTab; $$('.reward-tab').forEach((item) => { const active = item === tab; item.classList.toggle('active', active); item.setAttribute('aria-selected', String(active)); }); renderRewardCatalog(); }));
+      $('#add-selected-rewards').addEventListener('click', () => { selectedRewardIds.forEach((id) => { if (!state.rewardIds.includes(id) && isRewardAvailable(getReward(id))) state.rewardIds.push(id); }); selectedRewardIds = new Set(); closeModal('reward-drawer'); renderRewards(); update(); });
+      $('#open-new-reward').addEventListener('click', () => { closeModal('reward-drawer'); $('#new-reward-title').value = ''; $('#new-reward-description').value = ''; $('#new-reward-survey').checked = false; $('input[name="new-reward-type"][value="basic"]').checked = true; updateRewardTypeHelp(); openModal('new-reward-modal'); });
+      $('#back-to-reward-drawer').addEventListener('click', () => { closeModal('new-reward-modal'); renderRewardCatalog(); openModal('reward-drawer'); });
+      $$('input[name="new-reward-type"]').forEach((input) => input.addEventListener('change', updateRewardTypeHelp));
+      $('#create-reward').addEventListener('click', () => {
+        const title = $('#new-reward-title').value.trim(); const description = $('#new-reward-description').value.trim(); const type = $('input[name="new-reward-type"]:checked').value;
+        if (!title) { $('#new-reward-title').focus(); return; }
+        if (type === 'managed' && state.planType !== 'deduction') { updateRewardTypeHelp(); return; }
+        const reward = { id: Date.now(), type, title, description: description || '리워드 설명이 없습니다.', survey: $('#new-reward-survey').checked, sharedCount: 1 };
+        rewardCatalog.push(reward); state.rewardIds.push(reward.id); closeModal('new-reward-modal'); renderRewards(); update();
+      });
+      $('#confirm-edit-reward').addEventListener('click', () => { const reward = getReward(pendingRewardId); closeModal('edit-reward-confirm-modal'); if (reward) openRewardEditor(reward); });
+      $('#save-reward-edit').addEventListener('click', () => { const reward = getReward(pendingRewardId); const title = $('#edit-reward-title').value.trim(); if (!reward || !title) { $('#edit-reward-title').focus(); return; } reward.title = title; reward.description = $('#edit-reward-description').value.trim() || '리워드 설명이 없습니다.'; reward.survey = $('#edit-reward-survey').checked; closeModal('edit-reward-modal'); renderRewards(); update(); });
+      $('#confirm-remove-reward').addEventListener('click', () => { state.rewardIds = state.rewardIds.filter((id) => id !== pendingRewardId); pendingRewardId = null; closeModal('remove-reward-modal'); renderRewards(); update(); });
+
+      $$('.editor-tool').forEach((button) => button.addEventListener('click', () => {
+        const editor = $('#detail-editor'); editor.focus();
+        if (button.dataset.command === 'image-placeholder') document.execCommand('insertHTML', false, '<div class="demo-image">▧ 이미지 영역</div><p><br></p>');
+        else document.execCommand(button.dataset.command, false, button.dataset.value || null);
+        update();
+      }));
+      $('#detail-editor').addEventListener('input', update);
+
+      $$('.summary-section-link').forEach((button) => button.addEventListener('click', () => {
+        const name = button.dataset.summarySection; const section = expandSection(name);
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (name === 'basic') { const firstMissing = getRequiredItems().find((item) => !validValues()[item.key]); if (firstMissing) window.setTimeout(() => scrollToTarget(getRequiredTarget(firstMissing)), 300); }
+      }));
+      $('#missing-list').addEventListener('click', (event) => { const button = event.target.closest('.missing-item'); if (button) scrollToTarget(button.dataset.target); });
+
+      function getPreviewPricing() { return getDiscountCalculation(); }
+
+      function renderMembershipPreview() {
+        const pricing = getPreviewPricing();
+        const operationNames = { subscription: '가입일 기준', cohort: '종료일 기준', deduction: '혜택 이용 기준' };
+        const duration = Number(inputs.duration.value);
+        const hasDuration = Number.isFinite(duration) && duration >= 1;
+        const saleDiscount = pricing.saleDiscount;
+        const firstDiscount = state.planType === 'subscription' ? pricing.firstDiscount : 0;
+
+        $('#preview-operation').textContent = state.planType ? `설정 기준 · ${operationNames[state.planType]}` : '설정 기준';
+        const resolvedType = getResolvedTypeName();
+        $('#preview-resolved-type').hidden = !resolvedType;
+        $('#preview-resolved-type-name').textContent = resolvedType;
+        $('#preview-name').textContent = inputs.name.value.trim() || '새 멤버십';
+        $('#preview-summary').textContent = inputs.summary.value.trim() || '멤버십 한 줄 설명이 여기에 표시됩니다.';
+        $('#preview-hero').innerHTML = state.imageUrl ? `<img src="${state.imageUrl}" alt="선택한 대표 이미지" />` : '대표 이미지';
+
+        if (!pricing.validPrice) $('#preview-price').textContent = '판매가 미정';
+        else if (saleDiscount > 0) $('#preview-price').innerHTML = `<del>${formatWon(pricing.originalPrice)}</del>${formatWon(pricing.salePrice)}`;
+        else $('#preview-price').textContent = formatWon(pricing.salePrice);
+
+        $('#preview-first-benefit').hidden = firstDiscount === 0;
+        $('#preview-first-benefit').textContent = firstDiscount > 0
+          ? `첫 결제 ${pricing.firstType === 'rate' ? `${pricing.firstRate.value}%` : formatWon(firstDiscount)} 할인`
+          : '첫 결제 혜택 적용';
+        $('#preview-discount-summary').hidden = firstDiscount === 0;
+        $('#preview-discount-rate').hidden = saleDiscount === 0;
+        $('#preview-discount-rate').textContent = `${pricing.saleRate}% 할인`;
+        $('#preview-discount-label').textContent = '첫 결제 할인';
+        $('#preview-discount-total').textContent = firstDiscount > 0 ? `${formatWon(firstDiscount)} 할인 · ${formatWon(pricing.firstPrice)}` : '';
+        $('#preview-period').textContent = (state.planType === 'subscription' || state.planType === 'deduction') && hasDuration
+          ? `${duration}개월 이용`
+          : state.planType === 'cohort' ? inputs.endDate.value ? `${inputs.endDate.value} 종료` : '종료일 미정'
+          : state.planType === 'deduction' ? '혜택 이용 기준'
+          : '이용 기간 미정';
+        $('#preview-usage').textContent = state.planType === 'subscription'
+          ? hasDuration ? `${duration}개월 이용 · ${$('input[name="renewal-mode"]:checked').value === 'auto' ? '자동 갱신' : '1회 이용'}` : '기본 이용 기간을 입력해주세요.'
+          : state.planType === 'deduction' ? hasDuration ? `${BENEFIT_EXPIRY_NOTICE}${$('input[name="renewal-mode"]:checked').value === 'auto' ? ` ${BENEFIT_RENEWAL_NOTICE}` : ''}` : '기본 이용 기간을 입력해주세요.'
+          : state.planType === 'cohort' ? inputs.endDate.value ? `${inputs.endDate.value}에 이용이 종료됩니다.` : '이용 종료일을 선택해주세요.'
+          : '운영 방식을 선택하면 이용 안내가 표시됩니다.';
+
+        const benefits = [];
+        if (state.dm) benefits.push({ title: '다이렉트 메시지', description: '' });
+        if (state.badge) benefits.push({ title: '멤버십 배지', description: '' });
+        getConnectedRewards().forEach((reward) => benefits.push({ title: reward.title, description: reward.description }));
+        const list = $('#preview-benefits'); list.innerHTML = '';
+        if (!benefits.length) list.innerHTML = '<span class="preview-placeholder">설정한 혜택이 표시됩니다.</span>';
+        else benefits.forEach((benefit) => { const card = document.createElement('div'); card.className = 'preview-reward'; const title = document.createElement('strong'); title.textContent = benefit.title; card.append(title); if (benefit.description) { const description = document.createElement('span'); description.textContent = benefit.description; card.append(description); } list.append(card); });
+        const detail = $('#detail-editor').innerText.trim();
+        $('#preview-detail').textContent = detail ? `${detail.slice(0, 140)}${detail.length > 140 ? '…' : ''}` : '작성한 상세 소개 일부가 표시됩니다.';
+      }
+
+      $('#preview-button').addEventListener('click', () => {
+        renderMembershipPreview();
+        openModal('preview-modal');
+      });
+      $('#register-button').addEventListener('click', () => { $('#toast').classList.add('show'); window.setTimeout(() => $('#toast').classList.remove('show'), 3200); });
+      update();
+    })();
+  </script>
+</body>
+</html>
