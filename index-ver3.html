@@ -373,6 +373,34 @@
     #edit-reward-confirm-modal .form-actions .primary-button { height: 42px; padding: 0 18px; font-size: 13px; }
     #benefit-section.reward-menu-active { position: relative; z-index: 30; overflow: visible; }
     #benefit-section.reward-menu-active .accordion-panel { overflow: visible; }
+    #badge-modal .modal { display: flex; flex-direction: column; width: min(556px, 100%); min-height: 636px; max-height: calc(100vh - 40px); }
+    #badge-modal .modal-header { flex: 0 0 auto; padding: 18px 20px; }
+    #badge-modal .modal-header h2 { font-size: 16px; }
+    #badge-modal .modal-content { flex: 1 1 auto; min-height: 0; padding: 18px 12px 20px; overflow-y: auto; }
+    .badge-mode-options { display: grid; gap: 0; }
+    .badge-mode-option { align-items: center; min-height: 36px; padding: 8px 10px; border-radius: 7px; }
+    .badge-mode-option:has(input:checked) { background: #303035; }
+    .badge-mode-option .radio { margin-top: 0; }
+    .badge-preview-label { margin-top: 24px; }
+    .badge-preview { display: grid; min-height: 122px; place-items: center; border: 1px solid #414148; border-radius: 10px; background: #27272b; }
+    .badge-preview-composition { position: relative; width: 80px; height: 80px; }
+    .badge-avatar { display: grid; width: 80px; height: 80px; place-items: center; overflow: hidden; border-radius: 50%; background: radial-gradient(circle at 32% 25%, #7d2c35 0, #391b24 36%, #16161b 72%); color: #e7dfe2; font-size: 25px; font-weight: 800; }
+    .badge-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .badge-avatar img[hidden], .badge-avatar-fallback[hidden], .badge-default-icon[hidden], .badge-custom-preview[hidden], .badge-upload[hidden] { display: none; }
+    .badge-overlay { position: absolute; right: -4px; bottom: -2px; display: grid; width: 34px; height: 34px; place-items: center; overflow: hidden; border: 4px solid #f0eff4; border-radius: 50%; background: #f4f2f7; box-shadow: 0 2px 7px rgba(0,0,0,.22); }
+    .badge-default-icon { color: #7896ff; font-size: 21px; line-height: 1; text-shadow: 5px 0 0 #9bb0ff, 2px -4px 0 #b7c6ff; }
+    .badge-custom-preview { width: 100%; height: 100%; object-fit: cover; }
+    .badge-upload { margin-top: 24px; }
+    .badge-upload-help { margin: -4px 0 12px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .badge-upload-picker { position: relative; display: grid; width: 100px; height: 100px; place-items: center; border: 1px dashed #55545f; border-radius: 10px; background: #29292e; color: #aaa8b5; cursor: pointer; text-align: center; }
+    .badge-upload-picker:hover { border-color: #8b84ff; background: #302f39; }
+    .badge-upload-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .badge-upload-picker svg { width: 23px; height: 23px; margin-bottom: 4px; }
+    .badge-upload-picker span { display: block; font-size: 12px; line-height: 1.45; }
+    .badge-upload-name { min-height: 16px; margin: 8px 0 0; color: var(--success); font-size: 11px; }
+    .badge-upload-name.error { color: var(--danger); }
+    .badge-modal-footer { flex: 0 0 auto; padding: 12px 20px; border-top: 1px solid #3e3e43; }
+    .badge-modal-footer .primary-button { width: 100%; height: 40px; font-size: 13px; }
     #preview-modal .modal { width: min(500px, 100%); }
     .preview-card { overflow: hidden; margin-top: 14px; border: 1px solid #45444c; border-radius: 11px; background: #1d1d20; }
     .preview-hero { display: grid; height: 184px; place-items: center; overflow: hidden; border-bottom: 1px solid #45434d; background: linear-gradient(135deg, #4a456d, #2c2a36 58%, #242429); color: #c5c0ff; font-size: 12px; }
@@ -643,6 +671,7 @@
   </main>
 
   <div class="modal-backdrop" id="setting-modal" role="dialog" aria-modal="true" aria-labelledby="setting-modal-title"><div class="modal"><div class="modal-header"><h2 id="setting-modal-title">기본 혜택 설정</h2><button class="modal-close" data-close-modal="setting-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p id="setting-modal-copy"></p><div class="setting-choices" id="setting-choices"></div></div></div></div>
+  <div class="modal-backdrop" id="badge-modal" role="dialog" aria-modal="true" aria-labelledby="badge-modal-title"><div class="modal"><div class="modal-header"><h2 id="badge-modal-title">멤버십 배지 설정</h2><button class="modal-close" id="close-badge-modal" data-close-modal="badge-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><span class="group-label" id="badge-mode-label">배지 생성 방식</span><div class="badge-mode-options" role="radiogroup" aria-labelledby="badge-mode-label"><label class="option-row badge-mode-option"><input type="radio" name="badge-mode" value="default" checked /><span class="radio"></span><span>기본 배지 사용</span></label><label class="option-row badge-mode-option"><input type="radio" name="badge-mode" value="custom" /><span class="radio"></span><span>커스텀 배지 사용</span></label></div><span class="group-label badge-preview-label">미리보기</span><div class="badge-preview"><div class="badge-preview-composition"><div class="badge-avatar"><span id="badge-avatar-fallback">F</span><img id="badge-avatar-image" src="" alt="대표 이미지 미리보기" hidden /></div><span class="badge-overlay"><span class="badge-default-icon" id="badge-default-icon" aria-label="기본 배지">◆</span><img class="badge-custom-preview" id="badge-custom-preview" src="" alt="커스텀 배지 미리보기" hidden /></span></div></div><div class="badge-upload" id="badge-upload" hidden><label class="group-label" for="badge-image-input">이미지 업로드 <span class="required-mark">*</span></label><p class="badge-upload-help">지원되는 형식 : PNG, JPG | 최소 크기 : 32 X 32 | 업로드 크기 : 1MB 미만 | 가로세로 비율 : 1:1</p><label class="badge-upload-picker" for="badge-image-input"><input id="badge-image-input" type="file" accept="image/png,image/jpeg" /><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2"></rect><circle cx="8.5" cy="9" r="1.3"></circle><path d="m5.5 17 4.3-4.2 2.9 2.8 2.1-2 3.8 3.5"></path></svg><span>이미지를<br />넣어주세요</span></label><p class="badge-upload-name" id="badge-upload-name" aria-live="polite"></p></div></div><div class="badge-modal-footer"><button class="primary-button" id="save-badge-settings" type="button">저장</button></div></div></div>
   <div class="modal-backdrop" id="reward-drawer" role="dialog" aria-modal="true" aria-labelledby="reward-drawer-title"><div class="modal modal-wide"><div class="modal-header"><h2 id="reward-drawer-title">추가 혜택</h2><button class="modal-close" data-close-modal="reward-drawer" type="button" aria-label="닫기">×</button></div><div class="modal-content"><div class="reward-drawer-head"><span>리워드 목록</span><button class="text-button" id="open-new-reward" type="button">＋ 새 리워드</button></div><div class="reward-tabs" role="tablist" aria-label="리워드 사용 가능 상태"><button class="reward-tab active" id="available-reward-tab" data-reward-tab="available" type="button" role="tab" aria-selected="true">사용 가능</button><button class="reward-tab" id="unavailable-reward-tab" data-reward-tab="unavailable" type="button" role="tab" aria-selected="false">사용 불가</button></div><div class="catalog-list" id="reward-catalog-list"></div><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="reward-drawer" type="button">취소</button><button class="primary-button" id="add-selected-rewards" type="button">선택한 혜택 추가</button></div></div></div></div>
   <div class="modal-backdrop" id="new-reward-modal" role="dialog" aria-modal="true" aria-labelledby="new-reward-modal-title"><div class="modal"><div class="modal-header"><h2 id="new-reward-modal-title">새 리워드 생성</h2><button class="modal-close" data-close-modal="new-reward-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><span class="group-label" id="new-reward-type-label">리워드 타입</span><div class="compact-options" role="radiogroup" aria-labelledby="new-reward-type-label"><label class="option-row"><input type="radio" name="new-reward-type" value="basic" checked /><span class="radio"></span><span>기본형</span></label><label class="option-row"><input type="radio" name="new-reward-type" value="managed" /><span class="radio"></span><span>지급 관리형</span></label></div><p class="reward-type-help" id="new-reward-type-help">상시 제공하거나 비정기적으로 제공하는 리워드입니다.</p><label class="group-label" for="new-reward-title">리워드 타이틀 <span class="required-mark">*</span></label><input class="text-input" id="new-reward-title" type="text" maxlength="40" placeholder="예) 1:1 드로잉 피드백" /><label class="group-label" for="new-reward-description" style="margin-top:14px;">리워드 설명</label><input class="text-input" id="new-reward-description" type="text" maxlength="100" placeholder="예) 월 1회 이용" /><label class="option-row survey-option"><input id="new-reward-survey" type="checkbox" /><span class="checkbox"></span><span>리워드 요청 설문 사용</span></label><div class="form-actions"><button class="secondary-button" id="back-to-reward-drawer" type="button">이전</button><button class="primary-button" id="create-reward" type="button">생성</button></div></div></div></div>
   <div class="modal-backdrop" id="edit-reward-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="edit-reward-confirm-title"><div class="modal"><div class="modal-header"><h2 id="edit-reward-confirm-title">혜택을 수정하시겠어요?</h2><button class="modal-close" data-close-modal="edit-reward-confirm-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>이 혜택은 다른 멤버십에서도 사용 중입니다.<br />수정하면 이 혜택을 사용하는 다른 멤버십에도 변경 내용이 동일하게 적용됩니다.</p><p class="shared-reward-count" id="shared-reward-count">사용 중인 멤버십 3개</p><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="edit-reward-confirm-modal" type="button">취소</button><button class="primary-button" id="confirm-edit-reward" type="button">수정하기</button></div></div></div></div>
@@ -681,6 +710,7 @@
       let rewardTab = 'available';
       let pendingRewardId = null;
       let selectedRewardIds = new Set();
+      let badgeDraft = { mode: 'default', imageName: '', imageUrl: '' };
 
       function getRequiredLabel(item) {
         return item.key === 'duration' && state.planType === 'cohort' ? '이용 종료일' : item.label;
@@ -1181,9 +1211,21 @@
 
       function openModal(id) { $(`#${id}`).classList.add('open'); }
       function closeModal(id) { $(`#${id}`).classList.remove('open'); }
-      $$('.modal-close').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.closeModal)));
-      $$('.modal-backdrop').forEach((modal) => modal.addEventListener('click', (event) => { if (event.target === modal) modal.classList.remove('open'); }));
-      document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { pendingPlanType = ''; $$('.modal-backdrop.open').forEach((modal) => modal.classList.remove('open')); } });
+      $$('.modal-close').forEach((button) => button.addEventListener('click', () => {
+        if (button.dataset.closeModal === 'badge-modal') resetBadgeDraft();
+        closeModal(button.dataset.closeModal);
+      }));
+      $$('.modal-backdrop').forEach((modal) => modal.addEventListener('click', (event) => {
+        if (event.target !== modal) return;
+        if (modal.id === 'badge-modal') resetBadgeDraft();
+        modal.classList.remove('open');
+      }));
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        pendingPlanType = '';
+        if ($('#badge-modal').classList.contains('open')) resetBadgeDraft();
+        $$('.modal-backdrop.open').forEach((modal) => modal.classList.remove('open'));
+      });
       $('#operation-change-modal').addEventListener('click', (event) => { if (event.target === event.currentTarget) pendingPlanType = ''; });
       $('#cancel-operation-change').addEventListener('click', () => { pendingPlanType = ''; closeModal('operation-change-modal'); });
       $('#confirm-operation-change').addEventListener('click', () => {
@@ -1196,11 +1238,98 @@
       });
 
       const settingData = {
-        dm: { title: '다이렉트 메시지 이용 권한', copy: '멤버십 가입자에게 다이렉트 메시지 이용 권한을 제공할지 선택할 수 있습니다.', on: '제공함', off: '제공하지 않음' },
-        badge: { title: '멤버십 배지', copy: '멤버십 가입자에게 채널 내 전용 배지를 제공할지 선택할 수 있습니다.', on: '제공함', off: '제공하지 않음' }
+        dm: { title: '다이렉트 메시지 이용 권한', copy: '멤버십 가입자에게 다이렉트 메시지 이용 권한을 제공할지 선택할 수 있습니다.', on: '제공함', off: '제공하지 않음' }
       };
+
+      function getSavedBadge() {
+        const badge = state.badge || {};
+        return { mode: badge.mode === 'custom' ? 'custom' : 'default', imageName: badge.imageName || '', imageUrl: badge.imageUrl || '' };
+      }
+
+      function setBadgeUploadMessage(message = '', isError = false) {
+        const messageElement = $('#badge-upload-name');
+        messageElement.textContent = message;
+        messageElement.classList.toggle('error', isError);
+      }
+
+      function renderBadgeModal() {
+        const isCustom = badgeDraft.mode === 'custom';
+        $(`input[name="badge-mode"][value="${badgeDraft.mode}"]`).checked = true;
+        $('#badge-upload').hidden = !isCustom;
+
+        const channelImageUrl = state.imageUrl;
+        $('#badge-avatar-image').hidden = !channelImageUrl;
+        $('#badge-avatar-fallback').hidden = Boolean(channelImageUrl);
+        $('#badge-avatar-image').src = channelImageUrl || '';
+
+        const showCustomImage = isCustom && Boolean(badgeDraft.imageUrl);
+        $('#badge-default-icon').hidden = showCustomImage;
+        $('#badge-custom-preview').hidden = !showCustomImage;
+        $('#badge-custom-preview').src = showCustomImage ? badgeDraft.imageUrl : '';
+        setBadgeUploadMessage(isCustom && badgeDraft.imageName ? `${badgeDraft.imageName} 선택됨` : '');
+      }
+
+      function resetBadgeDraft() {
+        badgeDraft = getSavedBadge();
+        $('#badge-image-input').value = '';
+        renderBadgeModal();
+      }
+
+      function openBadgeModal() {
+        resetBadgeDraft();
+        openModal('badge-modal');
+      }
+
+      function showBadgeUploadError(message) {
+        $('#badge-image-input').value = '';
+        setBadgeUploadMessage(message, true);
+      }
+
+      function loadBadgeImage(file) {
+        const validTypes = ['image/png', 'image/jpeg'];
+        if (!validTypes.includes(file.type)) { showBadgeUploadError('PNG 또는 JPG 이미지를 선택해야 합니다.'); return; }
+        if (file.size >= 1024 * 1024) { showBadgeUploadError('이미지 용량은 1MB 미만이어야 합니다.'); return; }
+        const reader = new FileReader();
+        reader.onload = () => {
+          const image = new Image();
+          image.onload = () => {
+            if (image.naturalWidth < 32 || image.naturalHeight < 32) { showBadgeUploadError('이미지 크기는 32 × 32px 이상이어야 합니다.'); return; }
+            if (image.naturalWidth !== image.naturalHeight) { showBadgeUploadError('가로세로 비율이 1:1인 이미지를 선택해야 합니다.'); return; }
+            badgeDraft.imageName = file.name;
+            badgeDraft.imageUrl = reader.result;
+            renderBadgeModal();
+          };
+          image.onerror = () => showBadgeUploadError('이미지를 불러올 수 없습니다.');
+          image.src = reader.result;
+        };
+        reader.onerror = () => showBadgeUploadError('이미지를 불러올 수 없습니다.');
+        reader.readAsDataURL(file);
+      }
+
+      $$('input[name="badge-mode"]').forEach((input) => input.addEventListener('change', () => {
+        badgeDraft.mode = input.value;
+        renderBadgeModal();
+      }));
+      $('#badge-image-input').addEventListener('change', (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (file) loadBadgeImage(file);
+      });
+      $('#save-badge-settings').addEventListener('click', () => {
+        if (badgeDraft.mode === 'custom' && !badgeDraft.imageUrl) {
+          setBadgeUploadMessage('커스텀 배지 이미지를 등록해야 합니다.', true);
+          return;
+        }
+        state.badge = { ...badgeDraft };
+        $('#badge-state').textContent = state.badge.mode === 'custom' ? '커스텀 배지 사용' : '기본 배지 사용';
+        $('#badge-state').className = 'reward-state on';
+        closeModal('badge-modal');
+        update();
+      });
+
       $$('.reward-config').forEach((button) => button.addEventListener('click', () => {
-        const key = button.dataset.setting; const data = settingData[key];
+        const key = button.dataset.setting;
+        if (key === 'badge') { openBadgeModal(); return; }
+        const data = settingData[key];
         $('#setting-modal-title').textContent = data.title;
         $('#setting-modal-copy').textContent = data.copy;
         const choices = $('#setting-choices'); choices.innerHTML = '';
