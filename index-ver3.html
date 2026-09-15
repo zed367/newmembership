@@ -232,7 +232,9 @@
     .primary-button:hover:not(:disabled) { background: #746cff; }
     .primary-button:active:not(:disabled) { transform: translateY(1px); }
     .primary-button:disabled { cursor: not-allowed; opacity: .45; box-shadow: none; }
-    .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+    .primary-button, .secondary-button { appearance: none; -webkit-appearance: none; line-height: 1; white-space: nowrap; overflow: visible; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 8px; min-width: 0; margin-top: 14px; }
+    .form-actions > button { flex: 0 0 auto; }
     .secondary-button { height: 36px; padding: 0 12px; border: 1px solid #4b4a52; border-radius: 7px; background: transparent; color: #d7d5df; cursor: pointer; font-size: 12px; font-weight: 650; }
     .secondary-button:hover { background: #323238; }
     .reward-list { display: grid; gap: 8px; }
@@ -247,7 +249,7 @@
     .reward-action:disabled { cursor: not-allowed; opacity: .3; }
     .reward-action.delete:hover:not(:disabled) { border-color: rgba(255,124,138,.24); background: rgba(255,124,138,.12); color: #ff9aa4; }
     .reward-menu-wrap { position: relative; }
-    .reward-menu { position: absolute; z-index: 8; top: 35px; right: 0; display: none; min-width: 144px; padding: 5px; border: 1px solid #50505a; border-radius: 8px; background: #2f2f34; box-shadow: 0 12px 28px rgba(0,0,0,.34); }
+    .reward-menu { position: absolute; z-index: 40; top: 35px; right: 0; display: none; min-width: 144px; padding: 5px; border: 1px solid #50505a; border-radius: 8px; background: #2f2f34; box-shadow: 0 12px 28px rgba(0,0,0,.34); }
     .reward-menu.open { display: grid; }
     .reward-menu button { min-height: 31px; padding: 0 9px; border: 0; border-radius: 5px; background: transparent; color: #e5e3eb; cursor: pointer; text-align: left; font-size: 11px; }
     .reward-menu button:hover:not(:disabled) { background: #414047; }
@@ -313,8 +315,8 @@
     .modal { width: min(460px, 100%); overflow: hidden; border: 1px solid #52515a; border-radius: 13px; background: #28282c; box-shadow: 0 24px 70px rgba(0,0,0,.48); }
     .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #414148; }
     .modal-header h2 { margin: 0; font-size: 16px; }
-    .modal-close { width: 30px; height: 30px; border: 0; border-radius: 7px; background: transparent; color: #c5c3cc; cursor: pointer; font-size: 22px; line-height: 1; }
-    .modal-close:hover { background: #38383e; }
+    .modal-header .modal-close { width: 30px; height: 30px; border: 0; border-radius: 7px; background: transparent; color: #c5c3cc; cursor: pointer; font-size: 22px; line-height: 1; }
+    .modal-header .modal-close:hover { background: #38383e; }
     .modal-content { padding: 20px; }
     .modal-content > p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
     .setting-choices { display: grid; gap: 9px; margin-top: 16px; }
@@ -366,6 +368,11 @@
     #edit-reward-modal .form-actions { gap: 10px; margin-top: 22px; padding-top: 16px; border-top: 1px solid #414048; }
     #edit-reward-modal .form-actions .secondary-button { min-width: 88px; height: 42px; padding: 0 16px; font-size: 13px; }
     #edit-reward-modal .form-actions .primary-button { height: 42px; padding: 0 18px; font-size: 13px; }
+    #edit-reward-confirm-modal .form-actions { gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #414048; }
+    #edit-reward-confirm-modal .form-actions .secondary-button { min-width: 88px; height: 42px; padding: 0 16px; font-size: 13px; }
+    #edit-reward-confirm-modal .form-actions .primary-button { height: 42px; padding: 0 18px; font-size: 13px; }
+    #benefit-section.reward-menu-active { position: relative; z-index: 30; overflow: visible; }
+    #benefit-section.reward-menu-active .accordion-panel { overflow: visible; }
     #preview-modal .modal { width: min(500px, 100%); }
     .preview-card { overflow: hidden; margin-top: 14px; border: 1px solid #45444c; border-radius: 11px; background: #1d1d20; }
     .preview-hero { display: grid; height: 184px; place-items: center; overflow: hidden; border-bottom: 1px solid #45434d; background: linear-gradient(135deg, #4a456d, #2c2a36 58%, #242429); color: #c5c0ff; font-size: 12px; }
@@ -1215,7 +1222,10 @@
           ? reward.unavailableReason
           : '현재 멤버십 설정에서는 사용할 수 없습니다.';
       }
-      function closeRewardMenus() { $$('.reward-menu.open').forEach((menu) => menu.classList.remove('open')); }
+      function closeRewardMenus() {
+        $$('.reward-menu.open').forEach((menu) => menu.classList.remove('open'));
+        $('#benefit-section').classList.remove('reward-menu-active');
+      }
       function renderRewardCatalog() {
         const list = $('#reward-catalog-list'); list.innerHTML = '';
         const showAvailable = rewardTab === 'available';
@@ -1283,7 +1293,13 @@
           addMenuItem('위로 이동', () => moveReward(index, -1), index === 0);
           addMenuItem('아래로 이동', () => moveReward(index, 1), index === rewards.length - 1);
           addMenuItem('이 멤버십에서 제거', () => requestRewardRemoval(reward.id), false, 'remove-reward');
-          menuButton.addEventListener('click', (event) => { event.stopPropagation(); const opening = !menu.classList.contains('open'); closeRewardMenus(); menu.classList.toggle('open', opening); });
+          menuButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const opening = !menu.classList.contains('open');
+            closeRewardMenus();
+            menu.classList.toggle('open', opening);
+            $('#benefit-section').classList.toggle('reward-menu-active', opening);
+          });
           menuWrap.append(menuButton, menu); actions.append(menuWrap); card.append(copy, actions); list.append(card);
         });
       }
