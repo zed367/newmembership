@@ -182,6 +182,7 @@
     .payment-amount-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #bbb8c7; font-size: 11px; }
     .payment-amount-row strong { color: #e7e5ef; font-size: 12px; }
     .benefit-expiry-notice { display: flex; align-items: flex-start; gap: 9px; margin-top: 13px; padding: 12px 13px; border: 1px solid rgba(255, 189, 98, .32); border-radius: 9px; background: rgba(120, 84, 29, .2); color: #e0c697; font-size: 12px; line-height: 1.55; }
+    .benefit-expiry-notice[hidden] { display: none; }
     .benefit-expiry-notice::before { display: grid; flex: 0 0 auto; width: 18px; height: 18px; place-items: center; border-radius: 50%; background: rgba(255, 189, 98, .18); color: #ffd186; content: "!"; font-size: 12px; font-weight: 800; }
     .renewal-description { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
     .long-pass-description { margin: -2px 0 12px; color: var(--subtle); font-size: 12px; line-height: 1.5; }
@@ -341,6 +342,21 @@
     .reward-type-help { margin: 8px 0 16px; color: var(--subtle); font-size: 11px; line-height: 1.45; }
     .survey-option { margin-top: 16px; }
     .shared-reward-count { margin-top: 12px !important; padding: 9px 10px; border-radius: 7px; background: #363442; color: #d4d0ff !important; font-size: 12px !important; font-weight: 700; }
+    #reward-drawer .modal-header { padding: 20px 22px; }
+    #reward-drawer .modal-header h2 { font-size: 18px; letter-spacing: -.25px; }
+    #reward-drawer .modal-content { padding: 20px 22px 22px; }
+    #reward-drawer .reward-drawer-head { font-size: 14px; }
+    #reward-drawer .reward-drawer-head .text-button { height: 34px; font-size: 12px; }
+    #reward-drawer .reward-tabs { margin-top: 18px; }
+    #reward-drawer .reward-tab { min-height: 36px; padding: 0 12px; font-size: 13px; }
+    #reward-drawer .catalog-list { gap: 10px; max-height: 350px; }
+    #reward-drawer .catalog-reward { gap: 12px; padding: 14px; }
+    #reward-drawer .catalog-copy strong { font-size: 14px; line-height: 1.4; }
+    #reward-drawer .catalog-copy p { margin-top: 5px; font-size: 12px; line-height: 1.5; }
+    #reward-drawer .catalog-type { margin-top: 7px; font-size: 11px; }
+    #reward-drawer .form-actions { gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid #414048; }
+    #reward-drawer .form-actions .secondary-button { min-width: 88px; height: 42px; padding: 0 16px; font-size: 13px; }
+    #reward-drawer .form-actions .primary-button { height: 42px; padding: 0 18px; font-size: 13px; }
     #preview-modal .modal { width: min(500px, 100%); }
     .preview-card { overflow: hidden; margin-top: 14px; border: 1px solid #45444c; border-radius: 11px; background: #1d1d20; }
     .preview-hero { display: grid; height: 184px; place-items: center; overflow: hidden; border-bottom: 1px solid #45434d; background: linear-gradient(135deg, #4a456d, #2c2a36 58%, #242429); color: #c5c0ff; font-size: 12px; }
@@ -485,7 +501,7 @@
                     <p class="discount-description">가입한 회원이 멤버십을 사용할 수 있는 기간입니다.</p>
                     <div class="input-wrap"><input class="number-input required-input with-suffix" id="duration" type="number" min="1" max="120" inputmode="numeric" placeholder="1" /><span class="input-suffix">개월</span></div>
                     <div class="input-error">1개월 이상의 이용 기간을 입력해야 합니다.</div>
-                    <div class="benefit-expiry-notice" id="benefit-expiry-notice" hidden><span id="benefit-expiry-copy"></span></div>
+                    <div class="benefit-expiry-notice" id="benefit-expiry-notice" hidden aria-hidden="true"><span id="benefit-expiry-copy"></span></div>
                   </div>
                   <div class="field full" id="renewal-mode-field">
                     <span class="group-label" id="renewal-mode-label">갱신 방식 <span class="required-mark">*</span></span>
@@ -821,7 +837,9 @@
       function updateBenefitExpiryNotice() {
         const isBenefitMembership = state.planType === 'deduction';
         const autoRenewal = $('input[name="renewal-mode"]:checked').value === 'auto';
-        $('#benefit-expiry-notice').hidden = !isBenefitMembership;
+        const notice = $('#benefit-expiry-notice');
+        notice.hidden = !isBenefitMembership;
+        notice.setAttribute('aria-hidden', String(!isBenefitMembership));
         $('#benefit-expiry-copy').textContent = isBenefitMembership
           ? `${BENEFIT_EXPIRY_NOTICE}${autoRenewal ? ` ${BENEFIT_RENEWAL_NOTICE}` : ''}`
           : '';
