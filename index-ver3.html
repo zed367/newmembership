@@ -401,6 +401,28 @@
     .badge-upload-name.error { color: var(--danger); }
     .badge-modal-footer { flex: 0 0 auto; padding: 12px 20px; border-top: 1px solid #3e3e43; }
     .badge-modal-footer .primary-button { width: 100%; height: 40px; font-size: 13px; }
+    #dm-modal .modal { display: flex; flex-direction: column; width: min(564px, 100%); min-height: 640px; max-height: calc(100vh - 40px); }
+    #dm-modal .modal-header { flex: 0 0 auto; padding: 18px 20px; }
+    #dm-modal .modal-header h2 { font-size: 16px; }
+    #dm-modal .modal-content { flex: 1 1 auto; min-height: 0; padding: 18px; overflow-y: auto; }
+    .dm-audience-options { display: grid; gap: 0; }
+    .dm-audience-option { align-items: center; min-height: 36px; padding: 8px 10px; border-radius: 7px; }
+    .dm-audience-option:has(input:checked) { background: #303035; }
+    .dm-audience-option .radio { margin-top: 0; }
+    .dm-specific-settings { margin-top: 14px; }
+    .dm-specific-settings[hidden] { display: none; }
+    .dm-draft-membership-option { min-height: 38px; padding: 8px 10px; border-radius: 7px; background: #29292d; }
+    .dm-membership-label { margin: 20px 0 12px; }
+    .dm-membership-list { display: grid; gap: 2px; max-height: 276px; overflow-y: auto; padding-right: 6px; }
+    .dm-membership-option { display: flex; align-items: flex-start; gap: 10px; min-height: 55px; padding: 9px 10px; border-radius: 7px; cursor: pointer; }
+    .dm-membership-option:hover { background: #29292e; }
+    .dm-membership-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .dm-membership-option .checkbox { flex: 0 0 auto; margin-top: 1px; }
+    .dm-membership-copy { display: grid; gap: 3px; min-width: 0; }
+    .dm-membership-copy strong { color: #e8e6ec; font-size: 13px; line-height: 1.4; }
+    .dm-membership-copy span { color: #aaa8b4; font-size: 12px; }
+    .dm-modal-footer { flex: 0 0 auto; display: flex; justify-content: flex-end; padding: 12px 22px; border-top: 1px solid #3e3e43; }
+    .dm-modal-footer .primary-button { min-width: 60px; height: 40px; padding: 0 17px; font-size: 13px; }
     #preview-modal .modal { width: min(500px, 100%); }
     .preview-card { overflow: hidden; margin-top: 14px; border: 1px solid #45444c; border-radius: 11px; background: #1d1d20; }
     .preview-hero { display: grid; height: 184px; place-items: center; overflow: hidden; border-bottom: 1px solid #45434d; background: linear-gradient(135deg, #4a456d, #2c2a36 58%, #242429); color: #c5c0ff; font-size: 12px; }
@@ -672,6 +694,7 @@
 
   <div class="modal-backdrop" id="setting-modal" role="dialog" aria-modal="true" aria-labelledby="setting-modal-title"><div class="modal"><div class="modal-header"><h2 id="setting-modal-title">기본 혜택 설정</h2><button class="modal-close" data-close-modal="setting-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p id="setting-modal-copy"></p><div class="setting-choices" id="setting-choices"></div></div></div></div>
   <div class="modal-backdrop" id="badge-modal" role="dialog" aria-modal="true" aria-labelledby="badge-modal-title"><div class="modal"><div class="modal-header"><h2 id="badge-modal-title">멤버십 배지 설정</h2><button class="modal-close" id="close-badge-modal" data-close-modal="badge-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><span class="group-label" id="badge-mode-label">배지 생성 방식</span><div class="badge-mode-options" role="radiogroup" aria-labelledby="badge-mode-label"><label class="option-row badge-mode-option"><input type="radio" name="badge-mode" value="default" checked /><span class="radio"></span><span>기본 배지 사용</span></label><label class="option-row badge-mode-option"><input type="radio" name="badge-mode" value="custom" /><span class="radio"></span><span>커스텀 배지 사용</span></label></div><span class="group-label badge-preview-label">미리보기</span><div class="badge-preview"><div class="badge-preview-composition"><div class="badge-avatar"><span id="badge-avatar-fallback">F</span><img id="badge-avatar-image" src="" alt="대표 이미지 미리보기" hidden /></div><span class="badge-overlay"><span class="badge-default-icon" id="badge-default-icon" aria-label="기본 배지">◆</span><img class="badge-custom-preview" id="badge-custom-preview" src="" alt="커스텀 배지 미리보기" hidden /></span></div></div><div class="badge-upload" id="badge-upload" hidden><label class="group-label" for="badge-image-input">이미지 업로드 <span class="required-mark">*</span></label><p class="badge-upload-help">지원되는 형식 : PNG, JPG | 최소 크기 : 32 X 32 | 업로드 크기 : 1MB 미만 | 가로세로 비율 : 1:1</p><label class="badge-upload-picker" for="badge-image-input"><input id="badge-image-input" type="file" accept="image/png,image/jpeg" /><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2"></rect><circle cx="8.5" cy="9" r="1.3"></circle><path d="m5.5 17 4.3-4.2 2.9 2.8 2.1-2 3.8 3.5"></path></svg><span>이미지를<br />넣어주세요</span></label><p class="badge-upload-name" id="badge-upload-name" aria-live="polite"></p></div></div><div class="badge-modal-footer"><button class="primary-button" id="save-badge-settings" type="button">저장</button></div></div></div>
+  <div class="modal-backdrop" id="dm-modal" role="dialog" aria-modal="true" aria-labelledby="dm-modal-title"><div class="modal"><div class="modal-header"><h2 id="dm-modal-title">메시지 수신 설정</h2><button class="modal-close" data-close-modal="dm-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><span class="group-label" id="dm-audience-label">나에게 메시지를 보낼 수 있는 사람</span><div class="dm-audience-options" role="radiogroup" aria-labelledby="dm-audience-label"><label class="option-row dm-audience-option"><input type="radio" name="dm-audience" value="none" /><span class="radio"></span><span>없음</span></label><label class="option-row dm-audience-option"><input type="radio" name="dm-audience" value="all-fans" checked /><span class="radio"></span><span>모든 팬</span></label><label class="option-row dm-audience-option"><input type="radio" name="dm-audience" value="all-members" /><span class="radio"></span><span>모든 멤버</span></label><label class="option-row dm-audience-option"><input type="radio" name="dm-audience" value="specific-memberships" /><span class="radio"></span><span>특정 멤버십 가입자</span></label></div><div class="dm-specific-settings" id="dm-specific-settings" hidden><label class="checkbox-option dm-draft-membership-option"><input id="dm-include-draft" type="checkbox" /><span class="checkbox"></span><span>생성중인 멤버십 포함</span></label><span class="group-label dm-membership-label">대상 멤버십 선택</span><div class="dm-membership-list" id="dm-membership-list"></div></div></div><div class="dm-modal-footer"><button class="primary-button" id="save-dm-settings" type="button">저장</button></div></div></div>
   <div class="modal-backdrop" id="reward-drawer" role="dialog" aria-modal="true" aria-labelledby="reward-drawer-title"><div class="modal modal-wide"><div class="modal-header"><h2 id="reward-drawer-title">추가 혜택</h2><button class="modal-close" data-close-modal="reward-drawer" type="button" aria-label="닫기">×</button></div><div class="modal-content"><div class="reward-drawer-head"><span>리워드 목록</span><button class="text-button" id="open-new-reward" type="button">＋ 새 리워드</button></div><div class="reward-tabs" role="tablist" aria-label="리워드 사용 가능 상태"><button class="reward-tab active" id="available-reward-tab" data-reward-tab="available" type="button" role="tab" aria-selected="true">사용 가능</button><button class="reward-tab" id="unavailable-reward-tab" data-reward-tab="unavailable" type="button" role="tab" aria-selected="false">사용 불가</button></div><div class="catalog-list" id="reward-catalog-list"></div><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="reward-drawer" type="button">취소</button><button class="primary-button" id="add-selected-rewards" type="button">선택한 혜택 추가</button></div></div></div></div>
   <div class="modal-backdrop" id="new-reward-modal" role="dialog" aria-modal="true" aria-labelledby="new-reward-modal-title"><div class="modal"><div class="modal-header"><h2 id="new-reward-modal-title">새 리워드 생성</h2><button class="modal-close" data-close-modal="new-reward-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><span class="group-label" id="new-reward-type-label">리워드 타입</span><div class="compact-options" role="radiogroup" aria-labelledby="new-reward-type-label"><label class="option-row"><input type="radio" name="new-reward-type" value="basic" checked /><span class="radio"></span><span>기본형</span></label><label class="option-row"><input type="radio" name="new-reward-type" value="managed" /><span class="radio"></span><span>지급 관리형</span></label></div><p class="reward-type-help" id="new-reward-type-help">상시 제공하거나 비정기적으로 제공하는 리워드입니다.</p><label class="group-label" for="new-reward-title">리워드 타이틀 <span class="required-mark">*</span></label><input class="text-input" id="new-reward-title" type="text" maxlength="40" placeholder="예) 1:1 드로잉 피드백" /><label class="group-label" for="new-reward-description" style="margin-top:14px;">리워드 설명</label><input class="text-input" id="new-reward-description" type="text" maxlength="100" placeholder="예) 월 1회 이용" /><label class="option-row survey-option"><input id="new-reward-survey" type="checkbox" /><span class="checkbox"></span><span>리워드 요청 설문 사용</span></label><div class="form-actions"><button class="secondary-button" id="back-to-reward-drawer" type="button">이전</button><button class="primary-button" id="create-reward" type="button">생성</button></div></div></div></div>
   <div class="modal-backdrop" id="edit-reward-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="edit-reward-confirm-title"><div class="modal"><div class="modal-header"><h2 id="edit-reward-confirm-title">혜택을 수정하시겠어요?</h2><button class="modal-close" data-close-modal="edit-reward-confirm-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>이 혜택은 다른 멤버십에서도 사용 중입니다.<br />수정하면 이 혜택을 사용하는 다른 멤버십에도 변경 내용이 동일하게 적용됩니다.</p><p class="shared-reward-count" id="shared-reward-count">사용 중인 멤버십 3개</p><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="edit-reward-confirm-modal" type="button">취소</button><button class="primary-button" id="confirm-edit-reward" type="button">수정하기</button></div></div></div></div>
@@ -688,6 +711,12 @@
         { id: 1, type: 'basic', title: '포트폴리오 피드백 1회권', description: '멤버십 가입 시 1회 이용할 수 있는 혜택입니다.', available: true, survey: false, sharedCount: 3 },
         { id: 2, type: 'basic', title: '이벤트 티켓 참여권', description: '멤버십 전용 이벤트에 참여할 수 있습니다.', available: true, survey: false, sharedCount: 1 },
         { id: 3, type: 'managed', title: '월간 1:1 피드백', description: '월 1회 제공되는 지급 관리형 리워드입니다.', available: false, unavailableReason: '지급 관리형 리워드는 혜택 이용 기준 멤버십에만 추가할 수 있습니다.', survey: true, sharedCount: 2 }
+      ];
+      const dmMembershipCatalog = [
+        { id: 'test-membership', title: '테스트 멤버십', price: '₩ 1,000' },
+        { id: 'monthly-membership', title: '월간 멤버십', price: '₩ 3,000' },
+        { id: 'premium-membership', title: '프리미엄 멤버십', price: '₩ 5,000' },
+        { id: 'community-membership', title: '커뮤니티 멤버십', price: '₩ 10,000' }
       ];
       const baseRequired = [
         { key: 'planType', label: '멤버십 운영 방식', target: 'plan-type-field' },
@@ -711,6 +740,7 @@
       let pendingRewardId = null;
       let selectedRewardIds = new Set();
       let badgeDraft = { mode: 'default', imageName: '', imageUrl: '' };
+      let dmDraft = { audience: 'all-fans', includeDraftMembership: false, membershipIds: [] };
 
       function getRequiredLabel(item) {
         return item.key === 'duration' && state.planType === 'cohort' ? '이용 종료일' : item.label;
@@ -1213,17 +1243,20 @@
       function closeModal(id) { $(`#${id}`).classList.remove('open'); }
       $$('.modal-close').forEach((button) => button.addEventListener('click', () => {
         if (button.dataset.closeModal === 'badge-modal') resetBadgeDraft();
+        if (button.dataset.closeModal === 'dm-modal') resetDmDraft();
         closeModal(button.dataset.closeModal);
       }));
       $$('.modal-backdrop').forEach((modal) => modal.addEventListener('click', (event) => {
         if (event.target !== modal) return;
         if (modal.id === 'badge-modal') resetBadgeDraft();
+        if (modal.id === 'dm-modal') resetDmDraft();
         modal.classList.remove('open');
       }));
       document.addEventListener('keydown', (event) => {
         if (event.key !== 'Escape') return;
         pendingPlanType = '';
         if ($('#badge-modal').classList.contains('open')) resetBadgeDraft();
+        if ($('#dm-modal').classList.contains('open')) resetDmDraft();
         $$('.modal-backdrop.open').forEach((modal) => modal.classList.remove('open'));
       });
       $('#operation-change-modal').addEventListener('click', (event) => { if (event.target === event.currentTarget) pendingPlanType = ''; });
@@ -1237,9 +1270,80 @@
         selectPlanType(nextPlanType);
       });
 
-      const settingData = {
-        dm: { title: '다이렉트 메시지 이용 권한', copy: '멤버십 가입자에게 다이렉트 메시지 이용 권한을 제공할지 선택할 수 있습니다.', on: '제공함', off: '제공하지 않음' }
+      const dmAudienceLabels = {
+        none: '없음',
+        'all-fans': '모든 팬',
+        'all-members': '모든 멤버',
+        'specific-memberships': '특정 멤버십 가입자'
       };
+
+      function getSavedDm() {
+        const dm = state.dm;
+        if (!dm || typeof dm !== 'object') return { audience: 'all-fans', includeDraftMembership: false, membershipIds: [] };
+        return {
+          audience: dmAudienceLabels[dm.audience] ? dm.audience : 'all-fans',
+          includeDraftMembership: Boolean(dm.includeDraftMembership),
+          membershipIds: Array.isArray(dm.membershipIds) ? [...dm.membershipIds] : []
+        };
+      }
+
+      function renderDmMembershipList() {
+        const list = $('#dm-membership-list');
+        list.innerHTML = '';
+        dmMembershipCatalog.forEach((membership) => {
+          const label = document.createElement('label');
+          label.className = 'dm-membership-option';
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.checked = dmDraft.membershipIds.includes(membership.id);
+          const check = document.createElement('span');
+          check.className = 'checkbox';
+          const copy = document.createElement('span');
+          copy.className = 'dm-membership-copy';
+          const title = document.createElement('strong');
+          title.textContent = membership.title;
+          const price = document.createElement('span');
+          price.textContent = membership.price;
+          input.addEventListener('change', () => {
+            if (input.checked) dmDraft.membershipIds.push(membership.id);
+            else dmDraft.membershipIds = dmDraft.membershipIds.filter((id) => id !== membership.id);
+          });
+          copy.append(title, price);
+          label.append(input, check, copy);
+          list.append(label);
+        });
+      }
+
+      function renderDmModal() {
+        $(`input[name="dm-audience"][value="${dmDraft.audience}"]`).checked = true;
+        const isSpecificMemberships = dmDraft.audience === 'specific-memberships';
+        $('#dm-specific-settings').hidden = !isSpecificMemberships;
+        $('#dm-include-draft').checked = dmDraft.includeDraftMembership;
+        if (isSpecificMemberships) renderDmMembershipList();
+      }
+
+      function resetDmDraft() {
+        dmDraft = getSavedDm();
+        renderDmModal();
+      }
+
+      function openDmModal() {
+        resetDmDraft();
+        openModal('dm-modal');
+      }
+
+      $$('input[name="dm-audience"]').forEach((input) => input.addEventListener('change', () => {
+        dmDraft.audience = input.value;
+        renderDmModal();
+      }));
+      $('#dm-include-draft').addEventListener('change', (event) => { dmDraft.includeDraftMembership = event.target.checked; });
+      $('#save-dm-settings').addEventListener('click', () => {
+        state.dm = { ...dmDraft, membershipIds: [...dmDraft.membershipIds] };
+        $('#dm-state').textContent = dmAudienceLabels[state.dm.audience];
+        $('#dm-state').className = `reward-state${state.dm.audience === 'none' ? '' : ' on'}`;
+        closeModal('dm-modal');
+        update();
+      });
 
       function getSavedBadge() {
         const badge = state.badge || {};
@@ -1329,17 +1433,7 @@
       $$('.reward-config').forEach((button) => button.addEventListener('click', () => {
         const key = button.dataset.setting;
         if (key === 'badge') { openBadgeModal(); return; }
-        const data = settingData[key];
-        $('#setting-modal-title').textContent = data.title;
-        $('#setting-modal-copy').textContent = data.copy;
-        const choices = $('#setting-choices'); choices.innerHTML = '';
-        [{ value: true, label: data.on }, { value: false, label: data.off }].forEach((choice) => {
-          const el = document.createElement('button'); el.type = 'button'; el.className = `setting-choice${state[key] === choice.value ? ' active' : ''}`;
-          el.innerHTML = `<span><strong>${choice.label}</strong></span><span>${state[key] === choice.value ? '✓' : ''}</span>`;
-          el.addEventListener('click', () => { state[key] = choice.value; $(`#${key}-state`).textContent = choice.value ? data.on : data.off; $(`#${key}-state`).className = `reward-state${choice.value ? ' on' : ''}`; closeModal('setting-modal'); update(); });
-          choices.append(el);
-        });
-        openModal('setting-modal');
+        if (key === 'dm') openDmModal();
       }));
 
       function getReward(id) { return rewardCatalog.find((reward) => reward.id === id); }
@@ -1508,7 +1602,7 @@
           : '운영 방식을 선택하면 이용 안내가 표시됩니다.';
 
         const benefits = [];
-        if (state.dm) benefits.push({ title: '다이렉트 메시지', description: '' });
+        if (state.dm && state.dm.audience !== 'none') benefits.push({ title: '다이렉트 메시지', description: '' });
         if (state.badge) benefits.push({ title: '멤버십 배지', description: '' });
         getConnectedRewards().forEach((reward) => benefits.push({ title: reward.title, description: reward.description }));
         const list = $('#preview-benefits'); list.innerHTML = '';
