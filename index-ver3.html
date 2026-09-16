@@ -166,6 +166,7 @@
     .discount-details-inner { min-height: 0; overflow: hidden; }
     .capacity-range { margin: 7px 0 0; color: var(--subtle); font-size: 12px; }
     .discount-note { margin: 7px 0 0; color: var(--subtle); font-size: 11px; line-height: 1.45; }
+    .discount-limit { color: #aaa6d6; }
     .discount-warning { color: #ffc875; }
     .discount-result { display: grid; gap: 4px; margin-top: 12px; padding: 12px; border: 1px solid #414049; border-radius: 8px; background: #29292d; }
     .discount-result-label { color: var(--muted); font-size: 11px; font-weight: 650; }
@@ -273,6 +274,7 @@
     .summary { overflow: hidden; border: 1px solid #494850; border-radius: 12px; background: #242426; box-shadow: var(--shadow); }
     .summary-top { padding: 21px 20px 18px; border-bottom: 1px solid #3b3b40; }
     .resolved-type { display: grid; gap: 3px; margin-bottom: 15px; padding: 11px 12px; border: 1px solid rgba(137, 130, 255, .42); border-radius: 9px; background: rgba(83, 78, 158, .21); }
+    .resolved-type[hidden], .summary-pricing[hidden] { display: none; }
     .resolved-type span { color: #aaa5ff; font-size: 10px; font-weight: 750; }
     .resolved-type strong { color: #eeecff; font-size: 13px; letter-spacing: -.15px; }
     .resolved-type small { color: #b7b3d9; font-size: 10px; }
@@ -429,6 +431,7 @@
     .preview-hero img { width: 100%; height: 100%; object-fit: cover; }
     .preview-copy { padding: 17px 18px 19px; }
     .preview-resolved-type { display: grid; gap: 2px; margin-bottom: 10px; padding: 8px 10px; border: 1px solid rgba(137, 130, 255, .38); border-radius: 8px; background: rgba(82, 77, 156, .2); }
+    .preview-resolved-type[hidden], .preview-first-benefit[hidden], .preview-discount-rate[hidden], .preview-discount-summary[hidden], .price-summary-row[hidden] { display: none; }
     .preview-resolved-type strong { color: #e9e7ff; font-size: 11px; }
     .preview-resolved-type span { color: #b7b3d9; font-size: 10px; }
     .preview-first-benefit { display: flex; align-items: center; gap: 7px; margin-bottom: 11px; padding: 8px 10px; border: 1px solid rgba(133, 125, 255, .45); border-radius: 8px; background: #37345e; color: #e2e0ff; font-size: 11px; font-weight: 750; }
@@ -514,15 +517,10 @@
                     <input class="text-input required-input" id="plan-name" type="text" maxlength="60" placeholder="예) 팬더들을 위한 브론즈 멤버십" />
                     <div class="character-count"><span id="name-count">0</span>/60</div>
                   </div>
-                  <div class="field" id="original-price-field">
+                  <div class="field full" id="original-price-field">
                     <label class="group-label" for="plan-original-price">정가 <span class="required-mark">*</span></label>
-                    <div class="input-wrap"><input class="number-input required-input with-suffix" id="plan-original-price" type="number" min="1000" max="5000000" inputmode="numeric" placeholder="10,000" /><span class="input-suffix">원</span></div>
-                    <div class="input-error">1,000원~5,000,000원 사이로 입력해야 합니다.</div>
-                  </div>
-                  <div class="field" id="price-field">
-                    <label class="group-label" for="plan-price">판매가 <span class="required-mark">*</span></label>
-                    <div class="input-wrap"><input class="number-input required-input with-suffix" id="plan-price" type="number" min="1000" max="5000000" inputmode="numeric" placeholder="6,100" /><span class="input-suffix">원</span></div>
-                    <div class="input-error" id="sale-price-error">정가 이하, 1,000원~5,000,000원 사이로 입력해야 합니다.</div>
+                    <div class="input-wrap"><input class="number-input required-input with-suffix" id="plan-original-price" type="number" min="1000" max="5000000" step="1" inputmode="numeric" placeholder="10,000" /><span class="input-suffix">원</span></div>
+                    <div class="input-error">1,000원~5,000,000원 사이의 정수로 입력해야 합니다.</div>
                   </div>
                   <div class="field full" id="plan-summary-field">
                     <label class="group-label" for="plan-summary">멤버십 한 줄 설명 <span class="required-mark">*</span> <span class="field-help">최대 400자</span></label>
@@ -538,25 +536,35 @@
                   </div>
                 </div>
                 <div class="field-grid two" id="discount-settings" style="margin-top: 24px;">
+                  <div class="field full" id="sale-discount-field">
+                    <span class="group-label" id="sale-discount-label">판매가 할인 <span class="cycle-badge">매 결제마다 적용</span></span>
+                    <p class="discount-description">정가에서 할인한 판매가를 설정합니다. 판매가는 자동으로 계산됩니다.</p>
+                    <div class="compact-options discount-options" role="radiogroup" aria-labelledby="sale-discount-label">
+                      <label class="option-row"><input type="radio" name="sale-discount" value="rate" aria-controls="sale-discount-details" checked /><span class="radio"></span><span>정률 할인</span></label>
+                      <label class="option-row"><input type="radio" name="sale-discount" value="fixed" aria-controls="sale-discount-details" /><span class="radio"></span><span>정액 할인</span></label>
+                    </div>
+                    <div class="discount-details open" id="sale-discount-details" aria-hidden="false"><div class="discount-details-inner">
+                      <div id="sale-discount-rate-input"><label class="group-label" for="sale-discount-rate">할인율</label><div class="input-wrap"><input class="number-input with-suffix" id="sale-discount-rate" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="10" disabled /><span class="input-suffix">%</span></div></div>
+                      <div id="sale-discount-fixed-input" hidden><label class="group-label" for="sale-discount-amount">할인 금액</label><div class="input-wrap"><input class="number-input with-suffix" id="sale-discount-amount" type="number" min="1" max="5000000" step="1" inputmode="numeric" placeholder="1,000" disabled /><span class="input-suffix">원</span></div></div>
+                      <div class="input-error" id="sale-discount-error"></div><p class="discount-note discount-limit" id="sale-discount-limit"></p><p class="discount-note discount-warning" id="sale-discount-rounding" hidden></p>
+                    </div></div>
+                  </div>
                   <div class="field full" id="first-discount-field">
                     <span class="group-label" id="first-discount-label">첫 결제 할인 <span class="cycle-badge">최초 1회만 적용</span></span>
                     <p class="discount-description">멤버십 첫 결제에만 추가로 적용할 할인 방식을 설정합니다.</p>
                     <div class="compact-options discount-options" role="radiogroup" aria-labelledby="first-discount-label">
                       <label class="option-row"><input type="radio" name="first-discount" value="rate" aria-controls="first-discount-details" checked /><span class="radio"></span><span>정률 할인</span></label>
                       <label class="option-row"><input type="radio" name="first-discount" value="fixed" aria-controls="first-discount-details" /><span class="radio"></span><span>정액 할인</span></label>
-                      <label class="option-row"><input type="radio" name="first-discount" value="none" /><span class="radio"></span><span>적용 안 함</span></label>
                     </div>
-                    <div class="discount-details" id="first-discount-details" aria-hidden="true"><div class="discount-details-inner">
+                    <div class="discount-details open" id="first-discount-details" aria-hidden="false"><div class="discount-details-inner">
                       <div id="first-discount-rate-input"><label class="group-label" for="first-discount-rate">할인율</label><div class="input-wrap"><input class="number-input with-suffix" id="first-discount-rate" type="number" min="1" max="100" step="1" inputmode="numeric" placeholder="10" disabled /><span class="input-suffix">%</span></div></div>
-                      <div id="first-discount-fixed-input" hidden><label class="group-label" for="first-discount-amount">할인 금액</label><div class="input-wrap"><input class="number-input with-suffix" id="first-discount-amount" type="number" min="1" max="5000000" inputmode="numeric" placeholder="1,000" disabled /><span class="input-suffix">원</span></div></div>
-                      <div class="input-error" id="first-discount-error">할인 금액은 판매가 이하로 입력해야 합니다.</div><p class="discount-note discount-warning" id="first-discount-warning" hidden>할인율 100%는 첫 결제 금액이 0원이 됩니다.</p>
-                      <p class="discount-note" id="first-discount-note">할인율은 판매가를 기준으로 계산됩니다.</p>
-                      <div class="discount-result" aria-live="polite"><span class="discount-result-label">첫 결제 금액</span><strong class="discount-result-value" id="first-discount-price">—</strong><span class="discount-result-copy muted" id="first-discount-copy">판매가를 입력하면 첫 결제 금액이 표시됩니다.</span></div>
-                      <div class="payment-amounts" id="payment-amounts" hidden><div class="payment-amount-row"><span>첫 결제 금액</span><strong id="first-payment-amount">—</strong></div><div class="payment-amount-row" id="later-payment-row"><span>이후 결제 금액</span><strong id="later-payment-amount">—</strong></div></div>
+                      <div id="first-discount-fixed-input" hidden><label class="group-label" for="first-discount-amount">할인 금액</label><div class="input-wrap"><input class="number-input with-suffix" id="first-discount-amount" type="number" min="1" max="5000000" step="1" inputmode="numeric" placeholder="1,000" disabled /><span class="input-suffix">원</span></div></div>
+                      <div class="input-error" id="first-discount-error"></div><p class="discount-note discount-limit" id="first-discount-limit"></p>
+                      <p class="discount-note" id="first-discount-note">할인율은 정가를 기준으로 계산됩니다.</p>
                     </div></div>
                   </div>
                 </div>
-                <div class="price-summary" aria-label="가격 요약"><div class="price-summary-row" id="price-summary-original-row"><span>정가</span><strong id="price-summary-original">—</strong></div><div class="price-summary-row" id="price-summary-sale-row"><span>판매가</span><strong id="price-summary-sale">—</strong></div><div class="price-summary-row muted" id="price-summary-rate-row"><span>정가 대비</span><strong id="price-summary-rate">0% 할인</strong></div><div class="price-summary-row muted" id="price-summary-amount-row"><span>할인 금액</span><strong id="price-summary-amount">0원</strong></div><div class="price-summary-row muted" id="price-summary-first-discount-row"><span>첫 결제 할인</span><strong id="price-summary-first-discount">적용 안 함</strong></div><div class="price-summary-row" id="price-summary-first-row"><span>첫 결제 금액</span><strong id="price-summary-first">—</strong></div></div>
+                <div class="price-summary" aria-label="가격 요약"><div class="price-summary-row" id="price-summary-original-row"><span>정가</span><strong id="price-summary-original">—</strong></div><div class="price-summary-row" id="price-summary-sale-discount-row" hidden><span id="price-summary-sale-discount-label">판매가 할인</span><strong id="price-summary-sale-discount">—</strong></div><div class="price-summary-row" id="price-summary-sale-row"><span>판매가</span><strong id="price-summary-sale">—</strong></div><div class="price-summary-row" id="price-summary-first-discount-row" hidden><span id="price-summary-first-discount-label">첫 결제 할인</span><strong id="price-summary-first-discount">—</strong></div><div class="price-summary-row" id="price-summary-first-row" hidden><span>첫 결제 금액</span><strong id="price-summary-first">—</strong></div><div class="price-summary-row" id="price-summary-later-row" hidden><span>2회차부터</span><strong id="price-summary-later">—</strong></div></div>
               </div>
 
               <div class="form-group" id="subscription-settings">
@@ -679,7 +687,7 @@
 
       <aside class="summary-wrap" aria-label="멤버십 생성 준비 상태">
         <div class="summary">
-          <div class="summary-top"><div class="resolved-type" id="summary-resolved-type" hidden><span>생성되는 멤버십</span><strong id="summary-resolved-type-name"></strong><small>설정 기준은 운영 방식 선택 영역에서 확인할 수 있습니다.</small></div><h2 class="summary-title">생성 준비 상태</h2><p class="summary-caption">필수 입력 항목을 모두 입력해야 생성할 수 있습니다.</p><div class="progress-row"><div class="progress-ring" id="progress-ring"><strong id="progress-percent">0%</strong></div><div class="progress-copy"><b id="progress-title">필수 항목 0 / 7 완료</b><span id="progress-subtitle">멤버십 설정의 필수 항목을 입력해야 합니다.</span></div></div><div class="summary-pricing" id="summary-pricing" hidden><div><span>이용 기간</span><strong id="summary-duration">—</strong></div><div><span>갱신</span><strong id="summary-renewal">—</strong></div><div><span>정가</span><strong id="summary-original-price">—</strong></div><div><span>판매가</span><strong id="summary-sale-price">—</strong></div><div><span>정가 대비</span><strong id="summary-sale-discount">—</strong></div><div><span>첫 결제</span><strong id="summary-first-price">—</strong></div><div><span>추가 혜택</span><strong id="summary-reward-count">0개</strong></div></div></div>
+          <div class="summary-top"><div class="resolved-type" id="summary-resolved-type" hidden><span>생성되는 멤버십</span><strong id="summary-resolved-type-name"></strong><small>이 조합으로 생성됩니다.</small></div><h2 class="summary-title">생성 준비 상태</h2><p class="summary-caption">필수 입력 항목을 모두 입력해야 생성할 수 있습니다.</p><div class="progress-row"><div class="progress-ring" id="progress-ring"><strong id="progress-percent">0%</strong></div><div class="progress-copy"><b id="progress-title">필수 항목 0 / 6 완료</b><span id="progress-subtitle">멤버십 설정의 필수 항목을 입력해야 합니다.</span></div></div><div class="summary-pricing" id="summary-pricing" hidden><div><span>이용 기간</span><strong id="summary-duration">—</strong></div><div><span>갱신</span><strong id="summary-renewal">—</strong></div><div><span>정가</span><strong id="summary-original-price">—</strong></div><div><span>판매가</span><strong id="summary-sale-price">—</strong></div><div><span>정가 대비</span><strong id="summary-sale-discount">—</strong></div><div><span>첫 결제</span><strong id="summary-first-price">—</strong></div><div><span>추가 혜택</span><strong id="summary-reward-count">0개</strong></div></div></div>
           <div class="summary-statuses">
             <button class="summary-section-link" data-summary-section="basic" type="button"><span class="summary-indicator" id="basic-indicator">✓</span><span class="summary-label">멤버십 설정</span><span class="summary-state" id="basic-summary-state">6개 미완료</span></button>
             <button class="summary-section-link" data-summary-section="benefit" type="button"><span class="summary-indicator optional" id="benefit-indicator">✓</span><span class="summary-label">혜택 설정</span><span class="summary-state optional" id="benefit-summary-state">선택</span></button>
@@ -700,7 +708,7 @@
   <div class="modal-backdrop" id="edit-reward-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="edit-reward-confirm-title"><div class="modal"><div class="modal-header"><h2 id="edit-reward-confirm-title">혜택을 수정하시겠어요?</h2><button class="modal-close" data-close-modal="edit-reward-confirm-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>이 혜택은 다른 멤버십에서도 사용 중입니다.<br />수정하면 이 혜택을 사용하는 다른 멤버십에도 변경 내용이 동일하게 적용됩니다.</p><p class="shared-reward-count" id="shared-reward-count">사용 중인 멤버십 3개</p><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="edit-reward-confirm-modal" type="button">취소</button><button class="primary-button" id="confirm-edit-reward" type="button">수정하기</button></div></div></div></div>
   <div class="modal-backdrop" id="edit-reward-modal" role="dialog" aria-modal="true" aria-labelledby="edit-reward-modal-title"><div class="modal"><div class="modal-header"><h2 id="edit-reward-modal-title">혜택 수정</h2><button class="modal-close" data-close-modal="edit-reward-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p class="reward-edit-type" id="edit-reward-type">기본형 리워드</p><label class="group-label" for="edit-reward-title">리워드 타이틀 <span class="required-mark">*</span></label><input class="text-input" id="edit-reward-title" type="text" maxlength="40" /><label class="group-label" for="edit-reward-description" style="margin-top:14px;">리워드 설명</label><input class="text-input" id="edit-reward-description" type="text" maxlength="100" /><label class="option-row survey-option"><input id="edit-reward-survey" type="checkbox" /><span class="checkbox"></span><span>리워드 요청 설문 사용</span></label><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="edit-reward-modal" type="button">취소</button><button class="primary-button" id="save-reward-edit" type="button">수정 완료</button></div></div></div></div>
   <div class="modal-backdrop" id="remove-reward-modal" role="dialog" aria-modal="true" aria-labelledby="remove-reward-modal-title"><div class="modal"><div class="modal-header"><h2 id="remove-reward-modal-title">이 혜택을 멤버십에서 제거하시겠어요?</h2><button class="modal-close" data-close-modal="remove-reward-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>혜택 자체는 삭제되지 않으며 다른 멤버십에서는 계속 사용할 수 있습니다.</p><div class="form-actions"><button class="secondary-button modal-close" data-close-modal="remove-reward-modal" type="button">취소</button><button class="primary-button" id="confirm-remove-reward" type="button">제거</button></div></div></div></div>
-  <div class="modal-backdrop" id="preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title"><div class="modal"><div class="modal-header"><h2 id="preview-modal-title">멤버십 미리보기</h2><button class="modal-close" data-close-modal="preview-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>입력한 내용을 기준으로 사용자에게 보이는 멤버십 정보를 확인할 수 있습니다.</p><div class="preview-card"><div class="preview-hero" id="preview-hero">대표 이미지</div><div class="preview-copy"><div class="preview-resolved-type" id="preview-resolved-type" hidden><strong id="preview-resolved-type-name"></strong><span>이 조합으로 생성됩니다.</span></div><div class="preview-first-benefit" id="preview-first-benefit" hidden>첫 결제 혜택 적용</div><span class="preview-operation" id="preview-operation">운영 방식</span><h3 id="preview-name">새 멤버십</h3><p id="preview-summary">멤버십 한 줄 설명이 여기에 표시됩니다.</p><div class="preview-price-row"><div><div class="preview-price-caption">판매가</div><div class="preview-price-line"><span class="preview-discount-rate" id="preview-discount-rate" hidden>0% 할인</span><div class="preview-price" id="preview-price">판매가 미정</div></div></div><div class="preview-period" id="preview-period">이용 기간 미정</div></div><div class="preview-discount-summary" id="preview-discount-summary" hidden><span id="preview-discount-label">첫 결제 시 총 할인</span><strong id="preview-discount-total">0원 할인</strong></div><div class="preview-divider"></div><div class="preview-block"><span class="preview-block-title">이용 안내</span><div class="preview-detail" id="preview-usage">운영 방식을 선택하면 이용 안내가 표시됩니다.</div></div><div class="preview-block"><span class="preview-block-title">혜택</span><div class="preview-benefits" id="preview-benefits"><span class="preview-placeholder">설정한 혜택이 표시됩니다.</span></div></div><div class="preview-block"><span class="preview-block-title">상세 소개</span><div class="preview-detail" id="preview-detail">작성한 상세 소개 일부가 표시됩니다.</div></div></div></div></div></div></div>
+  <div class="modal-backdrop" id="preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-modal-title"><div class="modal"><div class="modal-header"><h2 id="preview-modal-title">멤버십 미리보기</h2><button class="modal-close" data-close-modal="preview-modal" type="button" aria-label="닫기">×</button></div><div class="modal-content"><p>입력한 내용을 기준으로 사용자에게 보이는 멤버십 정보를 확인할 수 있습니다.</p><div class="preview-card"><div class="preview-hero" id="preview-hero">대표 이미지</div><div class="preview-copy"><div class="preview-resolved-type" id="preview-resolved-type" hidden><strong id="preview-resolved-type-name"></strong><span>이 조합으로 생성됩니다.</span></div><div class="preview-first-benefit" id="preview-first-benefit" hidden>첫 결제 혜택 적용</div><span class="preview-operation" id="preview-operation">운영 방식</span><h3 id="preview-name">새 멤버십</h3><p id="preview-summary">멤버십 한 줄 설명이 여기에 표시됩니다.</p><div class="preview-price-row"><div><div class="preview-price-caption" id="preview-price-caption">판매가</div><div class="preview-price-line"><span class="preview-discount-rate" id="preview-discount-rate" hidden>0% 할인</span><div class="preview-price" id="preview-price">판매가 미정</div></div></div><div class="preview-period" id="preview-period">이용 기간 미정</div></div><div class="preview-discount-summary" id="preview-discount-summary" hidden><span id="preview-discount-label">2회차부터</span><strong id="preview-discount-total">0원</strong></div><div class="preview-divider"></div><div class="preview-block"><span class="preview-block-title">이용 안내</span><div class="preview-detail" id="preview-usage">운영 방식을 선택하면 이용 안내가 표시됩니다.</div></div><div class="preview-block"><span class="preview-block-title">혜택</span><div class="preview-benefits" id="preview-benefits"><span class="preview-placeholder">설정한 혜택이 표시됩니다.</span></div></div><div class="preview-block"><span class="preview-block-title">상세 소개</span><div class="preview-detail" id="preview-detail">작성한 상세 소개 일부가 표시됩니다.</div></div></div></div></div></div></div>
   <div class="modal-backdrop" id="operation-change-modal" role="dialog" aria-modal="true" aria-labelledby="operation-change-modal-title"><div class="modal"><div class="modal-header"><h2 id="operation-change-modal-title">운영 방식 변경</h2></div><div class="modal-content"><p>멤버십 운영 방식을 변경하면 입력한 내용이 모두 삭제됩니다.<br />운영 방식을 정말 변경하시겠어요?</p><div class="form-actions"><button class="secondary-button" id="cancel-operation-change" type="button">취소</button><button class="primary-button" id="confirm-operation-change" type="button">변경</button></div></div></div></div>
   <div class="toast" id="toast">멤버십이 생성되었습니다.</div>
 
@@ -724,12 +732,11 @@
         { key: 'summary', label: '멤버십 한 줄 설명', target: 'plan-summary-field' },
         { key: 'image', label: '대표 이미지', target: 'image-field' },
         { key: 'originalPrice', label: '정가', target: 'original-price-field' },
-        { key: 'price', label: '판매가', target: 'price-field' },
         { key: 'duration', label: '기본 이용 기간', target: 'duration-field' }
       ];
       const $ = (selector) => document.querySelector(selector);
       const $$ = (selector) => [...document.querySelectorAll(selector)];
-      const inputs = { name: $('#plan-name'), summary: $('#plan-summary'), originalPrice: $('#plan-original-price'), price: $('#plan-price'), duration: $('#duration'), endDate: $('#cohort-end-date'), recruitmentStart: $('#recruitment-start-date'), recruitmentEnd: $('#recruitment-end-date'), image: $('#plan-image'), firstDiscount: $('#first-discount-amount'), firstDiscountRate: $('#first-discount-rate'), capacity: $('#capacity-limit') };
+      const inputs = { name: $('#plan-name'), summary: $('#plan-summary'), originalPrice: $('#plan-original-price'), saleDiscount: $('#sale-discount-amount'), saleDiscountRate: $('#sale-discount-rate'), duration: $('#duration'), endDate: $('#cohort-end-date'), recruitmentStart: $('#recruitment-start-date'), recruitmentEnd: $('#recruitment-end-date'), image: $('#plan-image'), firstDiscount: $('#first-discount-amount'), firstDiscountRate: $('#first-discount-rate'), capacity: $('#capacity-limit') };
       const defaultImagePreview = $('#image-preview').innerHTML;
       const defaultImageMeta = $('#image-meta').textContent;
       const BENEFIT_EXPIRY_NOTICE = '설정한 이용 기간이 끝나면 제공한 혜택이 남아 있어도 멤버십 이용이 종료됩니다.';
@@ -765,23 +772,27 @@
       function getRequiredItems() {
         const items = [...baseRequired];
         const recruitment = getRecruitmentValidity();
+        const discount = getDiscountCalculation();
+        if ((discount.saleInput.hasValue || discount.firstInput.hasValue) && !discount.isConfigurationValid) {
+          items.push({ key: 'pricing', label: '할인 설정', target: 'discount-settings' });
+        }
         if (recruitment.limited) items.push({ key: 'recruitmentPeriod', label: '모집 기간', target: recruitment.startValid ? 'recruitment-end-date-field' : 'recruitment-start-date-field' });
         return items;
       }
 
       function validValues() {
         const originalPrice = Number(inputs.originalPrice.value);
-        const price = Number(inputs.price.value);
         const duration = Number(inputs.duration.value);
         const recruitment = getRecruitmentValidity();
         const usesDurationSettings = state.planType === 'subscription' || state.planType === 'deduction';
+        const discount = getDiscountCalculation();
         return {
           planType: Boolean(state.planType),
           name: inputs.name.value.trim().length > 0,
           summary: inputs.summary.value.trim().length > 0,
           image: Boolean(state.imageName),
-          originalPrice: Number.isFinite(originalPrice) && originalPrice >= 1000 && originalPrice <= 5000000,
-          price: Number.isFinite(originalPrice) && originalPrice >= 1000 && originalPrice <= 5000000 && Number.isFinite(price) && price >= 1000 && price <= 5000000 && price <= originalPrice,
+          originalPrice: Number.isInteger(originalPrice) && originalPrice >= 1000 && originalPrice <= 5000000,
+          pricing: discount.isConfigurationValid,
           duration: usesDurationSettings
             ? Number.isFinite(duration) && duration >= 1
             : state.planType === 'cohort'
@@ -796,106 +807,150 @@
       function readAmount(input) {
         const raw = input.value.trim();
         const value = Number(raw);
-        return { hasValue: raw !== '', value, isPositiveNumber: Number.isFinite(value) && value >= 1 };
+        return { hasValue: raw !== '', value, isPositiveNumber: Number.isInteger(value) && value >= 1 };
       }
 
       function readRate(input) {
         const raw = input.value.trim();
         const value = Number(raw);
-        return { hasValue: raw !== '', value, isValidRate: Number.isInteger(value) && value >= 1 && value <= 100 };
+        return { hasValue: raw !== '', value, isValidRate: Number.isInteger(value) && value >= 1 && value <= 99 };
       }
 
       function getDiscountType(name) { return $(`input[name="${name}"]:checked`).value; }
 
+      function floor100(value) { return Math.floor(value / 100) * 100; }
+
+      function getMaximumRate(test) {
+        let maximum = 0;
+        for (let rate = 1; rate <= 99; rate += 1) {
+          if (test(rate)) maximum = rate;
+        }
+        return maximum;
+      }
+
       function getDiscountCalculation() {
         const originalPrice = Number(inputs.originalPrice.value);
-        const salePrice = Number(inputs.price.value);
-        const validOriginalPrice = Number.isFinite(originalPrice) && originalPrice >= 1000 && originalPrice <= 5000000;
-        const validPrice = validOriginalPrice && Number.isFinite(salePrice) && salePrice >= 1000 && salePrice <= 5000000 && salePrice <= originalPrice;
+        const validOriginalPrice = Number.isInteger(originalPrice) && originalPrice >= 1000 && originalPrice <= 5000000;
+        const saleType = getDiscountType('sale-discount');
         const firstType = getDiscountType('first-discount');
-        const firstApplied = firstType !== 'none';
+        const saleFixed = readAmount(inputs.saleDiscount);
+        const saleRate = readRate(inputs.saleDiscountRate);
         const firstFixed = readAmount(inputs.firstDiscount);
         const firstRate = readRate(inputs.firstDiscountRate);
+        const saleInput = saleType === 'rate' ? saleRate : saleFixed;
         const firstInput = firstType === 'rate' ? firstRate : firstFixed;
-        const saleDiscount = validPrice ? originalPrice - salePrice : 0;
-        const saleRate = validPrice && saleDiscount > 0 ? Math.round((saleDiscount / originalPrice) * 100) : 0;
-        const firstDiscountAmount = firstType === 'rate' ? Math.floor(salePrice * firstRate.value / 100) : firstFixed.value;
-        const validFirst = !firstApplied || (validPrice && (firstType === 'rate' ? firstRate.isValidRate : firstFixed.isPositiveNumber) && firstDiscountAmount <= salePrice);
-        const firstDiscount = firstApplied && validFirst ? firstDiscountAmount : 0;
-        const firstPrice = firstApplied && validFirst ? salePrice - firstDiscount : salePrice;
-        return { originalPrice, salePrice, validOriginalPrice, validPrice, firstType, firstApplied, firstFixed, firstRate, firstInput, saleDiscount, saleRate, firstDiscountAmount, validFirst, firstDiscount, firstPrice };
+        const saleApplied = saleInput.hasValue;
+        const saleInputAmount = saleType === 'rate' ? originalPrice * saleRate.value / 100 : saleFixed.value;
+        const candidateSalePrice = validOriginalPrice ? floor100(originalPrice - (saleApplied ? saleInputAmount : 0)) : 0;
+        const maximumSaleRate = validOriginalPrice
+          ? getMaximumRate((rate) => floor100(originalPrice - originalPrice * rate / 100) >= 1000)
+          : 0;
+        const saleInputFormatValid = saleType === 'rate' ? saleRate.isValidRate : saleFixed.isPositiveNumber;
+        const validSale = validOriginalPrice && (!saleApplied || (saleInputFormatValid && candidateSalePrice >= 1000));
+        const salePrice = validSale ? candidateSalePrice : 0;
+        const saleDiscount = validSale ? originalPrice - salePrice : 0;
+        const saleRateDisplay = saleApplied && validSale
+          ? saleType === 'rate' ? saleRate.value : Math.floor((saleDiscount / originalPrice) * 100)
+          : 0;
+        const firstApplied = firstInput.hasValue;
+        const firstInputAmount = firstType === 'rate' ? originalPrice * firstRate.value / 100 : firstFixed.value;
+        const candidateFirstPrice = validOriginalPrice ? floor100(originalPrice - (saleApplied ? saleInputAmount : 0) - (firstApplied ? firstInputAmount : 0)) : 0;
+        const maximumFirstRate = validSale
+          ? getMaximumRate((rate) => floor100(originalPrice - (saleApplied ? saleInputAmount : 0) - originalPrice * rate / 100) >= 1000)
+          : 0;
+        const firstInputFormatValid = firstType === 'rate' ? firstRate.isValidRate : firstFixed.isPositiveNumber;
+        const validFirst = !firstApplied || (validSale && firstInputFormatValid && candidateFirstPrice >= 1000);
+        const firstPrice = validFirst && validSale ? candidateFirstPrice : 0;
+        const firstDiscount = firstApplied && validFirst ? salePrice - firstPrice : 0;
+        const firstRateDisplay = firstApplied && validFirst
+          ? firstType === 'rate' ? firstRate.value : Math.floor((firstDiscount / originalPrice) * 100)
+          : 0;
+        return {
+          originalPrice, validOriginalPrice, saleType, firstType, saleFixed, saleRate, firstFixed, firstRate,
+          saleInput, firstInput, saleApplied, firstApplied, saleInputAmount, firstInputAmount,
+          candidateSalePrice, candidateFirstPrice, validSale, validFirst, salePrice, firstPrice,
+          saleDiscount, firstDiscount, saleRateDisplay, firstRateDisplay,
+          totalRate: saleRateDisplay + firstRateDisplay, maximumSaleRate, maximumFirstRate,
+          isConfigurationValid: validSale && validFirst
+        };
       }
 
-      function setFirstDiscountDetails(type, canInput) {
-        const details = $('#first-discount-details');
-        const isApplied = type !== 'none';
+      function setDiscountDetails(prefix, type, canInput) {
         const isRate = type === 'rate';
-        details.classList.toggle('open', isApplied);
-        details.setAttribute('aria-hidden', String(!isApplied));
-        $('#first-discount-rate-input').hidden = !isRate;
-        $('#first-discount-fixed-input').hidden = type !== 'fixed';
-        inputs.firstDiscount.disabled = !(canInput && type === 'fixed');
-        inputs.firstDiscountRate.disabled = !(canInput && isRate);
-        $('#first-discount-note').textContent = isRate
-          ? '할인율은 판매가를 기준으로 계산됩니다.'
-          : '원 단위 정액 할인으로 적용됩니다.';
+        $(`#${prefix}-discount-rate-input`).hidden = !isRate;
+        $(`#${prefix}-discount-fixed-input`).hidden = isRate;
+        inputs[`${prefix}Discount`].disabled = !(canInput && !isRate);
+        inputs[`${prefix}DiscountRate`].disabled = !(canInput && isRate);
+        if (prefix === 'first') {
+          $('#first-discount-note').textContent = isRate
+            ? '할인율은 정가를 기준으로 계산됩니다.'
+            : '원 단위 정액 할인으로 적용됩니다.';
+        }
       }
 
-      function setFirstDiscountResult(value, copy, muted = false) {
-        $('#first-discount-price').textContent = value;
-        const copyElement = $('#first-discount-copy');
-        copyElement.textContent = copy;
-        copyElement.classList.toggle('muted', muted);
+      function setRateLimit(element, maximum, isAvailable) {
+        element.textContent = !isAvailable
+          ? '정가와 판매가 할인을 먼저 올바르게 입력해 주세요.'
+          : maximum > 0
+            ? `최대 ${maximum}%까지 입력할 수 있습니다.`
+            : '할인율을 설정할 수 없습니다. 할인 후 금액은 1,000원 이상이어야 합니다.';
+      }
+
+      function getSaleDiscountError(discount) {
+        if (!discount.saleInput.hasValue || discount.validSale) return '';
+        if (!discount.validOriginalPrice) return '정가를 먼저 1,000원 이상 입력해 주세요.';
+        if (discount.saleType === 'rate') {
+          if (!discount.saleRate.isValidRate) return '할인율은 1% 이상 99% 이하의 정수로만 입력할 수 있습니다.';
+          return `판매가가 1,000원 이상이 되도록 입력해 주세요. 최대 ${discount.maximumSaleRate}%까지 입력할 수 있습니다.`;
+        }
+        return '할인 후 금액이 1,000원 이상이어야 합니다.';
+      }
+
+      function getFirstDiscountError(discount) {
+        if (!discount.firstInput.hasValue || discount.validFirst) return '';
+        if (!discount.validSale) return '판매가 할인을 먼저 올바르게 입력해 주세요.';
+        if (discount.firstType === 'rate') {
+          if (!discount.firstRate.isValidRate) return '할인율은 1% 이상 99% 이하의 정수로만 입력할 수 있습니다.';
+          return `첫 결제 금액이 1,000원 이상이 되도록 입력해 주세요. 최대 ${discount.maximumFirstRate}%까지 입력할 수 있습니다.`;
+        }
+        return '할인 후 금액이 1,000원 이상이어야 합니다.';
       }
 
       function updatePriceSummary(discount) {
+        const hasSale = discount.validSale;
+        const hasFirst = discount.firstApplied && discount.validFirst;
+        const autoRenewal = state.planType === 'subscription' && $('input[name="renewal-mode"]:checked').value === 'auto';
         $('#price-summary-original').textContent = discount.validOriginalPrice ? formatWon(discount.originalPrice) : '—';
-        $('#price-summary-sale').textContent = discount.validPrice ? formatWon(discount.salePrice) : '—';
-        $('#price-summary-rate').textContent = `${discount.saleRate}% 할인`;
-        $('#price-summary-amount').textContent = formatWon(discount.saleDiscount);
-        $('#price-summary-first-discount').textContent = discount.firstApplied && discount.validFirst
-          ? discount.firstType === 'rate' ? `${discount.firstRate.value}% · ${formatWon(discount.firstDiscount)}` : formatWon(discount.firstDiscount)
-          : '적용 안 함';
-        $('#price-summary-first').textContent = discount.validPrice ? formatWon(discount.firstPrice) : '—';
-        ['price-summary-rate-row', 'price-summary-amount-row'].forEach((id) => $(`#${id}`).classList.toggle('muted', discount.saleDiscount === 0));
-        $('#price-summary-first-discount-row').classList.toggle('muted', discount.firstDiscount === 0);
-      }
-
-      function updatePaymentAmounts(discount) {
-        const showPaymentAmounts = state.planType === 'subscription' && discount.firstApplied && discount.validFirst;
-        const showLaterPayment = showPaymentAmounts && $('input[name="renewal-mode"]:checked').value === 'auto';
-        $('#payment-amounts').hidden = !showPaymentAmounts;
-        $('#later-payment-row').hidden = !showLaterPayment;
-        $('#first-payment-amount').textContent = showPaymentAmounts ? formatWon(discount.firstPrice) : '—';
-        $('#later-payment-amount').textContent = showLaterPayment ? formatWon(discount.salePrice) : '—';
+        $('#price-summary-sale-discount-row').hidden = !(discount.saleApplied && hasSale && discount.saleDiscount > 0);
+        $('#price-summary-sale-discount-label').textContent = discount.saleType === 'rate' ? `판매가 할인 ${discount.saleRateDisplay}%` : '판매가 할인';
+        $('#price-summary-sale-discount').textContent = `-${formatWon(discount.saleDiscount)}`;
+        $('#price-summary-sale').textContent = hasSale ? formatWon(discount.salePrice) : '—';
+        $('#price-summary-first-discount-row').hidden = !hasFirst;
+        $('#price-summary-first-discount-label').textContent = discount.firstType === 'rate' ? `첫 결제 할인 ${discount.firstRateDisplay}%` : '첫 결제 할인';
+        $('#price-summary-first-discount').textContent = `-${formatWon(discount.firstDiscount)}`;
+        $('#price-summary-first-row').hidden = !hasFirst;
+        $('#price-summary-first').textContent = hasFirst ? `${formatWon(discount.firstPrice)} · 정가 대비 ${discount.totalRate}% 할인` : '—';
+        $('#price-summary-later-row').hidden = !(hasFirst && autoRenewal);
+        $('#price-summary-later').textContent = `${formatWon(discount.salePrice)} · 정가 대비 ${discount.saleRateDisplay}% 할인`;
       }
 
       function updateDiscounts() {
         const discount = getDiscountCalculation();
-        setFirstDiscountDetails(discount.firstType, discount.validPrice);
-        const firstInvalid = discount.firstApplied && discount.firstInput.hasValue && !discount.validFirst;
-        $('#first-discount-field').classList.toggle('invalid', firstInvalid);
-        $('#first-discount-error').textContent = !discount.validPrice
-            ? '판매가를 먼저 올바르게 입력해야 합니다.'
-            : discount.firstType === 'rate'
-              ? '할인율은 1% 이상 100% 이하의 정수로 입력해야 합니다.'
-              : '할인 금액은 판매가 이하의 1원 이상으로 입력해야 합니다.';
-        $('#first-discount-warning').hidden = !(discount.firstType === 'rate' && discount.firstRate.value === 100);
-
-        if (!discount.validPrice) {
-          setFirstDiscountResult('—', '정가와 판매가를 먼저 올바르게 입력해야 합니다.', true);
-        } else if (discount.firstType === 'none') {
-          setFirstDiscountResult(formatWon(discount.salePrice), '첫 결제 할인이 적용되지 않습니다.', true);
-        } else if (!discount.firstInput.hasValue) {
-          setFirstDiscountResult('—', discount.firstType === 'rate' ? '할인율을 입력하면 첫 결제 금액이 표시됩니다.' : '할인 금액을 입력하면 첫 결제 금액이 표시됩니다.', true);
-        } else if (!discount.validFirst) {
-          setFirstDiscountResult('—', discount.firstType === 'rate' ? '할인율을 확인해야 합니다.' : '할인 금액을 확인해야 합니다.', true);
-        } else {
-          const copy = discount.firstType === 'rate' ? `${discount.firstRate.value}% 첫 결제 할인 · ${formatWon(discount.firstDiscount)} 할인 적용` : `${formatWon(discount.firstDiscount)} 첫 결제 할인`;
-          setFirstDiscountResult(formatWon(discount.firstPrice), copy);
-        }
+        setDiscountDetails('sale', discount.saleType, discount.validOriginalPrice);
+        setDiscountDetails('first', discount.firstType, discount.validOriginalPrice);
+        const saleError = getSaleDiscountError(discount);
+        const firstError = getFirstDiscountError(discount);
+        $('#sale-discount-field').classList.toggle('invalid', Boolean(saleError));
+        $('#first-discount-field').classList.toggle('invalid', Boolean(firstError));
+        $('#sale-discount-error').textContent = saleError;
+        $('#first-discount-error').textContent = firstError;
+        setRateLimit($('#sale-discount-limit'), discount.maximumSaleRate, discount.validOriginalPrice);
+        setRateLimit($('#first-discount-limit'), discount.maximumFirstRate, discount.validSale);
+        const actualSaleRate = discount.validSale && discount.saleDiscount > 0 ? Math.floor((discount.saleDiscount / discount.originalPrice) * 100) : 0;
+        const roundingChanged = discount.saleType === 'rate' && discount.saleApplied && discount.validSale && actualSaleRate >= discount.saleRate.value + 1;
+        $('#sale-discount-rounding').hidden = !roundingChanged;
+        $('#sale-discount-rounding').textContent = roundingChanged ? `100원 단위 절사로 실제 할인율은 ${actualSaleRate}%가 됩니다.` : '';
         updatePriceSummary(discount);
-        updatePaymentAmounts(discount);
         return discount;
       }
 
@@ -906,8 +961,8 @@
           return;
         }
         $('#renewal-description').innerHTML = discount.firstApplied && discount.validFirst
-          ? `기본 이용 기간이 끝나면 자동으로 결제되고, 같은 기간만큼 이용 기간이 연장됩니다.<br />첫 결제 할인은 최초 1회만 적용되므로, 이후 결제 금액은 ${formatWon(discount.salePrice)}입니다. 갱신 시 새 이용 기간에 해당하는 멤버십 혜택이 다시 제공됩니다.`
-          : '기본 이용 기간이 끝나면 자동으로 결제되고, 같은 기간만큼 이용 기간이 연장됩니다.<br />갱신 시 새 이용 기간에 해당하는 멤버십 혜택이 다시 제공됩니다.';
+          ? `기본 이용 기간이 끝나면 자동으로 결제되며, 같은 기간만큼 이용 기간이 연장됩니다.<br />첫 결제 할인은 최초 1회만 적용되므로, 이후 결제 금액은 ${formatWon(discount.salePrice)}입니다. 제공 혜택은 최초 결제와 동일합니다.`
+          : '기본 이용 기간이 끝나면 자동으로 결제되며, 같은 기간만큼 이용 기간이 연장됩니다.<br />결제 금액과 제공 혜택은 최초 결제와 동일합니다.';
       }
 
       function updateBenefitExpiryNotice() {
@@ -926,7 +981,7 @@
         const duration = Number(inputs.duration.value);
         if (state.planType === 'subscription') {
           if (!Number.isFinite(duration) || duration < 1) return '';
-          if (renewalMode === 'one-time') return `기간 이용 멤버십 · ${duration}개월`;
+          if (renewalMode === 'one-time') return `단건 이용 멤버십 · ${duration}개월권`;
           const sellingLongPass = duration === 1 && $('input[name="multi-month"]:checked').value === 'sell';
           return sellingLongPass ? '정기 구독 멤버십 · 묶음 이용권 판매' : '정기 구독 멤버십';
         }
@@ -1034,7 +1089,7 @@
       function updateSummaryPricing(discount) {
         const duration = Number(inputs.duration.value);
         const autoRenewal = $('input[name="renewal-mode"]:checked').value === 'auto';
-        const hasPrice = discount.validPrice;
+        const hasPrice = discount.validSale;
         $('#summary-pricing').hidden = !state.planType;
         $('#summary-duration').textContent = (state.planType === 'subscription' || state.planType === 'deduction') && Number.isFinite(duration) && duration >= 1
           ? `${duration}개월`
@@ -1042,8 +1097,8 @@
         $('#summary-renewal').textContent = state.planType === 'cohort' ? '자동 갱신 없음' : autoRenewal ? '이용 기간마다 자동 결제' : '자동 갱신 없음';
         $('#summary-original-price').textContent = discount.validOriginalPrice ? formatWon(discount.originalPrice) : '—';
         $('#summary-sale-price').textContent = hasPrice ? formatWon(discount.salePrice) : '—';
-        $('#summary-sale-discount').textContent = hasPrice && discount.saleDiscount > 0 ? `${discount.saleRate}% 할인` : '—';
-        $('#summary-first-price').textContent = hasPrice ? formatWon(discount.firstPrice) : '—';
+        $('#summary-sale-discount').textContent = hasPrice && discount.saleDiscount > 0 ? `${discount.saleRateDisplay}% 할인` : '—';
+        $('#summary-first-price').textContent = discount.firstApplied && discount.validFirst ? formatWon(discount.firstPrice) : '—';
         $('#summary-reward-count').textContent = `${state.rewardIds.length}개`;
       }
 
@@ -1062,7 +1117,6 @@
         $('#name-count').textContent = inputs.name.value.length;
         $('#summary-count').textContent = inputs.summary.value.length;
         $('#original-price-field').classList.toggle('invalid', inputs.originalPrice.value !== '' && !values.originalPrice);
-        $('#price-field').classList.toggle('invalid', inputs.price.value !== '' && !values.price);
         $('#duration-field').classList.toggle('invalid', (state.planType === 'subscription' || state.planType === 'deduction') && inputs.duration.value !== '' && !values.duration);
         $('#cohort-end-date-field').classList.toggle('invalid', state.planType === 'cohort' && inputs.endDate.value !== '' && !values.duration);
         const discount = updateDiscounts();
@@ -1140,9 +1194,10 @@
       }
 
       function hasMembershipFormContent() {
-        const hasInputValue = [inputs.name, inputs.summary, inputs.originalPrice, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity]
+        const hasInputValue = [inputs.name, inputs.summary, inputs.originalPrice, inputs.saleDiscount, inputs.saleDiscountRate, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity]
           .some((input) => input.value.trim() !== '');
-        const hasChangedSetting = $('input[name="first-discount"]:checked').value !== 'rate'
+        const hasChangedSetting = $('input[name="sale-discount"]:checked').value !== 'rate'
+          || $('input[name="first-discount"]:checked').value !== 'rate'
           || $('input[name="renewal-mode"]:checked').value !== 'auto'
           || $('input[name="multi-month"]:checked').value !== 'none'
           || $('input[name="capacity"]:checked').value !== 'unlimited'
@@ -1169,7 +1224,7 @@
         state.dm = null;
         state.badge = null;
         state.rewardIds = [];
-        [inputs.name, inputs.summary, inputs.originalPrice, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.image, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity].forEach((input) => { input.value = ''; });
+        [inputs.name, inputs.summary, inputs.originalPrice, inputs.saleDiscount, inputs.saleDiscountRate, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.image, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity].forEach((input) => { input.value = ''; });
         $('#new-reward-title').value = '';
         $('#new-reward-description').value = '';
         $('#detail-editor').innerHTML = '';
@@ -1183,6 +1238,7 @@
         $('#badge-state').className = 'reward-state';
         selectedRewardIds = new Set();
         pendingRewardId = null;
+        $('input[name="sale-discount"][value="rate"]').checked = true;
         $('input[name="first-discount"][value="rate"]').checked = true;
         $('input[name="renewal-mode"][value="auto"]').checked = true;
         $('input[name="multi-month"][value="none"]').checked = true;
@@ -1207,7 +1263,8 @@
         selectPlanType(planType);
       }));
 
-      [inputs.name, inputs.summary, inputs.originalPrice, inputs.price, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity].forEach((input) => input.addEventListener('input', update));
+      [inputs.name, inputs.summary, inputs.originalPrice, inputs.saleDiscount, inputs.saleDiscountRate, inputs.duration, inputs.endDate, inputs.recruitmentStart, inputs.recruitmentEnd, inputs.firstDiscount, inputs.firstDiscountRate, inputs.capacity].forEach((input) => input.addEventListener('input', update));
+      $$('input[name="sale-discount"]').forEach((input) => input.addEventListener('change', () => { inputs.saleDiscount.value = ''; inputs.saleDiscountRate.value = ''; update(); }));
       $$('input[name="first-discount"]').forEach((input) => input.addEventListener('change', () => { inputs.firstDiscount.value = ''; inputs.firstDiscountRate.value = ''; update(); }));
       $$('input[name="renewal-mode"], input[name="multi-month"]').forEach((input) => input.addEventListener('change', update));
       $$('input[name="capacity"]').forEach((input) => input.addEventListener('change', update));
@@ -1568,6 +1625,8 @@
         const hasDuration = Number.isFinite(duration) && duration >= 1;
         const saleDiscount = pricing.saleDiscount;
         const firstDiscount = state.planType === 'subscription' ? pricing.firstDiscount : 0;
+        const hasFirstDiscount = firstDiscount > 0 && pricing.validFirst;
+        const totalDiscountRate = pricing.saleRateDisplay + (hasFirstDiscount ? pricing.firstRateDisplay : 0);
 
         $('#preview-operation').textContent = state.planType ? `설정 기준 · ${operationNames[state.planType]}` : '설정 기준';
         const resolvedType = getResolvedTypeName();
@@ -1577,19 +1636,18 @@
         $('#preview-summary').textContent = inputs.summary.value.trim() || '멤버십 한 줄 설명이 여기에 표시됩니다.';
         $('#preview-hero').innerHTML = state.imageUrl ? `<img src="${state.imageUrl}" alt="선택한 대표 이미지" />` : '대표 이미지';
 
-        if (!pricing.validPrice) $('#preview-price').textContent = '판매가 미정';
-        else if (saleDiscount > 0) $('#preview-price').innerHTML = `<del>${formatWon(pricing.originalPrice)}</del>${formatWon(pricing.salePrice)}`;
-        else $('#preview-price').textContent = formatWon(pricing.salePrice);
+        const displayPrice = hasFirstDiscount ? pricing.firstPrice : pricing.salePrice;
+        if (!pricing.validSale) $('#preview-price').textContent = '판매가 미정';
+        else if (totalDiscountRate > 0) $('#preview-price').innerHTML = `<del>${formatWon(pricing.originalPrice)}</del>${formatWon(displayPrice)}`;
+        else $('#preview-price').textContent = formatWon(displayPrice);
 
-        $('#preview-first-benefit').hidden = firstDiscount === 0;
-        $('#preview-first-benefit').textContent = firstDiscount > 0
-          ? `첫 결제 ${pricing.firstType === 'rate' ? `${pricing.firstRate.value}%` : formatWon(firstDiscount)} 할인`
-          : '첫 결제 혜택 적용';
-        $('#preview-discount-summary').hidden = firstDiscount === 0;
-        $('#preview-discount-rate').hidden = saleDiscount === 0;
-        $('#preview-discount-rate').textContent = `${pricing.saleRate}% 할인`;
-        $('#preview-discount-label').textContent = '첫 결제 할인';
-        $('#preview-discount-total').textContent = firstDiscount > 0 ? `${formatWon(firstDiscount)} 할인 · ${formatWon(pricing.firstPrice)}` : '';
+        $('#preview-first-benefit').hidden = true;
+        $('#preview-price-caption').textContent = hasFirstDiscount ? '첫 결제 금액' : '판매가';
+        $('#preview-discount-summary').hidden = !hasFirstDiscount;
+        $('#preview-discount-rate').hidden = totalDiscountRate === 0;
+        $('#preview-discount-rate').textContent = `${totalDiscountRate}% 할인`;
+        $('#preview-discount-label').textContent = $('input[name="renewal-mode"]:checked').value === 'auto' ? '2회차부터' : '판매가';
+        $('#preview-discount-total').textContent = hasFirstDiscount ? formatWon(pricing.salePrice) : '';
         $('#preview-period').textContent = (state.planType === 'subscription' || state.planType === 'deduction') && hasDuration
           ? `${duration}개월 이용`
           : state.planType === 'cohort' ? inputs.endDate.value ? `${inputs.endDate.value} 종료` : '종료일 미정'
